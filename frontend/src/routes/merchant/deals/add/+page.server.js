@@ -1,6 +1,3 @@
-// @ts-nocheck
-import * as R from "ramda";
-
 /** @type {import('./$types').Actions} */
 export const actions = {
   default: async ({ request, fetch }) => {
@@ -9,6 +6,24 @@ export const actions = {
 
 
     const formData = await request.formData();
+
+    // Validate the deal data
+    if (!formData.get("merchantId") || !formData.get("title") || !formData.get("originalPrice") || !formData.get("discount") || !formData.get("logo") || !formData.get("category")) {
+      console.log("Invalid deal data");
+      // return {
+      //   status: 400,
+      //   body: JSON.stringify({ message: 'Invalid deal data' }),
+      // };
+
+      return {
+        status: 400,
+        body: {
+          errors: {
+            message: 'Invalid deal data'
+          }
+        }
+      };
+    }
 
     // const merchantId = formData.get("merchantId");
     // console.log("merchantId: " + merchantId);
@@ -49,12 +64,23 @@ export const actions = {
     //   expiration,
     // };
 
-    const response = await fetch("https://mms6a4j564.execute-api.us-east-1.amazonaws.com/prod/merchant/deals", {
-      method: "POST",
-      body: formData,
-    });
+    // Send the request to the backend API to add the new deal
+    // const response = await fetch("https://mms6a4j564.execute-api.us-east-1.amazonaws.com/prod/merchant/deals", {
+    //   method: "POST",
+    //   body: formData,
+    // });
 
-    const result = await response.json();
-    console.log("result: ", JSON.stringify(result, null, 2));
+    // Handle the response from the backend API
+    // if (response.ok) {
+    //   return {
+    //     status: 201,
+    //     body: JSON.stringify({ message: 'Deal added successfully' }),
+    //   };
+    // } else {
+    //   return {
+    //     status: response.status,
+    //     body: JSON.stringify({ message: 'Error adding deal' }),
+    //   };
+    // }
   }
 };

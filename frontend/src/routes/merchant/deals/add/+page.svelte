@@ -1,3 +1,7 @@
+<script>
+  export let form;
+</script>
+
 <h1 id="add-deal-title">Add a Deal</h1>
 
 <form 
@@ -51,6 +55,10 @@
 
   <button type="submit">Add Deal</button>
 </form>
+
+{#if form?.body?.errors?.message}
+  <p style="color: red;">{form.body.errors.message}</p>
+{/if}
 
 
 <style>

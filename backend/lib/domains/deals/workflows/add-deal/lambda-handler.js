@@ -5,7 +5,7 @@ const KSUID = require("ksuid");
 var multipart = require('parse-multipart-data');
 const { Buffer } = require('node:buffer');
 
-const Api = require("#src/util/api/service.js");
+const Api = require("#src/utils/api/service.js");
 
 
 const s3Client = new S3Client();

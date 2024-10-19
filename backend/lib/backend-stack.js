@@ -1,8 +1,8 @@
 const { Stack } = require('aws-cdk-lib');
-const { DbStack } = require('./util/db/stack');
-const { ApiStack } = require('./util/api/stack');
-const { DealsServiceStack } = require('./domain/deals/stack');
-const { StorageStack } = require('./util/storage/stack');
+const { DbStack } = require('./utils/db/stack');
+const { ApiStack } = require('./utils/api/stack');
+const { DealsServiceStack } = require('./domains/deals/stack');
+const { StorageStack } = require('./utils/storage/stack');
 
 class BackendStack extends Stack {
   /**
