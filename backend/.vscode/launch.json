@@ -1,0 +1,19 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Local Debug",
+      "skipFiles": ["<node_internals>/**"],
+      "args": ["${relativeFile}"],
+      "env": {
+        "S3_BUCKET_NAME": "superdealsbackendstackstoragestac-s3bucket07682993-alwl3ttatogk",
+        "DDB_TABLE_NAME": "SuperDealsBackendStackDbStackB5D45CA1-MainTable74195DAB-DPLTLV0A0881"
+      }
+    }
+  ]
+}

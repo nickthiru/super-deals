@@ -1,0 +1,120 @@
+{
+	"info": {
+		"_postman_id": "3186727e-4ef9-49fa-a857-8cd72b888af6",
+		"name": "Super Deals",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "17148380-3186727e-4ef9-49fa-a857-8cd72b888af6"
+	},
+	"item": [
+		{
+			"name": "merchant",
+			"item": [
+				{
+					"name": "deals",
+					"item": [
+						{
+							"name": "Add a new deal",
+							"id": "80a4d08d-e9ec-456b-bc0f-b0a35d436b40",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"merchantId\": \"Nike007\",\n  \"title\": \"Test\",\n  \"originalPrice\": \"100\",\n  \"discount\": \"50\",\n  \"logo\": {},\n  \"category\": \"Food\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/merchant/deals",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"merchant",
+										"deals"
+									]
+								},
+								"description": "Add a new deal"
+							},
+							"response": [
+								{
+									"id": "9c6f4714-c129-4e44-961b-8dec190dcfae",
+									"name": "Successfully signed up user",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"merchantId\": \"<string>\",\n  \"title\": \"<string>\",\n  \"originalPrice\": \"<number>\",\n  \"discount\": \"<number>\",\n  \"logo\": {},\n  \"category\": \"<string>\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/merchant/deals",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"merchant",
+												"deals"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"merchantId\": \"<string>\",\n  \"title\": \"<string>\",\n  \"originalPrice\": \"<number>\",\n  \"discount\": \"<number>\",\n  \"logo\": {},\n  \"category\": \"<string>\"\n}"
+								}
+							]
+						}
+					],
+					"id": "cef72077-1d5c-4bdf-aadb-88b734213d65"
+				}
+			],
+			"id": "92a86503-29b0-4320-8dd4-cfefde3712bf"
+		}
+	],
+	"variable": [
+		{
+			"id": "5ed58fbd-cc75-425a-8ff1-25abf61aa579",
+			"key": "baseUrl",
+			"value": "https://mms6a4j564.execute-api.us-east-1.amazonaws.com/prod/"
+		}
+	]
+}

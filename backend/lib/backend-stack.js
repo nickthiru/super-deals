@@ -1,5 +1,8 @@
-const { Stack, Duration } = require('aws-cdk-lib');
-// const sqs = require('aws-cdk-lib/aws-sqs');
+const { Stack } = require('aws-cdk-lib');
+const { DbStack } = require('./util/db/stack');
+const { ApiStack } = require('./util/api/stack');
+const { DealsServiceStack } = require('./domain/deals/stack');
+const { StorageStack } = require('./util/storage/stack');
 
 class BackendStack extends Stack {
   /**
@@ -10,13 +13,27 @@ class BackendStack extends Stack {
    */
   constructor(scope, id, props) {
     super(scope, id, props);
+    console.log("(+) Inside 'BackendStack'");
 
-    // The code that defines your stack goes here
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'BackendQueue', {
-    //   visibilityTimeout: Duration.seconds(300)
-    // });
+    /*** Utilities ***/
+
+    const storageStack = new StorageStack(this, "StorageStack");
+
+    const dbStack = new DbStack(this, "DbStack");
+
+    const apiStack = new ApiStack(this, "ApiStack");
+
+
+    /*** Services ***/
+
+    new DealsServiceStack(this, "DealsServiceStack", {
+      storageStack,
+      dbStack,
+      apiStack,
+    });
+
+
   }
 }
 

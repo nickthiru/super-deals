@@ -6,15 +6,26 @@
   },
   "scripts": {
     "build": "echo \"The build step is not required when using JavaScript!\" && exit 0",
+    "deploy": "cdk deploy --all --outputs-file outputs.json",
     "cdk": "cdk",
     "test": "jest"
+  },
+  "imports": {
+    "#src/*": "./src/*",
+    "#lib/*": "./lib/*"
   },
   "devDependencies": {
     "aws-cdk": "2.161.1",
     "jest": "^29.7.0"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.658.1",
+    "@aws-sdk/client-s3": "^3.658.1",
+    "@aws-sdk/util-dynamodb": "^3.658.1",
     "aws-cdk-lib": "2.161.1",
-    "constructs": "^10.0.0"
+    "constructs": "^10.0.0",
+    "ksuid": "^3.0.0",
+    "parse-multipart-data": "^1.5.0",
+    "ramda": "^0.30.1"
   }
 }

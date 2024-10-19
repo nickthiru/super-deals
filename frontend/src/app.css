@@ -1,0 +1,84 @@
+@import "open-props/postcss/style";
+/* @import "open-props/normalize.min.css"; */
+/* @import "open-props/normalize.dark.min.css"; */
+
+/*** Base Styles ***/
+
+/* :root { */
+  /* Colors */
+  /* --primary: ?; */
+/* } */
+
+/* Use a more-intuitive box-sizing model. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Remove default margin */
+* {
+  margin: 0;
+}
+
+/* Allow percentage-based heights in the application */
+html,
+body {
+  height: 100%;
+  background-color: var(--blue-0);
+}
+
+/* Typographic tweaks */
+body {
+  line-height: 1.5; /* Add accessible line-height */
+  -webkit-font-smoothing: antialiased; /* Improve text rendering */
+}
+
+/* Improve media defaults */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Remove built-in form typography styles */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Avoid text overflows */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* Create a root stacking context */
+#root,
+#__next {
+  isolation: isolate;
+}
+
+/* Make components like buttons and text fields easily clickable by finger i.e. coarse pointer */
+@media (pointer: coarse) {
+  html {
+    --min-tap-height: 44px;
+  }
+}
+
+/* Iconify web components are not rendered instantly and might cause layout shifts. This is to avoid layout shifts. */
+iconify-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+}
