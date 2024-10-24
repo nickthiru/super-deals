@@ -2,7 +2,7 @@ const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { DynamoDBClient, PutItemCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall } = require("@aws-sdk/util-dynamodb");
 const KSUID = require("ksuid");
-var multipart = require('parse-multipart-data');
+const multipart = require('parse-multipart-data');
 const { Buffer } = require('node:buffer');
 
 const Api = require("#src/utils/api/service.js");
@@ -19,24 +19,16 @@ exports.handler = async (event) => {
 
   // Decode Base64 Event Body
   let decodedBody = atob(event.body);
-  // console.log("decodedBody: " + decodedBody);
 
   // Get boundary
   const contentType = event.headers["content-type"];
-  // console.log("contentType: " + contentType);
-
   const boundaryStartIdx = contentType.indexOf("=") + 1;
-  // console.log("boundaryStartIdx: " + boundaryStartIdx);
-
   const boundary = contentType.slice(boundaryStartIdx);
-  // console.log("boundary: " + boundary);
-
 
   // Get Deal data
   const deal = {};
 
   const parts = multipart.parse(Buffer.from(decodedBody), boundary);
-  // console.log("parts: " + JSON.stringify(parts, null, 2));
 
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
@@ -61,43 +53,69 @@ exports.handler = async (event) => {
     }
   }
 
-  // console.log("deal: " + JSON.stringify(deal, null, 2));
-
-
-  // Validate Category data?
+  // Validate Category data
 
 
   // Generate KSUID for PK, SK, and Deal
   const ksuId = KSUID.randomSync(new Date());
-  // console.log("ksuId: " + ksuId);
 
-  // const logoS3Key = `MERCHANT#${deal.merchantId}/DEAL#${ksuId.string}/LOGO#${deal.logo.fileName}`;
   const logoS3Key = `merchants/${deal.merchantId}/deals/${ksuId.string}/logos/${deal.logo.fileName}`;
 
+  // Save Logo image to S3
+  // try {
+  //   console.log("(+) Saving to Bucket...");
 
-  // console.log("logoS3Key: " + logoS3Key);
+  //   const result = await s3Client.send(new PutObjectCommand({
+  //     Bucket: process.env.S3_BUCKET_NAME,
+  //     Key: logoS3Key,
+  //     Body: deal.logo.data,
+  //   }));
+
+  //   // console.log("(+) result: \n" + JSON.stringify(result, null, 2));
+
+  // } catch (error) {
+  //   console.log("(-) Error: " + error);
+  // };
 
   // Save Logo image to S3
   try {
     console.log("(+) Saving to Bucket...");
 
+    // Validate file type
+    const allowedFileTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
+    if (!allowedFileTypes.includes(deal.logo.type)) {
+      console.log("(-) Error: Invalid file type. Only JPEG, PNG, and SVG files are allowed.");
+      // You can also throw an error or return a specific error message here
+    }
+
+    // Validate file size (e.g., 5MB)
+    const maxFileSize = 5 * 1024 * 1024; // 5MB
+    if (deal.logo.data.length > maxFileSize) {
+      console.log("(-) Error: File size exceeds the maximum allowed size of 5MB.");
+      // You can also throw an error or return a specific error message here
+    }
+
+    // Upload file to S3
     const result = await s3Client.send(new PutObjectCommand({
       Bucket: process.env.S3_BUCKET_NAME,
       Key: logoS3Key,
       Body: deal.logo.data,
     }));
 
-    // console.log("(+) result: \n" + JSON.stringify(result, null, 2));
+    // Check if the upload was successful
+    if (result.$metadata.httpStatusCode !== 200) {
+      console.log("(-) Error: Failed to upload file to S3. Status code: " + result.$metadata.httpStatusCode);
+      // You can also throw an error or return a specific error message here
+    } else {
+      console.log("(+) File uploaded to S3 bucket successfully.");
+    }
 
   } catch (error) {
     console.log("(-) Error: " + error);
+    // You can also throw an error or return a specific error message here
   };
 
-
-
   // Anything to do for the 'Expiration' data i.e. Date
-
-
 
   const dealData = {
     PK: `DEAL#${ksuId.string}`,

@@ -17,7 +17,7 @@ components:
         - discount
         - logo
         - category
-        # - expiration
+        - expiration
       properties:
         merchantId:
           type: string
@@ -25,6 +25,7 @@ components:
         title:
           type: string
           description: Title of the deal
+          maxLength: 255
         originalPrice:
           type: number
           description: Original price of the deal
@@ -32,19 +33,21 @@ components:
           type: number
           description: Deal discount
         logo:
-          type: object
+          type: string
+          format: binary
           description: Logo image of the deal
         category:
           type: string
           description: The category this deal falls under
-        # expiration:
-        #   type: number
-        #   description: The expiration date of the deal
+        expiration:
+          type: string
+          format: date
+          description: The expiration date of the deal
     Merchant:
       type: object
       description: Data about merchant
 servers:
-  - url: https://mms6a4j564.execute-api.us-east-1.amazonaws.com/prod
+  - url: https://s5b9r0sjp8.execute-api.us-east-1.amazonaws.com/prod
     description: Basepath
 paths:
   /merchant/deals:
@@ -54,8 +57,10 @@ paths:
         - deals
       description: Add a new deal
       requestBody:
+        required: true
+        description: The deal to add
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: "#/components/schemas/Deal"
       responses:

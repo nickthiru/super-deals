@@ -9,8 +9,8 @@ const config = {
 		adapter: adapter(),
 		alias: {
 			"$src/*": "./src/*",
-			"$lib/*": "./src/lib/*",
 			"$types/*": "./.svelte-kit/types/*",
+			"$backend/*": "../backend/*",
 		},
 	}
 };

@@ -1,86 +1,43 @@
-/** @type {import('./$types').Actions} */
+// frontend/src/routes/merchant/deals/add/+page.server.js
+import { fail, redirect } from '@sveltejs/kit';
+import dealSchema from './deal.schema.js';
+import { BackendStackApiStackHttpStackA5B3EBBB } from "$backend/outputs.json";
+
+const { RestApiEndpoint0551178A: BaseUrl } = BackendStackApiStackHttpStackA5B3EBBB;
+
 export const actions = {
   default: async ({ request, fetch }) => {
-    console.log("Inside '/merchant/deals/add/+page.server.js");
-    // console.log("event: " + JSON.stringify(event, null, 2));
-
-
+    // Get the form data
     const formData = await request.formData();
 
-    // Validate the deal data
-    if (!formData.get("merchantId") || !formData.get("title") || !formData.get("originalPrice") || !formData.get("discount") || !formData.get("logo") || !formData.get("category")) {
-      console.log("Invalid deal data");
-      // return {
-      //   status: 400,
-      //   body: JSON.stringify({ message: 'Invalid deal data' }),
-      // };
+    // Parse and validate the form data
+    const result = dealSchema.safeParse(formData);
 
-      return {
-        status: 400,
-        body: {
-          errors: {
-            message: 'Invalid deal data'
-          }
-        }
-      };
+    // In case of an error, return the data and errors
+    if (!result.success) {
+      const errors = result.error.flatten().fieldErrors;
+      const data = Object.fromEntries(formData);
+      // Remove the logo file from the data returned to the client
+      delete data.logo;
+      return fail(400, {
+        data,
+        errors,
+      });
     }
 
-    // const merchantId = formData.get("merchantId");
-    // console.log("merchantId: " + merchantId);
+    // Handle the validated form data if successful (e.g., save the deal, call an API, etc.)
+    const response = await fetch(`${BaseUrl}` + 'merchant/deals', {
+      method: "POST",
+      body: formData
+    });
 
-    // const title = formData.get("title");
-    // console.log("title: " + title);
+    if (!response.ok) {
+      return fail(response.status, {
+        errors: ['Failed to add deal'],
+      });
+    }
 
-    // const originalPrice = formData.get("originalPrice");
-    // console.log("originalPrice: " + originalPrice);
-
-    // const discount = formData.get("discount");
-    // console.log("discount: " + discount);
-
-    // const logoFileInBase64 = formData.get("logoFileInBase64");
-    // console.log("logoFileInBase64: " + logoFileInBase64);
-    // console.log('typeof logoFileInBase64: ' + typeof logoFileInBase64);
-    // console.log("logoFileInBase64 is empty: " + R.isEmpty(logoFileInBase64));
-
-    // const logo = formData.get("logo");
-    // console.log("logo: " + logo);
-    // console.log('typeof logo: ' + typeof logo);
-    // console.log("logo is empty: " + R.isEmpty(logo));
-
-    // const category = formData.get("category");
-    // console.log("category: " + category);
-
-    // const expiration = formData.get("expiration");
-    // console.log("expiration: " + expiration);
-
-    // const deal = {
-    //   merchantId,
-    //   title,
-    //   originalPrice,
-    //   discount,
-    //   logo,
-    //   logoFileInBase64,
-    //   category,
-    //   expiration,
-    // };
-
-    // Send the request to the backend API to add the new deal
-    // const response = await fetch("https://mms6a4j564.execute-api.us-east-1.amazonaws.com/prod/merchant/deals", {
-    //   method: "POST",
-    //   body: formData,
-    // });
-
-    // Handle the response from the backend API
-    // if (response.ok) {
-    //   return {
-    //     status: 201,
-    //     body: JSON.stringify({ message: 'Deal added successfully' }),
-    //   };
-    // } else {
-    //   return {
-    //     status: response.status,
-    //     body: JSON.stringify({ message: 'Error adding deal' }),
-    //   };
-    // }
+    // Redirect the user after successful form submission
+    return redirect(303, '/merchant/deals/add/success');
   }
 };
