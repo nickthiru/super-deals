@@ -1,8 +1,8 @@
 <script>
   import { setContext } from "svelte";
-  import FeaturedDeals from "$lib/components/page/home/featured-deals/FeaturedDeals.svelte";
-  import Categories from "$lib/components/page/home/categories/Categories.svelte";
-  import LatestDeals from "$lib/components/page/home/latest-deals/LatestDeals.svelte";
+  import FeaturedDeals from "$lib/components/pages/home/featured-deals/FeaturedDeals.svelte";
+  import Categories from "$lib/components/pages/home/categories/Categories.svelte";
+  import LatestDeals from "$lib/components/pages/home/latest-deals/LatestDeals.svelte";
 
   /** @type {import('./$types').PageData} */
   export let data;

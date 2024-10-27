@@ -1,10 +1,33 @@
 import { zfd } from 'zod-form-data';
 import { z } from 'zod';
 
-// Define allowed file types
+/** @type {readonly string[]} */
 const allowedFileTypes = ['jpg', 'jpeg', 'png', 'gif'];
 
-// Define the validation schema using Zod
+/** @type {readonly string[]} */
+const categoryEnum = [
+  'foodDrink',
+  'bathroom',
+  'jewelery',
+  'sports',
+  'tech',
+  'auto',
+  'entertainment',
+  'travel',
+];
+
+/**
+ * @typedef {Object} DealSchema
+ * @property {string} merchantId
+ * @property {string} title
+ * @property {number} originalPrice
+ * @property {number} discount
+ * @property {File} logo
+ * @property {typeof categoryEnum[number]} category
+ * @property {string} expiration
+ */
+
+/** @type {import('zod').ZodType<DealSchema>} */
 const dealSchema = zfd.formData({
   merchantId: zfd.text(z.string().nonempty('Merchant ID is required')),
   title: zfd.text(z.string().max(255, 'Title must be 255 characters or less')),
@@ -14,16 +37,7 @@ const dealSchema = zfd.formData({
     const fileType = file.name.split('.').pop().toLowerCase();
     return allowedFileTypes.includes(fileType);
   }, 'Invalid file type')),
-  category: zfd.text(z.enum([
-    'foodDrink',
-    'bathroom',
-    'jewelery',
-    'sports',
-    'tech',
-    'auto',
-    'entertainment',
-    'travel',
-  ], 'Category is required')),
+  category: zfd.text(z.enum(categoryEnum, 'Category is required')),
   expiration: zfd.text(z.string().refine((val) => !isNaN(Date.parse(val)), 'Expiration must be a valid date')),
 });
 
