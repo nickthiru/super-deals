@@ -47,7 +47,7 @@
 
   <label>
     Expiration
-    <input name="expiration" type="date" required>
+    <input name="expiration" type="date" required min="{new Date().toISOString().split('T')[0]}">
   </label>
 
   <button type="submit">Add Deal</button>

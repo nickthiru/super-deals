@@ -1,6 +1,5 @@
-// frontend/src/routes/merchant/deals/add/+page.server.js
-import { fail, redirect } from '@sveltejs/kit';
-import dealSchema from './deal.schema.js';
+import { fail } from '@sveltejs/kit';
+import getDealSchema from './deal.schema.js';
 import { BackendStackApiStackHttpStackA5B3EBBB } from "$backend/outputs.json";
 
 const { RestApiEndpoint0551178A: BaseUrl } = BackendStackApiStackHttpStackA5B3EBBB;
@@ -9,6 +8,9 @@ export const actions = {
   default: async ({ request, fetch }) => {
     // Get the form data
     const formData = await request.formData();
+
+    // Get the deal schema with the current date
+    const dealSchema = getDealSchema();
 
     // Parse and validate the form data
     const result = dealSchema.safeParse(formData);
@@ -38,6 +40,6 @@ export const actions = {
     }
 
     // Redirect the user after successful form submission
-    return redirect(303, '/merchant/deals/add/success');
+    // return redirect(303, '/merchant/deals/add/success');
   }
 };
