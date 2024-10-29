@@ -42,13 +42,12 @@ components:
         expiration:
           type: string
           format: date
-          description: The expiration date of the deal
+          description: The expiration date of the deal. Must be today's date or later (YYYY-MM-DD).
     Merchant:
       type: object
       description: Data about merchant
 servers:
   - url: https://s5b9r0sjp8.execute-api.us-east-1.amazonaws.com/prod
-    description: Basepath
 paths:
   /merchant/deals:
     description: Merchant can add a deal to his catalog
