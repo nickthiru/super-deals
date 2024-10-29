@@ -1,5 +1,6 @@
 const { Stack } = require("aws-cdk-lib");
-const { LambdaIntegration } = require("aws-cdk-lib/aws-apigateway");
+const { LambdaIntegration, Model, RequestValidator } = require("aws-cdk-lib/aws-apigateway");
+import { jsonSchema } from '#schemas/deal.schema.js';
 
 
 class ApiEndpointsStack extends Stack {
@@ -19,7 +20,25 @@ class ApiEndpointsStack extends Stack {
     // /merchant/deals
     const deals = merchant.addResource("deals");
 
-    deals.addMethod("POST", new LambdaIntegration(addDealWorkflowConstruct.lambda), apiStack.http.optionsWithAuth);
+    const dealModel = new Model(this, 'DealModel', {
+      restApi: apiStack.http.restApi,
+      contentType: 'application/json',
+      description: 'Validation model for deals',
+      schema: jsonSchema
+    });
+
+    const dealRequestValidator = new RequestValidator(this, 'DealRequestValidator', {
+      restApi: apiStack.http.restApi,
+      validateRequestBody: true,
+      validateRequestParameters: false
+    });
+
+    deals.addMethod("POST", new LambdaIntegration(addDealWorkflowConstruct.lambda), {
+      requestValidator: dealRequestValidator,
+      requestModels: {
+        'application/json': dealModel
+      }
+    });
 
   }
 }

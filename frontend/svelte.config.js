@@ -11,6 +11,7 @@ const config = {
 			"$src/*": "./src/*",
 			"$types/*": "./.svelte-kit/types/*",
 			"$backend/*": "../backend/*",
+			"$schemas/*": "../shared/schemas/*",
 		},
 	}
 };
