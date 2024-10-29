@@ -1,5 +1,5 @@
 import { fail } from '@sveltejs/kit';
-import getDealSchema from './deal.schema.js';
+import getDealSchema from '$schemas/deal.schema.js';
 import { BackendStackApiStackHttpStackA5B3EBBB } from "$backend/outputs.json";
 
 const { RestApiEndpoint0551178A: BaseUrl } = BackendStackApiStackHttpStackA5B3EBBB;

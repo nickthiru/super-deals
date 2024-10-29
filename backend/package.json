@@ -12,7 +12,8 @@
   },
   "imports": {
     "#src/*": "./src/*",
-    "#lib/*": "./lib/*"
+    "#lib/*": "./lib/*",
+    "#schemas/*": "../shared/schemas/*"
   },
   "devDependencies": {
     "aws-cdk": "2.161.1",
