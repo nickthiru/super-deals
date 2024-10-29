@@ -4,9 +4,10 @@ const { marshall } = require("@aws-sdk/util-dynamodb");
 const KSUID = require("ksuid");
 const multipart = require('parse-multipart-data');
 const { Buffer } = require('node:buffer');
+/** @typedef {import('#shared/types/deal').DealItem} DealItem */
 
 const Api = require("#src/utils/api/service.js");
-
+const getDealSchema = require("#schemas/deal.schema.js").default;
 
 const s3Client = new S3Client();
 const ddbClient = new DynamoDBClient();
@@ -25,146 +26,92 @@ exports.handler = async (event) => {
   const boundaryStartIdx = contentType.indexOf("=") + 1;
   const boundary = contentType.slice(boundaryStartIdx);
 
-  // Get Deal data
-  const deal = {};
-
+  // Parse multipart form data
   const parts = multipart.parse(Buffer.from(decodedBody), boundary);
 
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
-    // will be: { filename: 'A.txt', type: 'text/plain', data: <Buffer 41 41 41 41 42 42 42 42> }
-
-    if (!part.filename) {
-      // string-type data
-      // console.log("part: " + JSON.stringify(part, null, 2));
-      deal[`${part.name}`] = part.data.toString()
-      // console.log("deal: " + JSON.stringify(deal, null, 2));
+  // Extract deal data from parts
+  const deal = {};
+  for (let part of parts) {
+    if (part.filename) {
+      // Handle file upload (logo)
+      deal.logo = {
+        filename: part.filename,
+        contentType: part.type,
+        data: part.data
+      };
     } else {
-      // process file type data before adding to data object
-      // console.log("part: " + JSON.stringify(part, null, 2));
-      // console.log("Setting file type data...");
-      const fileDetails = {
-        fileName: part.filename,
-        type: part.type,
-        data: part.data,
-      }
-
-      deal[`${part.name}`] = fileDetails;
+      // Handle other form fields
+      deal[part.name] = part.data.toString();
     }
   }
 
-  // Validate Category data
-
-
-  // Generate KSUID for PK, SK, and Deal
-  const ksuId = KSUID.randomSync(new Date());
-
-  const logoS3Key = `merchants/${deal.merchantId}/deals/${ksuId.string}/logos/${deal.logo.fileName}`;
-
-  // Save Logo image to S3
-  // try {
-  //   console.log("(+) Saving to Bucket...");
-
-  //   const result = await s3Client.send(new PutObjectCommand({
-  //     Bucket: process.env.S3_BUCKET_NAME,
-  //     Key: logoS3Key,
-  //     Body: deal.logo.data,
-  //   }));
-
-  //   // console.log("(+) result: \n" + JSON.stringify(result, null, 2));
-
-  // } catch (error) {
-  //   console.log("(-) Error: " + error);
-  // };
-
-  // Save Logo image to S3
+  // Validate the deal data
+  const dealSchema = getDealSchema();
   try {
-    console.log("(+) Saving to Bucket...");
-
-    // Validate file type
-    const allowedFileTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
-    if (!allowedFileTypes.includes(deal.logo.type)) {
-      console.log("(-) Error: Invalid file type. Only JPEG, PNG, and SVG files are allowed.");
-      // You can also throw an error or return a specific error message here
-    }
-
-    // Validate file size (e.g., 5MB)
-    const maxFileSize = 5 * 1024 * 1024; // 5MB
-    if (deal.logo.data.length > maxFileSize) {
-      console.log("(-) Error: File size exceeds the maximum allowed size of 5MB.");
-      // You can also throw an error or return a specific error message here
-    }
-
-    // Upload file to S3
-    const result = await s3Client.send(new PutObjectCommand({
-      Bucket: process.env.S3_BUCKET_NAME,
-      Key: logoS3Key,
-      Body: deal.logo.data,
-    }));
-
-    // Check if the upload was successful
-    if (result.$metadata.httpStatusCode !== 200) {
-      console.log("(-) Error: Failed to upload file to S3. Status code: " + result.$metadata.httpStatusCode);
-      // You can also throw an error or return a specific error message here
-    } else {
-      console.log("(+) File uploaded to S3 bucket successfully.");
-    }
-
+    await dealSchema.parseAsync(deal);
   } catch (error) {
-    console.log("(-) Error: " + error);
-    // You can also throw an error or return a specific error message here
-  };
+    console.error("Validation Error:", error);
+    return Api.error(400, "Invalid deal data: " + error.message);
+  }
 
-  // Anything to do for the 'Expiration' data i.e. Date
+  // Generate a new KSUID for the deal
+  const ksuid = KSUID.randomSync(new Date());
+  const dealId = ksuid.string;
 
-  const dealData = {
-    PK: `DEAL#${ksuId.string}`,
-    SK: `DEAL#${ksuId.string}`,
+  // Upload logo to S3
+  const logoS3Key = `merchants/${deal.merchantId}/deals/${dealId}/logos/${deal.logo.filename}`;
+  try {
+    console.log("(+) Saving to Bucket...")
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: process.env.BUCKET_NAME,
+        Key: logoS3Key,
+        Body: deal.logo.data,
+        ContentType: deal.logo.contentType,
+      })
+    );
+  } catch (error) {
+    console.error("S3 Upload Error:", error);
+    return Api.error(500, "Failed to upload logo");
+  }
+
+  // Prepare deal item for DynamoDB
+  /** @type {DealItem} */
+  const dealItem = {
+    PK: `DEAL#${dealId}`,
+    SK: `DEAL#${dealId}`,
     EntityType: "Deal",
-    Id: `${ksuId.string}`,
+    Id: `${dealId}`,
     Title: deal.title,
-    OriginalPrice: deal.originalPrice,
-    Discount: deal.discount,
+    OriginalPrice: parseFloat(deal.originalPrice),
+    Discount: parseFloat(deal.discount),
     Category: deal.category,
     Expiration: deal.expiration,
     MerchantId: deal.merchantId,
     LogoKey: logoS3Key,
+    CreatedAt: new Date().toISOString(),
   };
-  console.log("dealData: " + JSON.stringify(dealData, null, 2));
+  console.log("dealItem: " + JSON.stringify(dealItem, null, 2));
 
-  // Save Deal data to DDB
+  // Save Deal to DynamoDB
   try {
     console.log("(+) Saving to DDB...");
-
-    const result = await ddbClient.send(new PutItemCommand({
-      TableName: process.env.DDB_TABLE_NAME,
-      Item: marshall(dealData),
-    }));
-
-    console.log("(+) result: \n" + JSON.stringify(result, null, 2));
-
+    await ddbClient.send(
+      new PutItemCommand({
+        TableName: process.env.TABLE_NAME,
+        Item: marshall(dealItem),
+      })
+    );
   } catch (error) {
-    console.log("(-) Error: " + error);
-  };
+    console.error("DynamoDB Error:", error);
+    return Api.error(500, "Failed to save deal");
+  }
 
-  return prepareResponse();
+  return Api.success({ message: "Deal added successfully", dealId });
+
+  // return prepareResponse();
 }
 
-
-// function getProcessEnvData(process) {
-//   console.log("Inside 'getProcessEnvData()'");
-
-//   const bucketName = process.env.S3_BUCKET_NAME;
-//   console.log("bucketName: " + bucketName);
-
-//   const tableName = process.env.DDB_TABLE_NAME;
-//   console.log("tableName: " + tableName);
-
-//   return {
-//     bucketName,
-//     tableName,
-//   }
-// }
 
 
 // function getEventData(event) {
@@ -199,16 +146,16 @@ function prepareResponse() {
   const headers = {
     ...corsHeader,
   };
-  // console.log("(+) headers: " + JSON.stringify(headers));
+  console.log("(+) headers: " + JSON.stringify(headers));
 
-  // const body = JSON.stringify({
-  //   Message: "Resource created"
-  // });
-  // console.log("(+) body: " + JSON.stringify(body));
+  const body = JSON.stringify({
+    Message: "Resource created"
+  });
+  console.log("(+) body: " + JSON.stringify(body));
 
   return {
     statusCode: 201,
     headers: headers,
-    // body: body,
+    body: body,
   };
 }
