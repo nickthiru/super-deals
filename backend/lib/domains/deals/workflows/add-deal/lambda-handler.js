@@ -6,82 +6,141 @@ const multipart = require('parse-multipart-data');
 const { Buffer } = require('node:buffer');
 /** @typedef {import('#shared/types/deal').DealItem} DealItem */
 
+// Api object provides internal API-related helper functionality
+// such as standardized success and error responses
 const Api = require("#src/utils/api/service.js");
+
+// Import the deal schema for validation
 const getDealSchema = require("#schemas/deal.schema.js").default;
 
+// Initialize AWS clients
 const s3Client = new S3Client();
 const ddbClient = new DynamoDBClient();
 
-
 exports.handler = async (event) => {
-  // console.log("Inside 'lib/domain/deals/workflow/add-deal/lambda-handler.js'");
-  // console.log("process.env: \n" + JSON.stringify(process.env, null, 2));
-  console.log("event: \n" + JSON.stringify(event, null, 2));
+  console.log("Received event:", JSON.stringify(event, null, 2));
 
-  // Decode Base64 Event Body
-  let decodedBody = atob(event.body);
+  // Parse and validate the multipart form data
+  const deal = parseMultipartFormData(event);
+  const validationResult = await validateDealData(deal);
+  if (!validationResult.success) {
+    return Api.error(400, validationResult.error, validationResult.details);
+  }
 
-  // Get boundary
-  const contentType = event.headers["content-type"];
-  const boundaryStartIdx = contentType.indexOf("=") + 1;
-  const boundary = contentType.slice(boundaryStartIdx);
+  // Generate a unique ID for the deal
+  const dealId = KSUID.randomSync(new Date()).string;
 
-  // Parse multipart form data
-  const parts = multipart.parse(Buffer.from(decodedBody), boundary);
+  // Upload logo to S3
+  const logoUploadResult = await uploadLogoToS3(deal, dealId);
+  if (!logoUploadResult.success) {
+    return Api.error(500, logoUploadResult.error);
+  }
 
-  // Extract deal data from parts
+  // Prepare and save deal to DynamoDB
+  const saveDealResult = await saveDealToDynamoDB(deal, dealId, logoUploadResult.logoS3Key);
+  if (!saveDealResult.success) {
+    return Api.error(500, saveDealResult.error);
+  }
+
+  // Return success response
+  return Api.success({
+    message: "Deal added successfully",
+    dealId: dealId,
+  });
+};
+
+/**
+ * Parse multipart form data from the event
+ * @param {Object} event - The Lambda event object
+ * @returns {Object} The parsed deal data
+ */
+function parseMultipartFormData(event) {
+  const decodedBody = Buffer.from(event.body, 'base64');
+  const boundary = event.headers["content-type"].split("boundary=")[1];
+  const parts = multipart.parse(decodedBody, boundary);
+
   const deal = {};
   for (let part of parts) {
     if (part.filename) {
-      // Handle file upload (logo)
       deal.logo = {
         filename: part.filename,
         contentType: part.type,
         data: part.data
       };
     } else {
-      // Handle other form fields
       deal[part.name] = part.data.toString();
     }
   }
+  return deal;
+}
 
-  // Validate the deal data
+/**
+ * Validate the deal data against the schema
+ * @param {Object} deal - The deal data to validate
+ * @returns {Object} Validation result
+ */
+async function validateDealData(deal) {
   const dealSchema = getDealSchema();
   try {
     await dealSchema.parseAsync(deal);
+    return { success: true };
   } catch (error) {
     console.error("Validation Error:", error);
-    return Api.error(400, "Invalid deal data: " + error.message);
+    if (error.errors && error.errors.length > 0) {
+      // Return detailed error messages from the schema
+      return {
+        success: false,
+        error: "Validation failed",
+        details: error.errors.map(e => ({
+          field: e.path.join('.'),
+          message: e.message
+        }))
+      };
+    }
+    // Fallback for unexpected error structure
+    return { success: false, error: "Invalid deal data: " + error.message };
   }
+}
 
-  // Generate a new KSUID for the deal
-  const ksuid = KSUID.randomSync(new Date());
-  const dealId = ksuid.string;
-
-  // Upload logo to S3
+/**
+ * Upload the deal logo to S3
+ * @param {Object} deal - The deal data
+ * @param {string} dealId - The unique deal ID
+ * @returns {Object} Upload result
+ */
+async function uploadLogoToS3(deal, dealId) {
   const logoS3Key = `merchants/${deal.merchantId}/deals/${dealId}/logos/${deal.logo.filename}`;
   try {
-    console.log("(+) Saving to Bucket...")
+    console.log("(+) Uploading logo to Bucket...")
     await s3Client.send(
       new PutObjectCommand({
-        Bucket: process.env.BUCKET_NAME,
+        Bucket: process.env.S3_BUCKET_NAME,
         Key: logoS3Key,
         Body: deal.logo.data,
         ContentType: deal.logo.contentType,
       })
     );
+    return { success: true, logoS3Key };
   } catch (error) {
-    console.error("S3 Upload Error:", error);
-    return Api.error(500, "Failed to upload logo");
+    console.error("S3 Error:", error);
+    return { success: false, error: "Error uploading logo: " + error.message };
   }
+}
 
-  // Prepare deal item for DynamoDB
+/**
+ * Save the deal to DynamoDB
+ * @param {Object} deal - The deal data
+ * @param {string} dealId - The unique deal ID
+ * @param {string} logoS3Key - The S3 key for the deal logo
+ * @returns {Object} Save result
+ */
+async function saveDealToDynamoDB(deal, dealId, logoS3Key) {
   /** @type {DealItem} */
   const dealItem = {
     PK: `DEAL#${dealId}`,
     SK: `DEAL#${dealId}`,
     EntityType: "Deal",
-    Id: `${dealId}`,
+    Id: dealId,
     Title: deal.title,
     OriginalPrice: parseFloat(deal.originalPrice),
     Discount: parseFloat(deal.discount),
@@ -93,69 +152,17 @@ exports.handler = async (event) => {
   };
   console.log("dealItem: " + JSON.stringify(dealItem, null, 2));
 
-  // Save Deal to DynamoDB
   try {
-    console.log("(+) Saving to DDB...");
+    console.log("(+) Saving deal to DynamoDB...")
     await ddbClient.send(
       new PutItemCommand({
-        TableName: process.env.TABLE_NAME,
+        TableName: process.env.DDB_TABLE_NAME,
         Item: marshall(dealItem),
       })
     );
+    return { success: true };
   } catch (error) {
     console.error("DynamoDB Error:", error);
-    return Api.error(500, "Failed to save deal");
+    return { success: false, error: "Error saving deal: " + error.message };
   }
-
-  return Api.success({ message: "Deal added successfully", dealId });
-
-  // return prepareResponse();
 }
-
-
-
-// function getEventData(event) {
-//   console.log("Inside 'getEventData()'");
-
-//   const body = JSON.parse(event.body);
-//   console.log("(+) body.Username: " + body.Username);
-//   console.log("(+) body.Password: " + body.Password);
-//   console.log("(+) body.EmailAddress: " + body.EmailAddress);
-
-//   const username = body.Username;
-//   const password = body.Password;
-//   const emailAddress = body.EmailAddress;
-//   console.log("(+) username: " + username);
-//   console.log("(+) password: " + password);
-//   console.log("(+) emailAddress: " + emailAddress);
-
-//   return {
-//     username,
-//     password,
-//     emailAddress,
-//   };
-// }
-
-
-// function prepareResponse() {
-//   // console.log("Inside 'prepareResponse()'");
-
-//   const corsHeader = Api.addCorsHeader();
-//   // console.log("(+) corsHeadear: " + JSON.stringify(corsHeader));
-
-//   const headers = {
-//     ...corsHeader,
-//   };
-//   // console.log("(+) headers: " + JSON.stringify(headers));
-
-//   const body = JSON.stringify({
-//     Message: "Resource created"
-//   });
-//   console.log("(+) body: " + JSON.stringify(body));
-
-//   return {
-//     statusCode: 201,
-//     headers: headers,
-//     body: body,
-//   };
-// }

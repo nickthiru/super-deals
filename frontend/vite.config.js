@@ -5,6 +5,8 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	test: {
 		globals: true,
-		environment: 'jsdom', // 'node' can also be used depending on your needs  
+		reporter: 'verbose',
+		environment: 'jsdom', // 'node' can also be used depending on your needs
+		setupFiles: ['./src/vitest/registerMatchers.js'],
 	},
 });
