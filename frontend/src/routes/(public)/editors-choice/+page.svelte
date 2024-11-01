@@ -1,5 +1,5 @@
 <script>
-  export let data;
+  // export let data;
   // console.log("data: " + JSON.stringify(data, null, 2));
 
   // const products = data.products;

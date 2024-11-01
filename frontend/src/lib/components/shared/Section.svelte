@@ -1,6 +1,6 @@
 <script>
   import SectionTitle from "$lib/components/shared/SectionTitle.svelte";
-  import { capitalize } from "$lib/utils/capitalize";
+  import { capitalize } from "$shared/utils/capitalize";
 
   export let sectionName = "";
 

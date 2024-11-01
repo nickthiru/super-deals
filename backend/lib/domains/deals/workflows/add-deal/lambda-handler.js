@@ -8,7 +8,7 @@ const { Buffer } = require('node:buffer');
 
 // Api object provides internal API-related helper functionality
 // such as standardized success and error responses
-const Api = require("#src/utils/api/service.js");
+const Api = require("#src/utils/api/_service.js");
 
 // Import the deal schema for validation
 const getDealSchema = require("#schemas/deal.schema.js").default;
