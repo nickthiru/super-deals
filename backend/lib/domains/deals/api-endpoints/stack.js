@@ -1,6 +1,6 @@
 const { Stack } = require("aws-cdk-lib");
 const { LambdaIntegration, Model, RequestValidator } = require("aws-cdk-lib/aws-apigateway");
-import { jsonSchema } from '#schemas/deal.schema.js';
+const { jsonSchema } = require("#schemas/deal.schema.js");
 
 
 class ApiEndpointsStack extends Stack {

@@ -4,14 +4,14 @@ const { marshall } = require("@aws-sdk/util-dynamodb");
 const KSUID = require("ksuid");
 const multipart = require('parse-multipart-data');
 const { Buffer } = require('node:buffer');
-/** @typedef {import('#shared/types/deal').DealItem} DealItem */
+/** @typedef {import('#shared/types/deal').Deal} DealItem */
 
 // Api object provides internal API-related helper functionality
 // such as standardized success and error responses
 const Api = require("#src/utils/api/_service.js");
 
 // Import the deal schema for validation
-const getDealSchema = require("#schemas/deal.schema.js").default;
+const getDealSchema = require("#schemas/deal.schema.js");
 
 // Initialize AWS clients
 const s3Client = new S3Client();
