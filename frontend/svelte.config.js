@@ -1,19 +1,22 @@
 import adapter from "@sveltejs/adapter-auto";
 
-/** @type {import("@sveltejs/kit").Config} */
+/** @type {import('@sveltejs/kit').Config} */
 const config = {
 	kit: {
-		// adapter-auto only supports some environments, see https://kit.svelte.dev/docs/adapter-auto for a list.
-		// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
-		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
 		adapter: adapter(),
 		alias: {
-			"$src/*": "./src/*",
-			"$types/*": "./.svelte-kit/types/*",
-			"$backend/*": "../backend/*",
-			"$schemas/*": "../shared/schemas/*",
-		},
-	}
+			'$lib': './src/lib',
+			'$src': './src',
+			'shared': '../shared',
+			'$backend': '../backend',
+			'$sv-types': './.svelte-kit/types',
+			'$types': '../shared/types',
+			'$schemas': '../shared/schemas',
+			'$unit-tests': './src/tests',
+			'$playwright-tests': './tests',
+			'$shared-tests': '../shared/tests',
+		}
+	},
 };
 
 export default config;

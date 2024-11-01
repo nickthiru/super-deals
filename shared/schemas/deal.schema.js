@@ -1,6 +1,7 @@
 // shared/schemas/deal.schema.js
 import { zfd } from 'zod-form-data';
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 /** @type {readonly string[]} */
 const allowedFileTypes = ['jpg', 'jpeg', 'png', 'gif'];
@@ -53,7 +54,11 @@ const staticDealSchema = zfd.formData({
   expiration: zfd.text(z.string().refine((val) => !isNaN(Date.parse(val)), 'Expiration must be a valid date')),
 });
 
-const jsonSchema = staticDealSchema.toJsonSchema();
+// Convert the Zod schema to JSON schema
+const jsonSchema = zodToJsonSchema(staticDealSchema, {
+  $refStrategy: 'none',
+  target: 'openApi3',
+});
 
 /**
  * Export the getDealSchema function for use in +page.server.js validations.

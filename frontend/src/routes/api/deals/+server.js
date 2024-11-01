@@ -1,5 +1,5 @@
 import { json, text } from "@sveltejs/kit";
-import { deals } from "../../../../test/data/deals.js";
+import { deals } from "$tests/data/deals.js";
 
 
 
