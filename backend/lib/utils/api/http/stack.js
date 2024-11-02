@@ -1,7 +1,6 @@
 const { Stack, CfnOutput } = require("aws-cdk-lib");
 const { RestApi, Deployment, Stage, Cors, CognitoUserPoolsAuthorizer, AuthorizationType } = require("aws-cdk-lib/aws-apigateway");
-// const { AccountApiEndpointsStack } = require("./api-endpoints/account-endpoints-stack");
-// const { DeviceApiEndpointsStack } = require("./api-endpoints/device-endpoints-stack");
+const { ValidationsStack } = require("./validations/construct");
 
 
 class HttpStack extends Stack {
@@ -9,16 +8,16 @@ class HttpStack extends Stack {
     super(scope, id, props);
     console.log("(+) Inside 'HttpStack'");
 
-    // const {
-    // } = props;
-
-
     /*** API ***/
 
     this.restApi = new RestApi(this, "RestApi", {
       binaryMediaTypes: [
         "multipart/form-data",
       ]
+    });
+
+    this.validations = new ValidationsStack(this, 'ValidationsStack', {
+      restApi: this.restApi
     });
 
     // const authorizer = new CognitoUserPoolsAuthorizer(this, "CognitoUserPoolsAuthorizer", {

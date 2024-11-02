@@ -7,11 +7,7 @@ class ApiStack extends Stack {
     super(scope, id, props);
     console.log("(+) Inside 'ApiStack'");
 
-    // const {
-    // } = props;
-
-
-    this.http = new HttpStack(this, "HttpStack", {});
+    this.http = new HttpStack(this, "HttpStack");
 
     // this.webSocket = new WebSocketStack(this, "WebSocketStack", {
     //   // auth,

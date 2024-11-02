@@ -1,0 +1,71 @@
+openapi: "3.0.0"
+info:
+  title: Super Deals
+  version: "1.0"
+tags:
+  - name: deals
+    description: Deals service
+components:
+  schemas:
+    Deal:
+      type: object
+      description: A deal added by a merchant
+      required:
+        - merchantId
+        - title
+        - originalPrice
+        - discount
+        - logo
+        - category
+        - expiration
+      properties:
+        merchantId:
+          type: string
+          description: ID of merchant who created the deal
+        title:
+          type: string
+          description: Title of the deal
+          maxLength: 255
+        originalPrice:
+          type: number
+          description: Original price of the deal
+        discount:
+          type: number
+          description: Deal discount
+        logo:
+          type: string
+          format: binary
+          description: Logo image of the deal
+        category:
+          type: string
+          description: The category this deal falls under
+        expiration:
+          type: string
+          format: date
+          description: The expiration date of the deal. Must be today's date or later (YYYY-MM-DD).
+    Merchant:
+      type: object
+      description: Data about merchant
+servers:
+  - url: https://s5b9r0sjp8.execute-api.us-east-1.amazonaws.com/prod
+paths:
+  /merchant/deals:
+    description: Merchant can add a deal to his catalog
+    post:
+      tags:
+        - deals
+      description: Add a new deal
+      requestBody:
+        required: true
+        description: The deal to add
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/Deal"
+      responses:
+        "200":
+          description: Successfully signed up user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"

@@ -4,6 +4,12 @@ import path from 'path';
 
 export default defineConfig({
 	plugins: [sveltekit()],
+	server: {
+		fs: {
+			// Allow serving files from one level up to the project root
+			allow: ['..'],
+		},
+	},
 	test: {
 		globals: true,
 		reporter: 'verbose',
