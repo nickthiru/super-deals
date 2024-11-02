@@ -1,4 +1,3 @@
-// shared/schemas/deal.schema.js
 import { zfd } from 'zod-form-data';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
