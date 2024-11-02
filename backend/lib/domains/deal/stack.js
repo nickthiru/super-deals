@@ -3,24 +3,23 @@ const { ApiEndpointsStack } = require("./api-endpoints/stack");
 const { AddDealWorkflowContruct } = require("./workflows/add-deal/construct");
 
 
-class DealsServiceStack extends Stack {
+class DealServiceStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
     console.log("(+) Inside 'DealsServiceStack'");
 
     const {
-      storageStack,
-      dbStack,
-      apiStack,
-      // sharedResourcesStack
+      storage,
+      db,
+      api,
     } = props;
 
 
     /*** Workflows ***/
 
-    const addDealWorkflowConstruct = new AddDealWorkflowContruct(this, "AddDealWorkflowContruct", {
-      storageStack,
-      dbStack,
+    const addDealWorkflow = new AddDealWorkflowContruct(this, "AddDealWorkflowContruct", {
+      storage,
+      db,
     });
 
 
@@ -28,11 +27,10 @@ class DealsServiceStack extends Stack {
     /*** API Endpoints */
 
     new ApiEndpointsStack(this, "ApiEndpointsStack", {
-      apiStack,
-      // sharedResourcesStack,
-      addDealWorkflowConstruct,
+      api,
+      addDealWorkflow,
     });
   }
 }
 
-module.exports = { DealsServiceStack };
+module.exports = { DealServiceStack };

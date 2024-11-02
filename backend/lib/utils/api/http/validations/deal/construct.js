@@ -1,16 +1,14 @@
-const { Stack, CfnOutput } = require("aws-cdk-lib");
+const { Construct } = require('constructs');
 const { Model, RequestValidator } = require("aws-cdk-lib/aws-apigateway");
 const { jsonSchema } = require("#schemas/deal.schema.js");
 
-
-class DealsValidationStack extends Stack {
+class DealValidations extends Construct {
   constructor(scope, id, props) {
-    super(scope, id, props);
-    console.log("(+) Inside 'DealsValidationStack'");
+    super(scope, id);
+    console.log("(+) Inside 'DealValidations'");
 
-    const {
-      restApi,
-    } = props;
+
+    const { restApi } = props;
 
     this.model = new Model(this, 'DealModel', {
       restApi: restApi,
@@ -27,4 +25,4 @@ class DealsValidationStack extends Stack {
   }
 }
 
-module.exports = { DealsValidationStack };
+module.exports = { DealValidations };

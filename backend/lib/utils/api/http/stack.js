@@ -1,19 +1,12 @@
 const { Stack, CfnOutput } = require("aws-cdk-lib");
-const { RestApi, Deployment, Stage, Cors, CognitoUserPoolsAuthorizer, AuthorizationType, Model, RequestValidator } = require("aws-cdk-lib/aws-apigateway");
-const { jsonSchema } = require("#schemas/deal.schema.js");
-const { DealsValidationStack } = require("./validations/deals/stack");
-// const { AccountApiEndpointsStack } = require("./api-endpoints/account-endpoints-stack");
-// const { DeviceApiEndpointsStack } = require("./api-endpoints/device-endpoints-stack");
+const { RestApi, Deployment, Stage, Cors, CognitoUserPoolsAuthorizer, AuthorizationType } = require("aws-cdk-lib/aws-apigateway");
+const { ValidationsStack } = require("./validations/construct");
 
 
 class HttpStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
     console.log("(+) Inside 'HttpStack'");
-
-    // const {
-    // } = props;
-
 
     /*** API ***/
 
@@ -23,29 +16,15 @@ class HttpStack extends Stack {
       ]
     });
 
+    this.validations = new ValidationsStack(this, 'ValidationsStack', {
+      restApi: this.restApi
+    });
+
     // const authorizer = new CognitoUserPoolsAuthorizer(this, "CognitoUserPoolsAuthorizer", {
     //   cognitoUserPools: [authStack.consumerUserPool],
     //   identitySource: "method.request.header.Authorization",
     // });
     // authorizer._attachToApi(restApi);
-
-    // Create shared resources
-    this.dealModel = new Model(this, 'DealModel', {
-      restApi: this.restApi,
-      contentType: 'application/json',
-      description: 'Validation model for deals',
-      schema: jsonSchema
-    });
-
-    this.dealRequestValidator = new RequestValidator(this, 'DealRequestValidator', {
-      restApi: this.restApi,
-      validateRequestBody: true,
-      validateRequestParameters: false
-    });
-
-    // this.dealsValidationStack = new DealsValidationStack(this, "DealsValidationStack", {
-    //   restApi: this.restApi,
-    // });
 
     // Attach this to each root-level Resource
     this.optionsWithCors = {

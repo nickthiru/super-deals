@@ -17,13 +17,14 @@ class AddDealWorkflowContruct extends Construct {
     console.log("(+) Inside 'AddDealWorkflowContruct'");
 
     const {
-      storageStack,
-      dbStack,
+      storage,
+      db,
     } = props;
 
     this.lambda = new NodejsFunction(this, "AddDealWorkflowLambda", {
       bundling: {
-        externalModules: ["@aws-sdk"]
+        externalModules: ["@aws-sdk"],
+        forceDockerBundling: true,
       },
       runtime: Runtime.NODEJS_18_X,
       // memorySize: 1024,
@@ -33,18 +34,18 @@ class AddDealWorkflowContruct extends Construct {
       handler: "handler",
       depsLockFilePath: (path.join(__dirname, "../../../../../package-lock.json")),
       environment: {
-        S3_BUCKET_NAME: storageStack.s3Bucket.bucketName,
-        DDB_TABLE_NAME: dbStack.mainTable.tableName,
+        S3_BUCKET_NAME: storage.s3Bucket.bucketName,
+        DDB_TABLE_NAME: db.table.tableName,
       },
       initialPolicy: [
         new PolicyStatement({
           effect: Effect.ALLOW,
-          resources: [`${storageStack.s3Bucket.bucketArn}/*`],
+          resources: [`${storage.s3Bucket.bucketArn}/*`],
           actions: ["s3:PutObject"],
         }),
         new PolicyStatement({
           effect: Effect.ALLOW,
-          resources: [dbStack.mainTable.tableArn],
+          resources: [db.table.tableArn],
           actions: ["dynamodb:PutItem"],
         }),
       ]

@@ -6,7 +6,7 @@ class DbStack extends Stack {
     super(scope, id, props);
     console.log("(+) Inside 'DbStack'");
 
-    this.mainTable = new TableV2(this, "MainTable", {
+    this.table = new TableV2(this, "Table", {
       partitionKey: {
         name: "PK",
         type: AttributeType.STRING
