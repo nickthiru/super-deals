@@ -1,4 +1,3 @@
-// backend/shared/schemas/deal.schema.js
 const { zfd } = require('zod-form-data');
 const { z } = require('zod');
 const { zodToJsonSchema } = require('zod-to-json-schema');

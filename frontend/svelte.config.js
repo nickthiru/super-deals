@@ -7,14 +7,14 @@ const config = {
 		alias: {
 			'$lib': './src/lib',
 			'$src': './src',
-			'shared': '../shared',
-			'$backend': '../backend',
 			'$sv-types': './.svelte-kit/types',
-			'$types': '../shared/types',
-			'$schemas': '../shared/schemas',
 			'$unit-tests': './src/tests',
 			'$playwright-tests': './tests',
-			'$shared-tests': '../shared/tests',
+			// '$backend': '../backend',
+			'$shared': '../backend/shared',
+			'$types': '../backend/shared/types',
+			'$schemas': '../backend/shared/schemas',
+
 		}
 	},
 };
