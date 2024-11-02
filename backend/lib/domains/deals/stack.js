@@ -12,6 +12,7 @@ class DealsServiceStack extends Stack {
       storageStack,
       dbStack,
       apiStack,
+      // sharedResourcesStack
     } = props;
 
 
@@ -28,6 +29,7 @@ class DealsServiceStack extends Stack {
 
     new ApiEndpointsStack(this, "ApiEndpointsStack", {
       apiStack,
+      // sharedResourcesStack,
       addDealWorkflowConstruct,
     });
   }

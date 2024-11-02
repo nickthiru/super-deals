@@ -10,36 +10,36 @@ class ApiEndpointsStack extends Stack {
 
     const {
       apiStack,
+      // sharedResourcesStack,
       addDealWorkflowConstruct,
     } = props;
 
 
     // /merchant
-    const merchant = apiStack.http.restApi.root.addResource("merchant", apiStack.http.optionsWithCors);
+    const merchant = apiStack.httpStack.restApi.root.addResource("merchant", apiStack.httpStack.restApi.optionsWithCors);
 
     // /merchant/deals
     const deals = merchant.addResource("deals");
 
-    const dealModel = new Model(this, 'DealModel', {
-      restApi: apiStack.http.restApi,
-      contentType: 'application/json',
-      description: 'Validation model for deals',
-      schema: jsonSchema
-    });
+    // const dealModel = new Model(this, 'DealModel', {
+    //   restApi: apiStack.http.restApi,
+    //   contentType: 'application/json',
+    //   description: 'Validation model for deals',
+    //   schema: jsonSchema
+    // });
 
-    const dealRequestValidator = new RequestValidator(this, 'DealRequestValidator', {
-      restApi: apiStack.http.restApi,
-      validateRequestBody: true,
-      validateRequestParameters: false
-    });
+    // const dealRequestValidator = new RequestValidator(this, 'DealRequestValidator', {
+    //   restApi: apiStack.http.restApi,
+    //   validateRequestBody: true,
+    //   validateRequestParameters: false
+    // });
 
     deals.addMethod("POST", new LambdaIntegration(addDealWorkflowConstruct.lambda), {
-      requestValidator: dealRequestValidator,
+      requestValidator: apiStack.httpStack.dealRequestValidator,
       requestModels: {
-        'application/json': dealModel
+        'application/json': apiStack.httpStack.dealModel
       }
     });
-
   }
 }
 

@@ -1,5 +1,7 @@
 const { Stack, CfnOutput } = require("aws-cdk-lib");
-const { RestApi, Deployment, Stage, Cors, CognitoUserPoolsAuthorizer, AuthorizationType } = require("aws-cdk-lib/aws-apigateway");
+const { RestApi, Deployment, Stage, Cors, CognitoUserPoolsAuthorizer, AuthorizationType, Model, RequestValidator } = require("aws-cdk-lib/aws-apigateway");
+const { jsonSchema } = require("#schemas/deal.schema.js");
+const { DealsValidationStack } = require("./validations/deals/stack");
 // const { AccountApiEndpointsStack } = require("./api-endpoints/account-endpoints-stack");
 // const { DeviceApiEndpointsStack } = require("./api-endpoints/device-endpoints-stack");
 
@@ -26,6 +28,24 @@ class HttpStack extends Stack {
     //   identitySource: "method.request.header.Authorization",
     // });
     // authorizer._attachToApi(restApi);
+
+    // Create shared resources
+    this.dealModel = new Model(this, 'DealModel', {
+      restApi: this.restApi,
+      contentType: 'application/json',
+      description: 'Validation model for deals',
+      schema: jsonSchema
+    });
+
+    this.dealRequestValidator = new RequestValidator(this, 'DealRequestValidator', {
+      restApi: this.restApi,
+      validateRequestBody: true,
+      validateRequestParameters: false
+    });
+
+    // this.dealsValidationStack = new DealsValidationStack(this, "DealsValidationStack", {
+    //   restApi: this.restApi,
+    // });
 
     // Attach this to each root-level Resource
     this.optionsWithCors = {

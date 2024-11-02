@@ -3,6 +3,7 @@ const { DbStack } = require('./utils/db/stack');
 const { ApiStack } = require('./utils/api/stack');
 const { DealsServiceStack } = require('./domains/deals/stack');
 const { StorageStack } = require('./utils/storage/stack');
+const { SharedResourcesStack } = require('./shared/stack');
 
 class BackendStack extends Stack {
   /**
@@ -25,15 +26,25 @@ class BackendStack extends Stack {
     const apiStack = new ApiStack(this, "ApiStack");
 
 
+    /*** Shared Resources ***/
+
+    // const sharedResourcesStack = new SharedResourcesStack(this, "SharedResourcesStack", {
+    //   apiStack,
+    // });
+
+
     /*** Services ***/
 
     new DealsServiceStack(this, "DealsServiceStack", {
       storageStack,
       dbStack,
       apiStack,
+      // sharedResourcesStack,
     });
 
 
+    // Ensure correct dependency order
+    // sharedResourcesStack.addDependency(apiStack);
   }
 }
 

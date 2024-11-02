@@ -11,7 +11,7 @@ class ApiStack extends Stack {
     // } = props;
 
 
-    this.http = new HttpStack(this, "HttpStack", {});
+    this.httpStack = new HttpStack(this, "HttpStack", {});
 
     // this.webSocket = new WebSocketStack(this, "WebSocketStack", {
     //   // auth,
