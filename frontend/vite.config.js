@@ -26,7 +26,8 @@ export default defineConfig({
 			'$unit-tests': path.resolve(__dirname, './src/tests'),
 			'$playwright-tests': path.resolve(__dirname, './tests'),
 			'$backend': path.resolve(__dirname, '../backend'),
-			'$shared': path.resolve(__dirname, '../shared'),
+			'$schemas': path.resolve(__dirname, './src/schemas'),
+			'$types': path.resolve(__dirname, './src/types'),
 		}
 	},
 	optimizeDeps: {

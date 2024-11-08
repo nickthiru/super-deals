@@ -9,7 +9,8 @@ const config = {
 			'$unit-tests': './src/tests',
 			'$playwright-tests': './tests',
 			'$backend': '../backend',
-			'$shared': '../shared',
+			'$schemas': './src/schemas',
+			'$types': './src/types',
 		}
 	},
 };
