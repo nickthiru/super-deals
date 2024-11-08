@@ -1,7 +1,6 @@
-import { zfd } from 'zod-form-data';
-import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
-
+const { zfd } = require('zod-form-data');
+const { z } = require('zod');
+const { zodToJsonSchema } = require('zod-to-json-schema');
 
 /**
  * Allowed file types for the deal logo.
@@ -71,4 +70,4 @@ const jsonSchema = zodToJsonSchema(staticDealSchema, {
   target: 'openApi3',
 });
 
-export { getDealSchema, jsonSchema };
+module.exports = { getDealSchema, jsonSchema };

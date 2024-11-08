@@ -13,8 +13,8 @@
   "imports": {
     "#src/*": "./src/*",
     "#lib/*": "./lib/*",
-    "#shared/*": "./shared/*",
-    "#schemas/*": "./shared/schemas/*"
+    "#schemas/*": "./shared/schemas/*",
+    "#types/*": "./shared/types/*"
   },
   "devDependencies": {
     "aws-cdk": "2.161.1",

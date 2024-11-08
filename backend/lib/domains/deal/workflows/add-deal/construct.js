@@ -1,13 +1,8 @@
 const { Construct } = require("constructs");
-const { CfnOutput } = require("aws-cdk-lib");
 const { NodejsFunction } = require("aws-cdk-lib/aws-lambda-nodejs");
 const { Runtime } = require("aws-cdk-lib/aws-lambda");
 // const { Duration } = require("aws-cdk-lib");
 const { PolicyStatement, Effect } = require("aws-cdk-lib/aws-iam");
-// const { LambdaFunctionAction } = require("@aws-cdk/aws-iot-actions-alpha");
-// const { TopicRule, IotSql } = require("@aws-cdk/aws-iot-alpha");
-// const { Topic } = require("aws-cdk-lib/aws-sns");
-// const { SnsToSqs } = require("@aws-solutions-constructs/aws-sns-sqs");
 const path = require("path");
 
 
