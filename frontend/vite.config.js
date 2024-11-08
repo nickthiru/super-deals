@@ -22,16 +22,11 @@ export default defineConfig({
 	},
 	resolve: {
 		alias: {
-			'$lib': path.resolve(__dirname, './src/lib'),
-			'$src': path.resolve(__dirname, './src'),
 			'$sv-types': path.resolve(__dirname, './.svelte-kit/types'),
 			'$unit-tests': path.resolve(__dirname, './src/tests'),
 			'$playwright-tests': path.resolve(__dirname, './tests'),
-			// '$backend': path.resolve(__dirname, '../backend'),
-			'$shared': path.resolve(__dirname, '../backend/shared'),
-			'$types': path.resolve(__dirname, '../backend/shared/types'),
-			'$schemas': path.resolve(__dirname, '../backend/shared/schemas'),
-
+			'$backend': path.resolve(__dirname, '../backend'),
+			'$shared': path.resolve(__dirname, '../shared'),
 		}
 	},
 	optimizeDeps: {
