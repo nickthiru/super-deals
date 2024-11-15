@@ -21,7 +21,11 @@ export type DealFormSchema = {
   /**
    * Logo file for the deal.
    */
-  logo: File;
+  logo: {
+    filename: string;
+    contentType: string;
+    data: Buffer;
+  };
   /**
    * Category of the deal.
    */

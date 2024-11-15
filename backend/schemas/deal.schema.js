@@ -32,8 +32,12 @@ const commonSchemaObject = {
   title: zfd.text(z.string().max(255, 'Title must be 255 characters or less')),
   originalPrice: zfd.text(z.coerce.number().min(0, 'Original Price must be a positive number')),
   discount: zfd.text(z.coerce.number().min(0, 'Discount must be at least 0').max(100, 'Discount cannot exceed 100')),
-  logo: zfd.file(z.instanceof(File).refine(file => {
-    const fileType = file.name.split('.').pop().toLowerCase();
+  logo: zfd.file(z.object({
+    filename: z.string(),
+    contentType: z.string(),
+    data: z.instanceof(Buffer)
+  }).refine(file => {
+    const fileType = file.filename.split('.').pop().toLowerCase();
     return allowedFileTypes.includes(fileType);
   }, 'Invalid file type')),
   category: zfd.text(z.enum(categoryEnum, 'Category is required')),

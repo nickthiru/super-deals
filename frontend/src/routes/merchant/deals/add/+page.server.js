@@ -1,5 +1,5 @@
 import { fail } from '@sveltejs/kit';
-import getDealSchema from '$schemas/deal.schema.js';
+import { getDealSchema } from '$schemas/deal.schema.js';
 import { BackendStackApiStackHttpStackA5B3EBBB } from "$backend/outputs.json";
 
 const { RestApiEndpoint0551178A: BaseUrl } = BackendStackApiStackHttpStackA5B3EBBB;
@@ -8,12 +8,14 @@ export const actions = {
   default: async ({ request, fetch }) => {
     // Get the form data
     const formData = await request.formData();
+    console.log("formData.logo: " + formData.get("logo"));
 
     // Get the deal schema with the current date
     const dealSchema = getDealSchema();
 
     // Parse and validate the form data
     const result = dealSchema.safeParse(formData);
+    console.log("result: " + JSON.stringify(result, null, 2));
 
     // In case of an error, return the data and errors
     if (!result.success) {
