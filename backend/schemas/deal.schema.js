@@ -49,13 +49,28 @@ const commonSchemaObject = {
  * Returns the deal schema with dynamic validation for expiration date.
  * @returns {import('zod').ZodType<DealFormSchema>}
  */
+// const getDealSchema = () => {
+//   const today = new Date();
+//   today.setHours(0, 0, 0, 0);
+
+//   return zfd.formData({
+//     ...commonSchemaObject,
+//     expiration: zfd.text(z.string().refine((val) => !isNaN(Date.parse(val)) && new Date(val) >= today, 'Expiration must be today\'s date or later')),
+//   });
+// };
 const getDealSchema = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  const sevenDaysFromToday = new Date(today);
+  sevenDaysFromToday.setDate(today.getDate() + 7);
+
   return zfd.formData({
     ...commonSchemaObject,
-    expiration: zfd.text(z.string().refine((val) => !isNaN(Date.parse(val)) && new Date(val) >= today, 'Expiration must be today\'s date or later')),
+    expiration: zfd.text(z.string().refine(val => val.length > 0, { message: 'Required' }).refine(val => {
+      const parsedDate = Date.parse(val);
+      return !isNaN(parsedDate) && new Date(parsedDate) >= sevenDaysFromToday;
+    }, 'Expiration must be seven days from today or later')),
   });
 };
 

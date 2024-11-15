@@ -2,7 +2,6 @@ import { zfd } from 'zod-form-data';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-
 /**
  * Allowed file types for the deal logo.
  * @type {readonly string[]}
@@ -30,14 +29,17 @@ const categoryEnum = [
  */
 const commonSchemaObject = {
   merchantId: zfd.text(z.string().min(1, 'Merchant ID is required')),
-  title: zfd.text(z.string().max(255, 'Title must be 255 characters or less')),
-  originalPrice: zfd.text(z.coerce.number().min(0, 'Original Price must be a positive number')),
-  discount: zfd.text(z.coerce.number().min(0, 'Discount must be at least 0').max(100, 'Discount cannot exceed 100')),
-  logo: zfd.file(z.instanceof(File).refine(file => {
-    const fileType = file.name.split('.').pop().toLowerCase();
-    return allowedFileTypes.includes(fileType);
-  }, 'Invalid file type')),
-  category: zfd.text(z.enum(categoryEnum, 'Category is required')),
+  title: zfd.text(z.string().min(1, 'Required').max(255, 'Title must be 255 characters or less')),
+  originalPrice: zfd.text(z.string().refine(val => val.length > 0, { message: 'Required' }).transform(val => parseFloat(val)).refine(val => !isNaN(val) && val > 0, { message: 'Original Price must be more than 0' })),
+  discount: zfd.text(z.string().refine(val => val.length > 0, { message: 'Required' }).transform(val => parseFloat(val)).refine(val => !isNaN(val) && val > 0 && val <= 100, { message: 'Discount must be between 0 and 100' })),
+  logo: zfd.file(z.any()).refine(val => val !== undefined && val !== null, { message: 'Required' }).refine(file => {
+    if (file) {
+      const fileType = file.name.split('.').pop().toLowerCase();
+      return allowedFileTypes.includes(fileType);
+    }
+    return true;
+  }, 'Invalid file type'),
+  category: zfd.text(z.enum(categoryEnum, 'Required')),
 };
 
 /**
@@ -48,9 +50,15 @@ const getDealSchema = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  const sevenDaysFromToday = new Date(today);
+  sevenDaysFromToday.setDate(today.getDate() + 7);
+
   return zfd.formData({
     ...commonSchemaObject,
-    expiration: zfd.text(z.string().refine((val) => !isNaN(Date.parse(val)) && new Date(val) >= today, 'Expiration must be today\'s date or later')),
+    expiration: zfd.text(z.string().refine(val => val.length > 0, { message: 'Required' }).refine(val => {
+      const parsedDate = Date.parse(val);
+      return !isNaN(parsedDate) && new Date(parsedDate) >= sevenDaysFromToday;
+    }, 'Expiration must be seven days from today or later')),
   });
 };
 
@@ -60,7 +68,7 @@ const getDealSchema = () => {
  */
 const staticDealSchema = zfd.formData({
   ...commonSchemaObject,
-  expiration: zfd.text(z.string().refine((val) => !isNaN(Date.parse(val)), 'Expiration must be a valid date')),
+  expiration: zfd.text(z.string().refine(val => val.length > 0, { message: 'Required' }).refine((val) => !isNaN(Date.parse(val)), 'Expiration must be a valid date')),
 });
 
 /**

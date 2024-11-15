@@ -8,7 +8,6 @@ export const actions = {
   default: async ({ request, fetch }) => {
     // Get the form data
     const formData = await request.formData();
-    console.log("formData.logo: " + formData.get("logo"));
 
     // Get the deal schema with the current date
     const dealSchema = getDealSchema();
