@@ -29,20 +29,34 @@ components:
         originalPrice:
           type: number
           description: Original price of the deal
+          minimum: 0
         discount:
           type: number
           description: Deal discount
+          minimum: 0
+          maximum: 100
         logo:
           type: string
           format: binary
-          description: Logo image of the deal
+          description: Logo image of the deal. Must be of type jpg, jpeg, png, or gif.
         category:
           type: string
           description: The category this deal falls under
+          enum:
+            - foodDrink
+            - bathroom
+            - jewelery
+            - sports
+            - tech
+            - auto
+            - entertainment
+            - travel
         expiration:
           type: string
           format: date
-          description: The expiration date of the deal. Must be today's date or later (YYYY-MM-DD).
+          description: >
+            The expiration date of the deal. Must be a valid date in YYYY-MM-DD format.
+            Must be at least seven days from today's date.
     Merchant:
       type: object
       description: Data about merchant
