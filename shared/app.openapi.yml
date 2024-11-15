@@ -61,7 +61,7 @@ components:
       type: object
       description: Data about merchant
 servers:
-  - url: https://s5b9r0sjp8.execute-api.us-east-1.amazonaws.com/prod
+  - url: https://ifq1hc035i.execute-api.us-east-1.amazonaws.com/prod
 paths:
   /merchant/deals:
     description: Merchant can add a deal to his catalog
