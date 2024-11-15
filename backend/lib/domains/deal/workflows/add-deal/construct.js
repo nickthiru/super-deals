@@ -21,7 +21,7 @@ class AddDealWorkflowContruct extends Construct {
         externalModules: ["@aws-sdk"],
         forceDockerBundling: true,
       },
-      runtime: Runtime.NODEJS_18_X,
+      runtime: Runtime.NODEJS_20_X,
       // memorySize: 1024,
       // memorySize: 512,
       // timeout: Duration.minutes(1),
