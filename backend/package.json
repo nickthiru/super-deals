@@ -14,11 +14,13 @@
     "#src/*": "./src/*",
     "#lib/*": "./lib/*",
     "#schemas/*": "./schemas/*",
-    "#types/*": "./types/*"
+    "#types/*": "./types/*",
+    "#tests/*": "./tests/*"
   },
   "devDependencies": {
     "aws-cdk": "2.161.1",
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.658.1",
