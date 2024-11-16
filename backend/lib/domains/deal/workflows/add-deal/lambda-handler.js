@@ -45,7 +45,7 @@ exports.handler = async (event) => {
 
   // Return success response
   return Api.success({
-    message: "Deal added successfully",
+    message: "Deal successfully added",
     dealId: dealId,
   });
 };
