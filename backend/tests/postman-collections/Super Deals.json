@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "3186727e-4ef9-49fa-a857-8cd72b888af6",
+		"_postman_id": "83f1ef06-ddcf-47f3-bacd-5d39bf609acc",
 		"name": "Super Deals",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_uid": "17148380-3186727e-4ef9-49fa-a857-8cd72b888af6"
+		"_uid": "17148380-83f1ef06-ddcf-47f3-bacd-5d39bf609acc"
 	},
 	"item": [
 		{
@@ -14,7 +14,7 @@
 					"item": [
 						{
 							"name": "Add a new deal",
-							"id": "80a4d08d-e9ec-456b-bc0f-b0a35d436b40",
+							"id": "2fd8796f-98a6-4fc4-b228-11261b559731",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -54,7 +54,7 @@
 							},
 							"response": [
 								{
-									"id": "9c6f4714-c129-4e44-961b-8dec190dcfae",
+									"id": "6de56dba-d58a-43c1-ac06-8a4a1cf3c863",
 									"name": "Successfully signed up user",
 									"originalRequest": {
 										"method": "POST",
@@ -92,6 +92,7 @@
 									"status": "OK",
 									"code": 200,
 									"_postman_previewlanguage": "json",
+									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
@@ -104,10 +105,10 @@
 							]
 						}
 					],
-					"id": "cef72077-1d5c-4bdf-aadb-88b734213d65"
+					"id": "ce1ab0da-d68a-4cde-b908-ee37fa0be876"
 				}
 			],
-			"id": "92a86503-29b0-4320-8dd4-cfefde3712bf"
+			"id": "b30c72f5-8473-4706-aa7a-be7fc479a97b"
 		}
 	],
 	"variable": [
