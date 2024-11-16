@@ -29,9 +29,9 @@ const categoryEnum = [
  */
 const commonSchemaObject = {
   merchantId: zfd.text(z.string().min(1, 'Merchant ID is required')),
-  title: zfd.text(z.string().max(255, 'Title must be 255 characters or less')),
-  originalPrice: zfd.text(z.coerce.number().min(0, 'Original Price must be a positive number')),
-  discount: zfd.text(z.coerce.number().min(0, 'Discount must be at least 0').max(100, 'Discount cannot exceed 100')),
+  title: zfd.text(z.string().min(1, 'Title is required').max(255, 'Title must be 255 characters or less')),
+  originalPrice: zfd.numeric(z.number().min(1, 'Original Price is required').positive('Original Price must be a positive number')),
+  discount: zfd.numeric(z.number().min(1, 'Discount is required').max(100, 'Discount must be between 1 and 100')),
   logo: zfd.file(
     z.object({
       filename: z.string().min(1, "Filename is required"),
@@ -43,21 +43,13 @@ const commonSchemaObject = {
     })
   ),
   category: zfd.text(z.enum(categoryEnum, 'Category is required')),
+  expiration: zfd.text(z.string().min(1, 'Expiration is required').refine((val) => !isNaN(Date.parse(val)), 'Expiration must be a valid date')),
 };
 
 /**
  * Returns the deal schema with dynamic validation for expiration date.
  * @returns {import('zod').ZodType<DealFormSchema>}
  */
-// const getDealSchema = () => {
-//   const today = new Date();
-//   today.setHours(0, 0, 0, 0);
-
-//   return zfd.formData({
-//     ...commonSchemaObject,
-//     expiration: zfd.text(z.string().refine((val) => !isNaN(Date.parse(val)) && new Date(val) >= today, 'Expiration must be today\'s date or later')),
-//   });
-// };
 const getDealSchema = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -67,7 +59,7 @@ const getDealSchema = () => {
 
   return zfd.formData({
     ...commonSchemaObject,
-    expiration: zfd.text(z.string().refine(val => val.length > 0, { message: 'Required' }).refine(val => {
+    expiration: zfd.text(z.string().min(1, 'Expiration is required').refine(val => {
       const parsedDate = Date.parse(val);
       return !isNaN(parsedDate) && new Date(parsedDate) >= sevenDaysFromToday;
     }, 'Expiration must be seven days from today or later')),
@@ -78,10 +70,7 @@ const getDealSchema = () => {
  * Static schema for API Gateway validation.
  * This schema doesn't include the dynamic check for expiration date.
  */
-const staticDealSchema = zfd.formData({
-  ...commonSchemaObject,
-  expiration: zfd.text(z.string().refine((val) => !isNaN(Date.parse(val)), 'Expiration must be a valid date')),
-});
+const staticDealSchema = zfd.formData(commonSchemaObject);
 
 /**
  * JSON schema for the deal.
