@@ -64,11 +64,10 @@ servers:
   - url: https://ifq1hc035i.execute-api.us-east-1.amazonaws.com/prod
 paths:
   /merchant/deals:
-    description: Merchant can add a deal to his catalog
     post:
       tags:
         - deals
-      description: Add a new deal
+      description: Merchant can add a deal to his catalog
       requestBody:
         required: true
         description: The deal to add
