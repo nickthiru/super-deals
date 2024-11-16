@@ -7,9 +7,9 @@ tags:
     description: Deals service
 components:
   schemas:
-    Deal:
+    DealFormSchema:
       type: object
-      description: A deal added by a merchant
+      description: Form data for adding a deal to a merchant's catalog
       required:
         - merchantId
         - title
@@ -75,11 +75,21 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/Deal"
+              $ref: "#/components/schemas/DealFormSchema"
       responses:
         "200":
-          description: Successfully signed up user
+          description: Successfully added the deal
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Deal"
+                type: object
+                required:
+                  - message
+                  - dealId
+                properties:
+                  message:
+                    type: string
+                    example: "Deal successfully added"
+                  dealId:
+                    type: string
+                    example: "1yn5w7gKp8d7L2M3v4e5T9a6B"
