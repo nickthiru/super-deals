@@ -65,7 +65,7 @@ const commonSchemaObject = {
  * Returns the deal schema with dynamic validation for expiration date.
  * @returns {import('zod').ZodType<DealFormSchema>}
  */
-const getDealSchema = () => {
+const getSchema = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -100,14 +100,14 @@ const getDealSchema = () => {
  * Static schema for API Gateway validation.
  * This schema doesn't include the dynamic check for expiration date.
  */
-const staticDealSchema = zfd.formData(commonSchemaObject);
+const staticSchema = zfd.formData(commonSchemaObject);
 
 /**
  * JSON schema for the deal.
  */
-const jsonSchema = zodToJsonSchema(staticDealSchema, {
+const jsonSchema = zodToJsonSchema(staticSchema, {
   $refStrategy: 'none',
   target: 'openApi3',
 });
 
-export { getDealSchema, jsonSchema };
+export { getSchema, jsonSchema };
