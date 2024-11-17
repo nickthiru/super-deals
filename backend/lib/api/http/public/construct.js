@@ -1,12 +1,17 @@
-const { Stack, CfnOutput } = require("aws-cdk-lib");
+const { Construct } = require("constructs");
+// const { CfnOutput } = require("aws-cdk-lib");
 const { RestApi, Deployment, Stage, Cors, CognitoUserPoolsAuthorizer, AuthorizationType } = require("aws-cdk-lib/aws-apigateway");
-const { ValidationsStack } = require("./validations/construct");
 
 
-class HttpStack extends Stack {
+class PublicHttpConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id, props);
-    console.log("(+) Inside 'HttpStack'");
+    console.log("(+) Inside 'PublicHttpConstruct'");
+
+    const {
+      // auth,
+      lambda
+    } = props;
 
     /*** API ***/
 
@@ -16,9 +21,9 @@ class HttpStack extends Stack {
       ]
     });
 
-    this.validations = new ValidationsStack(this, 'ValidationsStack', {
-      restApi: this.restApi
-    });
+    // this.validations = new ValidationsStack(this, 'ValidationsStack', {
+    //   restApi: this.restApi
+    // });
 
     // const authorizer = new CognitoUserPoolsAuthorizer(this, "CognitoUserPoolsAuthorizer", {
     //   cognitoUserPools: [authStack.consumerUserPool],
@@ -42,17 +47,16 @@ class HttpStack extends Stack {
     //   },
     // };
 
-    // const deployment = new Deployment(this, "Deployment", {
-    //   api: restApi,
-    // });
-
+    const deployment = new Deployment(this, "Deployment", {
+      api: this.restApi,
+    });
 
     // Stages
 
-    // const devStage = new Stage(this, "dev", {
-    //   deployment: deployment,
-    //   stageName: "dev",
-    // });
+    const devStage = new Stage(this, "dev", {
+      deployment: deployment,
+      stageName: "dev",
+    });
 
 
     /*** Outputs ***/
@@ -65,4 +69,4 @@ class HttpStack extends Stack {
   }
 }
 
-module.exports = { HttpStack };
+module.exports = { PublicHttpConstruct };

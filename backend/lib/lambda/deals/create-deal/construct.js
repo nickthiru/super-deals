@@ -6,17 +6,17 @@ const { PolicyStatement, Effect } = require("aws-cdk-lib/aws-iam");
 const path = require("path");
 
 
-class CreateDealWorkflowContruct extends Construct {
+class CreateDealContruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id, props);
-    console.log("(+) Inside 'CreateDealWorkflowContruct'");
+    console.log("(+) Inside 'CreateDealContruct'");
 
     const {
       storage,
       db,
     } = props;
 
-    this.lambda = new NodejsFunction(this, "CreateDealWorkflowLambda", {
+    this.function = new NodejsFunction(this, "CreateDealFunction", {
       bundling: {
         externalModules: ["@aws-sdk"],
         forceDockerBundling: true,
@@ -27,7 +27,8 @@ class CreateDealWorkflowContruct extends Construct {
       // timeout: Duration.minutes(1),
       entry: (path.join(__dirname, "./lambda-handler.js")),
       handler: "handler",
-      depsLockFilePath: (path.join(__dirname, "../../../../../package-lock.json")),
+      // depsLockFilePath: (path.join(__dirname, "../../../../../package-lock.json")),
+      depsLockFilePath: require.resolve("#package-lock"),
       environment: {
         S3_BUCKET_NAME: storage.s3Bucket.bucketName,
         DDB_TABLE_NAME: db.table.tableName,
@@ -48,4 +49,4 @@ class CreateDealWorkflowContruct extends Construct {
   }
 }
 
-module.exports = { CreateDealWorkflowContruct };
+module.exports = { CreateDealContruct };

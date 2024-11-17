@@ -15,7 +15,8 @@
     "#lib/*": "./lib/*",
     "#schemas/*": "./schemas/*",
     "#types/*": "./types/*",
-    "#tests/*": "./tests/*"
+    "#tests/*": "./tests/*",
+    "#package-lock": "./package-lock.json"
   },
   "devDependencies": {
     "aws-cdk": "2.161.1",
