@@ -12,7 +12,7 @@ const { Buffer } = require('node:buffer');
 const Api = require("#src/utils/api/_service.js");
 
 // Import the deal schema for validation
-const { getDealSchema } = require("#schemas/deal.schema.js");
+const { getDealSchema } = require("#schemas/create-deal-form.schema.js");
 
 // Initialize AWS clients
 const s3Client = new S3Client();
@@ -45,7 +45,7 @@ exports.handler = async (event) => {
 
   // Return success response
   return Api.success({
-    message: "Deal successfully added",
+    message: "Deal successfully created",
     dealId: dealId,
   });
 };

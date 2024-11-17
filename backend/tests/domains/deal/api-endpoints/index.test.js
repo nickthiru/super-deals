@@ -12,21 +12,21 @@ const baseUrl = outputs.BackendStackApiStackHttpStackA5B3EBBB.RestApiEndpoint055
 const endpoint = 'merchant/deals';
 
 describe('Deal API Endpoints', () => {
-  // it('should validate form data for adding a deal', async () => {
-  //   const response = await request(baseUrl)
-  //     .post(endpoint)
-  //     .field('merchantId', 'Nike007')
-  //     .field('title', 'Test Deal')
-  //     .field('originalPrice', 100)
-  //     .field('discount', 50)
-  //     .attach('logo', path.resolve(__dirname, '../data/deal-logo.png'))
-  //     .field('category', 'foodDrink')
-  //     .field('expiration', '2024-12-31');
+  it('should validate form data for adding a deal', async () => {
+    const response = await request(baseUrl)
+      .post(endpoint)
+      .field('merchantId', 'Nike007')
+      .field('title', 'Test Deal')
+      .field('originalPrice', 100)
+      .field('discount', 50)
+      .attach('logo', path.resolve(__dirname, '../data/deal-logo.png'))
+      .field('category', 'foodDrink')
+      .field('expiration', '2024-12-31');
 
-  //   expect(response.status).toBe(200);
-  //   expect(response.body).toHaveProperty('message', 'Deal successfully added');
-  //   expect(response.body).toHaveProperty('dealId');
-  // });
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('message', 'Deal successfully created');
+    expect(response.body).toHaveProperty('dealId');
+  });
 
   it('should fail validation when all fields are empty', async () => {
     const response = await request(baseUrl)

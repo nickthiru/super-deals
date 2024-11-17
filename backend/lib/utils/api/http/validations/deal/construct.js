@@ -1,6 +1,6 @@
 const { Construct } = require('constructs');
 const { Model, RequestValidator } = require("aws-cdk-lib/aws-apigateway");
-const { jsonSchema } = require("#schemas/deal.schema.js");
+const { jsonSchema } = require("#schemas/create-deal-form.schema.js");
 
 class DealValidations extends Construct {
   constructor(scope, id, props) {
@@ -10,14 +10,14 @@ class DealValidations extends Construct {
 
     const { restApi } = props;
 
-    this.model = new Model(this, 'DealModel', {
+    this.model = new Model(this, 'CreateDealForm_Model', {
       restApi: restApi,
       contentType: 'application/json',
-      description: 'Validation model for deals',
+      description: 'Validation model for create deals form',
       schema: jsonSchema
     });
 
-    this.requestValidator = new RequestValidator(this, 'DealRequestValidator', {
+    this.requestValidator = new RequestValidator(this, 'CreateDealForm_RequestValidator', {
       restApi: restApi,
       validateRequestBody: true,
       validateRequestParameters: false

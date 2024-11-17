@@ -6,17 +6,17 @@ const { PolicyStatement, Effect } = require("aws-cdk-lib/aws-iam");
 const path = require("path");
 
 
-class AddDealWorkflowContruct extends Construct {
+class CreateDealWorkflowContruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id, props);
-    console.log("(+) Inside 'AddDealWorkflowContruct'");
+    console.log("(+) Inside 'CreateDealWorkflowContruct'");
 
     const {
       storage,
       db,
     } = props;
 
-    this.lambda = new NodejsFunction(this, "AddDealWorkflowLambda", {
+    this.lambda = new NodejsFunction(this, "CreateDealWorkflowLambda", {
       bundling: {
         externalModules: ["@aws-sdk"],
         forceDockerBundling: true,
@@ -48,4 +48,4 @@ class AddDealWorkflowContruct extends Construct {
   }
 }
 
-module.exports = { AddDealWorkflowContruct };
+module.exports = { CreateDealWorkflowContruct };
