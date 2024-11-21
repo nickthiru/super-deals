@@ -1,16 +1,25 @@
 {
-  "BackendStackStorageStack7364EE02": {
-    "ExportsOutputFnGetAttS3Bucket07682993Arn6D6BF9FF": "arn:aws:s3:::backendstackstoragestack7364ee02-s3bucket07682993-bjhlsmgadxt2",
-    "ExportsOutputRefS3Bucket07682993C02DCE6B": "backendstackstoragestack7364ee02-s3bucket07682993-bjhlsmgadxt2"
+  "BackendStackDbStackdev245DA190": {
+    "ExportsOutputRefTableV2devB86C8D84839FBB54": "DealsTable-dev",
+    "ExportsOutputFnGetAttTableV2devB86C8D84Arn7249F9F8": "arn:aws:dynamodb:us-east-1:654654543926:table/DealsTable-dev"
   },
-  "BackendStackDbStack8670BFC6": {
-    "ExportsOutputRefTableCD117FA1D18A8047": "BackendStackDbStack8670BFC6-TableCD117FA1-JKJ6U1C1WPEA",
-    "ExportsOutputFnGetAttTableCD117FA1ArnE2C8C204": "arn:aws:dynamodb:us-east-1:654654543926:table/BackendStackDbStack8670BFC6-TableCD117FA1-JKJ6U1C1WPEA"
+  "BackendStackStorageStackdev02010C4B": {
+    "ExportsOutputRefS3Bucketdev1ADFBA8971FE73E0": "deals-bucket-dev",
+    "ExportsOutputFnGetAttS3Bucketdev1ADFBA89Arn94B97450": "arn:aws:s3:::deals-bucket-dev"
   },
-  "BackendStackDealServiceStackE31407AB": {
-    "ExportsOutputFnGetAttAddDealWorkflowContructAddDealWorkflowLambda9CE5AC2FArnD6D408F3": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackDealServiceSt-AddDealWorkflowContructA-BabbfacqiA8Q"
+  "BackendStackDbStackpreprod2E397A33": {
+    "ExportsOutputFnGetAttTableV2preprod8E207E62ArnAB77979F": "arn:aws:dynamodb:us-east-1:654654543926:table/DealsTable-preprod",
+    "ExportsOutputRefTableV2preprod8E207E623B5FF413": "DealsTable-preprod"
+  },
+  "BackendStackStorageStackpreprod273CF0DF": {
+    "ExportsOutputRefS3BucketpreprodF8A355A83DEA24D3": "deals-bucket-preprod",
+    "ExportsOutputFnGetAttS3BucketpreprodF8A355A8ArnCDAF8F23": "arn:aws:s3:::deals-bucket-preprod"
+  },
+  "BackendStackLambdaStackDealsStack744315FE": {
+    "ExportsOutputFnGetAttCreateContructNodejsFunctionD0DEAE44ArnD3253407": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackLambdaStackDe-CreateContructNodejsFunc-cmnRolpZ5emc"
   },
   "BackendStackApiStackHttpStackA5B3EBBB": {
-    "RestApiEndpoint0551178A": "https://ifq1hc035i.execute-api.us-east-1.amazonaws.com/prod/"
+    "RestApiUrlpreprod": "https://zb3iitmz0h.execute-api.us-east-1.amazonaws.com/preprod/",
+    "RestApiUrldev": "https://zb3iitmz0h.execute-api.us-east-1.amazonaws.com/dev/"
   }
 }

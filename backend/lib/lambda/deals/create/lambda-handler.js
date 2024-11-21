@@ -9,17 +9,27 @@ const { Buffer } = require('node:buffer');
 
 // Api object provides internal API-related helper functionality
 // such as standardized success and error responses
-const Api = require("#src/utils/api/_service.js");
+const Api = require("#src/api/_index.js");
 
 // Import the deal schema for validation
-const { getSchema } = require("#schemas/deals/create-deal/schema.js");
+const { getSchema } = require("#schemas/deals/create/schema.js");
 
 // Initialize AWS clients
 const s3Client = new S3Client();
 const ddbClient = new DynamoDBClient();
 
+
 exports.handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
+
+  const stage = event.headers['X-Stage'] || 'dev';
+
+  // Parse the environment variables containing stage-specific resource names
+  const ddbTableNames = JSON.parse(process.env.DDB_TABLE_NAMES);
+  const s3BucketNames = JSON.parse(process.env.S3_BUCKET_NAMES);
+
+  const dbTableName = ddbTableNames[stage];
+  const s3BucketName = s3BucketNames[stage];
 
   // Parse and validate the multipart form data
   const deal = parseMultipartFormData(event);
@@ -32,13 +42,16 @@ exports.handler = async (event) => {
   const dealId = KSUID.randomSync(new Date()).string;
 
   // Upload logo to S3
-  const logoUploadResult = await uploadLogoToS3(deal, dealId);
+  let logoS3Key = "";
+  const { logoUploadResult } = await uploadLogoToS3(deal, dealId, s3BucketName);
   if (!logoUploadResult.success) {
     return Api.error(500, logoUploadResult.error);
+  } else {
+    logoS3Key = logoUploadResult.logoS3Key
   }
 
   // Prepare and save deal to DynamoDB
-  const saveDealResult = await saveDealToDynamoDB(deal, dealId, logoUploadResult.logoS3Key);
+  const saveDealResult = await saveDealToDynamoDB(deal, dealId, logoS3Key, dbTableName);
   if (!saveDealResult.success) {
     return Api.error(500, saveDealResult.error);
   }
@@ -81,7 +94,7 @@ function parseMultipartFormData(event) {
  * @returns {Object} Validation result
  */
 async function validateDealData(deal) {
-  const dealSchema = getDealSchema();
+  const dealSchema = getSchema();
   try {
     await dealSchema.parseAsync(deal);
     return { success: true };
@@ -109,13 +122,15 @@ async function validateDealData(deal) {
  * @param {string} dealId - The unique deal ID
  * @returns {Object} Upload result
  */
-async function uploadLogoToS3(deal, dealId) {
+async function uploadLogoToS3(deal, dealId, s3BucketName) {
+
   const logoS3Key = `merchants/${deal.merchantId}/deals/${dealId}/logos/${deal.logo.filename}`;
+
   try {
-    console.log("(+) Uploading logo to Bucket...")
+    console.log(`(+) Uploading logo to Bucket: ${s3BucketName}`);
     await s3Client.send(
       new PutObjectCommand({
-        Bucket: process.env.S3_BUCKET_NAME,
+        Bucket: s3BucketName,
         Key: logoS3Key,
         Body: deal.logo.data,
         ContentType: deal.logo.contentType,
@@ -135,7 +150,7 @@ async function uploadLogoToS3(deal, dealId) {
  * @param {string} logoS3Key - The S3 key for the deal logo
  * @returns {Object} Save result
  */
-async function saveDealToDynamoDB(deal, dealId, logoS3Key) {
+async function saveDealToDynamoDB(deal, dealId, logoS3Key, dbTableName) {
   /** @type {DealItem} */
   const dealItem = {
     PK: `DEAL#${dealId}`,
@@ -157,7 +172,7 @@ async function saveDealToDynamoDB(deal, dealId, logoS3Key) {
     console.log("(+) Saving deal to DynamoDB...")
     await ddbClient.send(
       new PutItemCommand({
-        TableName: process.env.DDB_TABLE_NAME,
+        TableName: dbTableName,
         Item: marshall(dealItem),
       })
     );

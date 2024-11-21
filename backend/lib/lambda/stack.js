@@ -4,7 +4,6 @@ const { DealsStack } = require("./deals/stack");
 class LambdaStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
-    console.log("(+) Inside 'LambdaStack'");
 
     const {
       storage,

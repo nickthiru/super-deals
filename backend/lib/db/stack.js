@@ -4,9 +4,11 @@ const { TableV2, AttributeType, BillingMode } = require("aws-cdk-lib/aws-dynamod
 class DbStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
-    console.log("(+) Inside 'DbStack'");
 
-    this.table = new TableV2(this, "Table", {
+    const { stage } = props;
+
+    this.table = new TableV2(this, `TableV2-${stage}`, {
+      tableName: `DealsTable-${stage}`,
       partitionKey: {
         name: "PK",
         type: AttributeType.STRING
@@ -28,7 +30,7 @@ class DbStack extends Stack {
           },
         },
       ],
-      removalPolicy: RemovalPolicy.DESTROY,
+      removalPolicy: stage === 'prod' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
   };
