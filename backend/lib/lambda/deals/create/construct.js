@@ -6,17 +6,16 @@ const { PolicyStatement, Effect } = require("aws-cdk-lib/aws-iam");
 const path = require("path");
 
 
-class CreateDealContruct extends Construct {
+class CreateContruct extends Construct {
   constructor(scope, id, props) {
-    super(scope, id, props);
-    console.log("(+) Inside 'CreateDealContruct'");
+    super(scope, id);
 
     const {
       storage,
       db,
     } = props;
 
-    this.function = new NodejsFunction(this, "CreateDealFunction", {
+    this.function = new NodejsFunction(this, "NodejsFunction", {
       bundling: {
         externalModules: ["@aws-sdk"],
         forceDockerBundling: true,
@@ -30,18 +29,31 @@ class CreateDealContruct extends Construct {
       // depsLockFilePath: (path.join(__dirname, "../../../../../package-lock.json")),
       depsLockFilePath: require.resolve("#package-lock"),
       environment: {
-        S3_BUCKET_NAME: storage.s3Bucket.bucketName,
-        DDB_TABLE_NAME: db.table.tableName,
+        // Pass the stage-specific table and bucket names as environment variables
+        DDB_TABLE_NAMES: JSON.stringify({
+          dev: db.dev.table.tableName,
+          preprod: db.preprod.table.tableName,
+        }),
+        S3_BUCKET_NAMES: JSON.stringify({
+          dev: storage.dev.s3bucket.bucketName,
+          preprod: storage.preprod.s3bucket.bucketName,
+        }),
       },
       initialPolicy: [
         new PolicyStatement({
           effect: Effect.ALLOW,
-          resources: [`${storage.s3Bucket.bucketArn}/*`],
+          resources: [
+            `${storage.dev.s3bucket.bucketArn}/*`,
+            `${storage.preprod.s3bucket.bucketArn}/*`,
+          ],
           actions: ["s3:PutObject"],
         }),
         new PolicyStatement({
           effect: Effect.ALLOW,
-          resources: [db.table.tableArn],
+          resources: [
+            db.dev.table.tableArn,
+            db.preprod.table.tableArn,
+          ],
           actions: ["dynamodb:PutItem"],
         }),
       ]
@@ -49,4 +61,4 @@ class CreateDealContruct extends Construct {
   }
 }
 
-module.exports = { CreateDealContruct };
+module.exports = { CreateContruct };

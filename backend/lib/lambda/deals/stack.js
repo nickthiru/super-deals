@@ -1,10 +1,9 @@
 const { Stack } = require("aws-cdk-lib");
-const { CreateDealContruct } = require("./create-deal/construct");
+const { CreateContruct } = require("./create/construct");
 
 class DealsStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
-    console.log("(+) Inside 'DealsStack'");
 
     const {
       storage,
@@ -12,7 +11,7 @@ class DealsStack extends Stack {
     } = props;
 
 
-    this.createDeal = new CreateDealContruct(this, "CreateDealContruct", {
+    this.create = new CreateContruct(this, "CreateContruct", {
       storage,
       db,
     });

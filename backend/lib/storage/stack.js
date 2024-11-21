@@ -1,15 +1,18 @@
 const { Stack, RemovalPolicy } = require("aws-cdk-lib");
-const { TableV2, AttributeType, BillingMode } = require("aws-cdk-lib/aws-dynamodb");
 const { Bucket } = require("aws-cdk-lib/aws-s3");
+const { StorageConstruct } = require("./construct");
 
 class StorageStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
     console.log("(+) Inside 'StorageStack'");
 
+    this.dev = new StorageConstruct(this, "StorageConstruct-dev", {
+      stage: "dev",
+    });
 
-    this.s3Bucket = new Bucket(this, "S3Bucket", {
-      //
+    this.preprod = new StorageConstruct(this, "StorageConstruct-preprod", {
+      stage: "preprod",
     });
   };
 }
