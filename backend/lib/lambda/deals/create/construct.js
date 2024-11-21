@@ -35,16 +35,16 @@ class CreateContruct extends Construct {
           preprod: db.preprod.table.tableName,
         }),
         S3_BUCKET_NAMES: JSON.stringify({
-          dev: storage.dev.s3bucket.bucketName,
-          preprod: storage.preprod.s3bucket.bucketName,
+          dev: storage.dev.s3Bucket.bucketName,
+          preprod: storage.preprod.s3Bucket.bucketName,
         }),
       },
       initialPolicy: [
         new PolicyStatement({
           effect: Effect.ALLOW,
           resources: [
-            `${storage.dev.s3bucket.bucketArn}/*`,
-            `${storage.preprod.s3bucket.bucketArn}/*`,
+            `${storage.dev.s3Bucket.bucketArn}/*`,
+            `${storage.preprod.s3Bucket.bucketArn}/*`,
           ],
           actions: ["s3:PutObject"],
         }),

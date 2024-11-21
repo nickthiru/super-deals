@@ -9,7 +9,7 @@ const { Buffer } = require('node:buffer');
 
 // Api object provides internal API-related helper functionality
 // such as standardized success and error responses
-const Api = require("#src/utils/api/_service.js");
+const Api = require("#src/api/_index.js");
 
 // Import the deal schema for validation
 const { getSchema } = require("#schemas/deals/create/schema.js");
@@ -17,6 +17,7 @@ const { getSchema } = require("#schemas/deals/create/schema.js");
 // Initialize AWS clients
 const s3Client = new S3Client();
 const ddbClient = new DynamoDBClient();
+
 
 exports.handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
@@ -41,13 +42,16 @@ exports.handler = async (event) => {
   const dealId = KSUID.randomSync(new Date()).string;
 
   // Upload logo to S3
-  const logoUploadResult = await uploadLogoToS3(deal, dealId);
+  let logoS3Key = "";
+  const { logoUploadResult } = await uploadLogoToS3(deal, dealId, s3BucketName);
   if (!logoUploadResult.success) {
     return Api.error(500, logoUploadResult.error);
+  } else {
+    logoS3Key = logoUploadResult.logoS3Key
   }
 
   // Prepare and save deal to DynamoDB
-  const saveDealResult = await saveDealToDynamoDB(deal, dealId, logoUploadResult.logoS3Key);
+  const saveDealResult = await saveDealToDynamoDB(deal, dealId, logoS3Key, dbTableName);
   if (!saveDealResult.success) {
     return Api.error(500, saveDealResult.error);
   }

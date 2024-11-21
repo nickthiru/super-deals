@@ -6,7 +6,6 @@ const { HttpStack } = require("./http/stack");
 class ApiStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
-    console.log("(+) Inside 'ApiStack'");
 
     const {
       // auth,

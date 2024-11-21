@@ -12,46 +12,31 @@ class BackendStack extends Stack {
    */
   constructor(scope, id, props) {
     super(scope, id, props);
-    console.log("(+) Inside 'BackendStack'");
 
-    // const auth = new AuthStack(this, "AuthStack");
+    // // const auth = new AuthStack(this, "AuthStack");
 
-    const db = new DbStack(this, "DbStack");
+    // Staged Resources
+    const stages = ['dev', 'preprod'];
 
-    const storage = new StorageStack(this, "StorageStack");
+    const storageStacks = {};
+    const dbStacks = {};
 
+    stages.forEach(stage => {
 
+      dbStacks[stage] = new DbStack(this, `DbStack-${stage}`, { stage });
 
-
-    // const stages = ['dev', 'preprod'];
-
-    // const storageStacks = {};
-    // const dbStacks = {};
-
-    // stages.forEach(stage => {
-
-    //   storageStacks[stage] = new StorageStack(this, `StorageStack-${stage}`, { stage });
-
-    //   dbStacks[stage] = new DbStack(this, `DbStack-${stage}`, { stage });
-    // });
-
-    // storageStacks["dev"] = new StorageStack(this, `StorageStack-dev`, { stage: "dev" });
-
-    // dbStacks["dev"] = new DbStack(this, `DbStack-dev`, { stage: "dev" });
-
-    // storageStacks["preprod"] = new StorageStack(this, `StorageStack-preprod`, { stage: "preprod" });
-
-    // dbStacks["preprod"] = new DbStack(this, `DbStack-preprod`, { stage: "preprod" });
+      storageStacks[stage] = new StorageStack(this, `StorageStack-${stage}`, { stage });
+    });
 
 
     // LambdaStack is shared
     const lambda = new LambdaStack(this, "LambdaStack", {
-      storage,
-      db,
+      storage: storageStacks,
+      db: dbStacks,
     });
 
     // ApiStack is shared
-    const api = new ApiStack(this, "ApiStack", {
+    new ApiStack(this, "ApiStack", {
       // auth,
       lambda
     });

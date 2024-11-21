@@ -2,6 +2,8 @@ const { Stack, CfnOutput, Fn } = require("aws-cdk-lib");
 const { RestApi, Deployment, Stage, Cors, CognitoUserPoolsAuthorizer, AuthorizationType } = require("aws-cdk-lib/aws-apigateway");
 const { EndpointsConstruct } = require("./endpoints/construct");
 
+const Utils = require("#src/utils/_index.js");
+
 
 class HttpStack extends Stack {
   constructor(scope, id, props) {
@@ -33,32 +35,17 @@ class HttpStack extends Stack {
         stageName: stage,
       });
 
-      // // Manually construct the URLs
-      // const stageUrl = Fn.join("", [
-      //   `https://`,
-      //   restApi.restApiId,
-      //   `.execute-api.`,
-      //   restApi.env.region,
-      //   `.amazonaws.com/`,
-      //   devStage.stageName,
-      //   `/`
-      // ]);
-
-      // // Output the stage-specific URL
-      // new CfnOutput(this, 'DevStageUrl', {
-      //   value: devStageUrl,
-      //   description: "The URL of the dev stage of the HTTP API",
-      // });
+      // Set the default deployment stage
+      if (stage === 'dev') {
+        restApi.deploymentStage = apiStage;
+      }
 
       // Output the stage-specific URL
-      new CfnOutput(this, `RestApiEndpoint-${stage}`, {
+      new CfnOutput(this, `RestApiUrl-${stage}`, {
         value: apiStage.urlForPath(),
-        exportName: `RestApiEndpoint-${stage}`,
+        exportName: `RestApiUrl${Utils.capitalize(stage)}`,
       });
     });
-
-    // Set the default deployment stage
-    restApi.deploymentStage = devStage;
 
 
     /*** Authorizer ***/
@@ -86,42 +73,7 @@ class HttpStack extends Stack {
     // };
 
 
-    /*** Outputs ***/
-
-    // // Manually construct the URLs
-    // const devStageUrl = Fn.join("", [
-    //   `https://`,
-    //   restApi.restApiId,
-    //   `.execute-api.`,
-    //   restApi.env.region,
-    //   `.amazonaws.com/`,
-    //   devStage.stageName,
-    //   `/`
-    // ]);
-
-    // const preprodStageUrl = Fn.join("", [
-    //   `https://`,
-    //   restApi.restApiId,
-    //   `.execute-api.`,
-    //   restApi.env.region,
-    //   `.amazonaws.com/`,
-    //   preprodStage.stageName,
-    //   `/`
-    // ]);
-
-    // new CfnOutput(this, 'DevStageUrl', {
-    //   value: devStageUrl,
-    //   description: "The URL of the dev stage of the HTTP API",
-    // });
-
-    // new CfnOutput(this, 'PreprodStageUrl', {
-    //   value: preprodStageUrl,
-    //   description: "The URL of the preprod stage of the HTTP API",
-    // });
-
-
     /*** Endpoints ***/
-
 
     new EndpointsConstruct(this, "EndpointsConstruct", {
       lambda,
