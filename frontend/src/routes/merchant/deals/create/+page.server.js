@@ -1,8 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import { getSchema } from './schema.js';
-import { BackendStackApiStackHttpStackA5B3EBBB } from "$backend/outputs.json";
+import send from '../../../../lib/api/send.js';
 
-const { RestApiEndpoint0551178A: BaseUrl } = BackendStackApiStackHttpStackA5B3EBBB;
 
 export const actions = {
   default: async ({ request, fetch }) => {
@@ -29,7 +28,11 @@ export const actions = {
     }
 
     // Handle the validated form data if successful (e.g., save the deal, call an API, etc.)
-    const response = await fetch(`${BaseUrl}` + 'merchant/deals', {
+    // const response = await fetch(`${BaseUrl}` + 'merchant/deals', {
+    //   method: "POST",
+    //   body: formData
+    // });
+    const response = await send(fetch, 'merchant/deals', {
       method: "POST",
       body: formData
     });

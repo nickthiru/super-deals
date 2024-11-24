@@ -47,16 +47,17 @@ const commonSchemaObject = {
   title: zfd.text(z.string().min(1, 'Title is required').max(255, 'Title must be 255 characters or less')),
   originalPrice: zfd.numeric(z.number().min(1, 'Original Price is required').positive('Original Price must be a positive number')),
   discount: zfd.numeric(z.number().min(0, 'Discount is required').max(100, 'Discount must be between 0 and 100')),
-  logo: zfd.file(
-    z.object({
-      filename: z.string().min(1, "Filename is required"),
-      contentType: z.string().refine((type) => {
-        const fileType = type.split('/').pop().toLowerCase();
-        return allowedFileTypes.includes(fileType);
-      }, "Invalid file type"),
-      data: z.instanceof(File, "File data must be a file")
-    })
-  ),
+  // logo: zfd.file(
+  //   z.object({
+  //     filename: z.string().min(1, "Filename is required"),
+  //     contentType: z.string().refine((type) => {
+  //       const fileType = type.split('/').pop().toLowerCase();
+  //       return allowedFileTypes.includes(fileType);
+  //     }, "Invalid file type"),
+  //     data: z.instanceof(File, "File data must be a file")
+  //   })
+  // ),
+  logo: z.instanceof(File),
   category: zfd.text(z.enum(categoryEnum, 'Category is required')),
   expiration: zfd.text(z.string().min(1, 'Expiration is required').refine((val) => !isNaN(Date.parse(val)), 'Expiration must be a valid date')),
 };

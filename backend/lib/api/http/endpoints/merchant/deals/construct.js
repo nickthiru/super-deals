@@ -8,10 +8,11 @@ class DealsConstruct extends Construct {
     const {
       lambda,
       http,
+      merchant,
     } = props;
 
 
-    const deals = http.restApi.root.addResource("deals", http.optionsWithCors);
+    const deals = merchant.addResource("deals");
 
     new CreateConstruct(this, "CreateConstruct", {
       lambda,
@@ -21,7 +22,6 @@ class DealsConstruct extends Construct {
 
     // new DeleteEndpointConstruct(this, "DeleteDealEndpointConstruct", {
     //   lambda,
-    //   http,
     //   deals,
     // });
   }
