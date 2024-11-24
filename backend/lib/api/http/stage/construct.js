@@ -3,8 +3,6 @@ const { Deployment, Stage, LogGroupLogDestination, AccessLogFormat } = require("
 const { LogGroup } = require("aws-cdk-lib/aws-logs");
 const { CfnOutput, } = require("aws-cdk-lib");
 
-const Utils = require("#src/utils/_index.js");
-
 
 class StageConstruct extends Construct {
   constructor(scope, id, props) {
@@ -52,11 +50,12 @@ class StageConstruct extends Construct {
       api.deploymentStage = stage;
     }
 
-    // Output the stage-specific URL
+    // Output the stage-specific URL with custom LogicalId (in outputs.json)
     new CfnOutput(this, `RestApiUrl-${stageName}`, {
       value: stage.urlForPath(),
-      exportName: `RestApiUrl${Utils.capitalize(stageName)}`,
-    });
+      exportName: `RestApiUrl${stageName}`,
+    })
+      .overrideLogicalId(`RestApiUrl${stageName}`);
   }
 }
 
