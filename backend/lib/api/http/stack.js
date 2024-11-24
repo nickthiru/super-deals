@@ -1,8 +1,7 @@
-const { Stack, CfnOutput, Fn } = require("aws-cdk-lib");
-const { RestApi, Deployment, Stage, Cors, CognitoUserPoolsAuthorizer, AuthorizationType } = require("aws-cdk-lib/aws-apigateway");
+const { Stack } = require("aws-cdk-lib");
+const { RestApi, Cors, CognitoUserPoolsAuthorizer, AuthorizationType } = require("aws-cdk-lib/aws-apigateway");
+const { StageConstruct } = require("./stage/construct");
 const { EndpointsConstruct } = require("./endpoints/construct");
-
-const Utils = require("#src/utils/_index.js");
 
 
 class HttpStack extends Stack {
@@ -20,30 +19,16 @@ class HttpStack extends Stack {
     const restApi = new RestApi(this, "RestApi", {
       deploy: false,  // Disable automatic stage creation i.e. prod
       binaryMediaTypes: ["multipart/form-data"],
+      cloudWatchRole: true,
     });
 
     // Stages
     const stages = ['dev', 'preprod'];
 
     stages.forEach(stage => {
-      const deployment = new Deployment(this, `Deployment-${stage}`, {
+      new StageConstruct(this, `StageConstruct-${stage}`, {
         api: restApi,
-      });
-
-      const apiStage = new Stage(this, `Stage-${stage}`, {
-        deployment,
         stageName: stage,
-      });
-
-      // Set the default deployment stage
-      if (stage === 'dev') {
-        restApi.deploymentStage = apiStage;
-      }
-
-      // Output the stage-specific URL
-      new CfnOutput(this, `RestApiUrl-${stage}`, {
-        value: apiStage.urlForPath(),
-        exportName: `RestApiUrl${Utils.capitalize(stage)}`,
       });
     });
 
