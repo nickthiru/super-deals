@@ -12,7 +12,8 @@ const { Buffer } = require('node:buffer');
 const Api = require("#src/api/_index.js");
 
 // Import the deal schema for validation
-const { getSchema } = require("#schemas/deals/create/schema.js");
+// const { getSchema } = require("#schemas/deals/create/schema.js");
+const { getSchema } = require("./schema.js");
 
 // Initialize AWS clients
 const s3Client = new S3Client();
@@ -43,7 +44,7 @@ exports.handler = async (event) => {
 
   // Upload logo to S3
   let logoS3Key = "";
-  const { logoUploadResult } = await uploadLogoToS3(deal, dealId, s3BucketName);
+  const logoUploadResult = await uploadLogoToS3(deal, dealId, s3BucketName);
   if (!logoUploadResult.success) {
     return Api.error(500, logoUploadResult.error);
   } else {
@@ -57,11 +58,15 @@ exports.handler = async (event) => {
   }
 
   // Return success response
-  return Api.success({
+  const successResponse = Api.success({
     message: "Deal successfully created",
     dealId: dealId,
   });
+  console.log(`Success Response: ${JSON.stringify(successResponse, null, 2)}`);
+  return successResponse;
 };
+
+
 
 /**
  * Parse multipart form data from the event
@@ -124,7 +129,7 @@ async function validateDealData(deal) {
  */
 async function uploadLogoToS3(deal, dealId, s3BucketName) {
 
-  const logoS3Key = `merchants/${deal.merchantId}/deals/${dealId}/logos/${deal.logo.filename}`;
+  const logoS3Key = `merchants/${deal.merchantId}/deals/DEAL#${dealId}/logo/${deal.logo.filename}`;
 
   try {
     console.log(`(+) Uploading logo to Bucket: ${s3BucketName}`);
@@ -136,10 +141,10 @@ async function uploadLogoToS3(deal, dealId, s3BucketName) {
         ContentType: deal.logo.contentType,
       })
     );
-    return { success: true, logoS3Key };
+    return { success: true, logoS3Key: logoS3Key };
   } catch (error) {
     console.error("S3 Error:", error);
-    return { success: false, error: "Error uploading logo: " + error.message };
+    return { success: false, error: error.message };
   }
 }
 

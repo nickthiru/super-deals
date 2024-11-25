@@ -1,23 +1,3 @@
-// export default async function send(fetch, path, options) {
-//   const url = `${process.env.REST_API_URL}${path}`;
-//   console.log(`process.env.REST_API_URL: ${process.env.REST_API_URL}`);
-//   console.log(`URL: ${url}`);
-//   const headers = new Headers(options.headers);
-//   headers.set('X-Stage', process.env.STAGE);
-
-
-//   try {
-//     const response = await fetch(url, { ...options, headers });
-//     if (!response.ok) {
-//       throw new Error(`API error: ${response.status} ${response.statusText}`);
-//     }
-//     return response.json();
-//   } catch (error) {
-//     console.error(`API error: ${error.message}`);
-//     throw error;
-//   }
-// };
-
 import backendOutputs from '../../../../backend/outputs.json';
 
 const REST_API_URL = backendOutputs["BackendStackApiStackHttpStackA5B3EBBB"][`RestApiUrl${process.env.STAGE}`];
@@ -35,10 +15,18 @@ export default async function send(fetch, path, options) {
 
   try {
     const response = await fetch(url, options);
+    console.log(`Response Status: ${response.status}`);
+    console.log(`Response StatusText: ${response.statusText}`);
+
+    const responseBody = await response.json();
+    console.log(`Response Body: ${JSON.stringify(responseBody, null, 2)}`);
+
     if (!response.ok) {
       throw new Error(`API error: ${response.status} ${response.statusText}`);
     }
-    return response.json();
+
+    return responseBody;
+
   } catch (error) {
     console.error(`API error: ${error.message}`);
     throw error;

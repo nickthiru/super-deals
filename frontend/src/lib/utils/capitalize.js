@@ -1,6 +1,6 @@
 import { map, toUpper, join } from "ramda";
 
-export function capitalize(text = "", splitOn = " ", joinWith = " ") {
+export default function capitalize(text = "", splitOn = " ", joinWith = " ") {
 
   const copy = text.slice(0);
   const split = copy.split(splitOn);

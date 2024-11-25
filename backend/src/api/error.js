@@ -10,11 +10,13 @@ function error(statusCode, message, details = null) {
   if (details) {
     body.details = details;
   }
-  return {
+  const response = {
     statusCode,
     headers,
     body: JSON.stringify(body)
   };
+  console.log(`Error Response: ${JSON.stringify(response, null, 2)}`);
+  return response;
 }
 
 module.exports = error;
