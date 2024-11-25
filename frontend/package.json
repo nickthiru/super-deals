@@ -4,8 +4,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
-		"devD": "set STAGE=dev&&vite dev",
+		"dev": "set STAGE=dev&&vite dev",
 		"test": "vitest",
 		"test:e2e": "playwright test",
 		"build": "vite build",
