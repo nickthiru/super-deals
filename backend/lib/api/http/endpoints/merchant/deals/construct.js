@@ -6,7 +6,9 @@ class DealsConstruct extends Construct {
     super(scope, id, props);
 
     const {
-      lambda,
+      // auth,
+      storage,
+      db,
       http,
       merchant,
     } = props;
@@ -15,7 +17,9 @@ class DealsConstruct extends Construct {
     const deals = merchant.addResource("deals");
 
     new CreateConstruct(this, "CreateConstruct", {
-      lambda,
+      // auth,
+      storage,
+      db,
       http,
       deals,
     });

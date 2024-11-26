@@ -6,7 +6,9 @@ class MerchantConstruct extends Construct {
     super(scope, id, props);
 
     const {
-      lambda,
+      // auth,
+      storage,
+      db,
       http,
     } = props;
 
@@ -14,7 +16,9 @@ class MerchantConstruct extends Construct {
     const merchant = http.restApi.root.addResource("merchant", http.optionsWithCors);
 
     new DealsConstruct(this, "DealsConstruct", {
-      lambda,
+      // auth,
+      storage,
+      db,
       http,
       merchant,
     });

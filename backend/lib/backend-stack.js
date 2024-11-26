@@ -1,7 +1,7 @@
 const { Stack } = require('aws-cdk-lib');
 const { DbStack } = require('./db/stack');
 const { StorageStack } = require('./storage/stack');
-const { LambdaStack } = require('./lambda/stack');
+// const { LambdasStack } = require('./lambdas/stack');
 const { ApiStack } = require('./api/stack');
 const { AuthStack } = require('./auth/stack');
 
@@ -30,14 +30,13 @@ class BackendStack extends Stack {
 
     const auth = new AuthStack(this, "AuthStack");
 
-    const lambda = new LambdaStack(this, "LambdaStack", {
-      storage: storageStacks,
-      db: dbStacks,
-    });
+    // const lambda = new LambdasStack(this, "LambdasStack", {
+    // });
 
     new ApiStack(this, "ApiStack", {
-      // auth,
-      lambda
+      auth,
+      storage: storageStacks,
+      db: dbStacks,
     });
   }
 }

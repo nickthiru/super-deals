@@ -6,7 +6,7 @@ const { PolicyStatement, Effect } = require("aws-cdk-lib/aws-iam");
 const path = require("path");
 
 
-class CreateContruct extends Construct {
+class LambdaConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id);
 
@@ -24,9 +24,8 @@ class CreateContruct extends Construct {
       // memorySize: 1024,
       // memorySize: 512,
       // timeout: Duration.minutes(1),
-      entry: (path.join(__dirname, "./lambda-handler.js")),
+      entry: (path.join(__dirname, "./handler.js")),
       handler: "handler",
-      // depsLockFilePath: (path.join(__dirname, "../../../../../package-lock.json")),
       depsLockFilePath: require.resolve("#package-lock"),
       environment: {
         // Pass the stage-specific table and bucket names as environment variables
@@ -61,4 +60,4 @@ class CreateContruct extends Construct {
   }
 }
 
-module.exports = { CreateContruct };
+module.exports = { LambdaConstruct };
