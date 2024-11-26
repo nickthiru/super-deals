@@ -1,10 +1,11 @@
 <script>
   import SectionTitle from "$lib/components/shared/SectionTitle.svelte";
-  import { capitalize } from "$lib/utils/capitalize";
+
+  import Utils from '$lib/utils/_index.js';
 
   export let sectionName = "";
 
-  $: capSectionName = capitalize(sectionName, "-");
+  $: capSectionName = Utils.capitalize(sectionName, "-");
 </script>
 
 <section 

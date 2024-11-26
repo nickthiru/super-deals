@@ -12,22 +12,34 @@
 
   <label>
     Deal Title
-    <input name="title" type="text" required maxlength="255">
+    <input name="title" type="text" required maxlength="255" />
+    {#if form?.errors?.title}
+      <span class="error">{form.errors.title[0]}</span>
+    {/if}
   </label>
 
   <label>
     Original Price
-    <input name="originalPrice" type="number" required min="0">
+    <input name="originalPrice" type="number" min="0.01" step="0.01" required />
+    {#if form?.errors?.originalPrice}
+      <span class="error">{form.errors.originalPrice[0]}</span>
+    {/if}
   </label>
 
   <label>
     Discount
-    <input name="discount" type="number" required min="0" max="100">
+    <input name="discount" type="number" min="0.01" max="100" step="0.01" required />
+    {#if form?.errors?.discount}
+      <span class="error">{form.errors.discount[0]}</span>
+    {/if}
   </label>
 
   <label>
-    Logo
-    <input name="logo" type="file" required accept=".jpg, .jpeg, .png, .gif">
+    Logo (accepts .jpg, .jpeg, .png, .gif)
+    <input name="logo" type="file" accept=".jpg, .jpeg, .png, .gif" required />
+    {#if form?.errors?.logo}
+      <span class="error">{form.errors.logo[0]}</span>
+    {/if}
   </label>
 
   <label>
@@ -43,29 +55,27 @@
       <option value="entertainment">Entertainment</option>
       <option value="travel">Travel</option>
     </select>
+    {#if form?.errors?.category}
+      <span class="error">{form.errors.category[0]}</span>
+    {/if}
   </label>
 
   <label>
     Expiration
-    <input name="expiration" type="date" required min="{new Date().toISOString().split('T')[0]}">
+    <input name="expiration" type="date" required />
+    {#if form?.errors?.expiration}
+      <span class="error">{form.errors.expiration[0]}</span>
+    {/if}
   </label>
 
   <button type="submit">Add Deal</button>
 </form>
 
-{#if form?.errors}
-  <ul>
-    {#each Object.entries(form.errors) as [field, errorMessages]}
-      {#each errorMessages as errorMessage}
-        <li class="error">{field}: {errorMessage}</li>
-      {/each}
-    {/each}
-  </ul>
-{/if}
-
 <style>
   .error {
     color: tomato;
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
   }
 
   form {

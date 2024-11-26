@@ -1,8 +1,8 @@
 import { fail } from '@sveltejs/kit';
 import { getSchema } from './schema.js';
-import { BackendStackApiStackHttpStackA5B3EBBB } from "$backend/outputs.json";
 
-const { RestApiEndpoint0551178A: BaseUrl } = BackendStackApiStackHttpStackA5B3EBBB;
+import Api from '$lib/api/_index.js';
+
 
 export const actions = {
   default: async ({ request, fetch }) => {
@@ -28,13 +28,18 @@ export const actions = {
       });
     }
 
-    // Handle the validated form data if successful (e.g., save the deal, call an API, etc.)
-    const response = await fetch(`${BaseUrl}` + 'merchant/deals', {
+    // Send the validated form data if successful
+    const response = await Api.send(fetch, 'merchant/deals', {
       method: "POST",
       body: formData
     });
+    console.log(`Response Status: ${response.status}`);
+    console.log(`Response StatusText: ${response.statusText}`);
 
-    if (!response.ok) {
+    const responseBody = await response.json();
+    console.log(`Response Body: ${JSON.stringify(responseBody, null, 2)}`);
+
+    if (response.status !== 200) {
       return fail(response.status, {
         errors: ['Failed to add deal'],
       });

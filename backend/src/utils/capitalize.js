@@ -1,6 +1,6 @@
-import { map, toUpper, join } from "ramda";
+const { map, toUpper, join } = require("ramda");
 
-export default function capitalize(text = "", splitOn = " ", joinWith = " ") {
+module.exports = function capitalize(text = "", splitOn = " ", joinWith = " ") {
 
   const copy = text.slice(0);
   const split = copy.split(splitOn);
