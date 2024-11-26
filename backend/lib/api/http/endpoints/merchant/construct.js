@@ -1,4 +1,6 @@
 const { Construct } = require("constructs");
+
+const { SignUpConstruct } = require("./sign-up/construct");
 const { DealsConstruct } = require("./deals/construct");
 
 class MerchantConstruct extends Construct {
@@ -14,6 +16,13 @@ class MerchantConstruct extends Construct {
 
 
     const merchant = http.restApi.root.addResource("merchant", http.optionsWithCors);
+
+
+    new SignUpConstruct(this, "SignUpConstruct", {
+      // auth,
+      http,
+      merchant,
+    });
 
     new DealsConstruct(this, "DealsConstruct", {
       // auth,

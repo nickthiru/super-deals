@@ -1,7 +1,8 @@
-const addCorsHeader = require("./addCorsHeader.js");
+// const addCorsHeader = require("./add-cors-header.js");
+const Api = require("#src/api/_index.js");
 
 function success(data, statusCode = 200) {
-  const headers = addCorsHeader();
+  const headers = Api.addCorsHeader();
   const response = {
     statusCode,
     headers,
