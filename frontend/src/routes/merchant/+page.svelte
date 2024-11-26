@@ -3,4 +3,4 @@
   // export let data;
 </script>
 
-<h1>Welcome to Your Merchant Dashboard</h1>
+<h1>Welcome to the Merchant Landing Page</h1>

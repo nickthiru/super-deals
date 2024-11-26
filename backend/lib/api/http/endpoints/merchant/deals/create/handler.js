@@ -2,8 +2,8 @@ const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { DynamoDBClient, PutItemCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall } = require("@aws-sdk/util-dynamodb");
 const KSUID = require("ksuid");
-const multipart = require('parse-multipart-data');
-const { Buffer } = require('node:buffer');
+// const multipart = require('parse-multipart-data');
+// const { Buffer } = require('node:buffer');
 
 /** @typedef {import('#types/deal-entity').DealEntity} DealItem */
 
@@ -12,7 +12,9 @@ const { Buffer } = require('node:buffer');
 const Api = require("#src/api/_index.js");
 
 // Import the deal schema for validation
-const { getSchema } = require("./schema.js");
+const { schema } = require("./schema.js");
+const validateData = require("#src/utils/validate-data.js");
+
 
 // Initialize AWS clients
 const s3Client = new S3Client();
@@ -32,8 +34,8 @@ exports.handler = async (event) => {
   const s3BucketName = s3BucketNames[stage];
 
   // Parse and validate the multipart form data
-  const deal = parseMultipartFormData(event);
-  const validationResult = await validateDealData(deal);
+  const createDealFormData = Api.parseMultipartFormData(event);
+  const validationResult = await validateData(schema, createDealFormData);
   if (!validationResult.success) {
     return Api.error(400, validationResult.error, validationResult.details);
   }
@@ -67,58 +69,58 @@ exports.handler = async (event) => {
 
 
 
-/**
- * Parse multipart form data from the event
- * @param {Object} event - The Lambda event object
- * @returns {Object} The parsed deal data
- */
-function parseMultipartFormData(event) {
-  const decodedBody = Buffer.from(event.body, 'base64');
-  const boundary = event.headers["content-type"].split("boundary=")[1];
-  const parts = multipart.parse(decodedBody, boundary);
+// /**
+//  * Parse multipart form data from the event
+//  * @param {Object} event - The Lambda event object
+//  * @returns {Object} The parsed deal data
+//  */
+// function parseMultipartFormData(event) {
+//   const decodedBody = Buffer.from(event.body, 'base64');
+//   const boundary = event.headers["content-type"].split("boundary=")[1];
+//   const parts = multipart.parse(decodedBody, boundary);
 
-  const deal = {};
-  for (let part of parts) {
-    if (part.filename) {
-      deal.logo = {
-        filename: part.filename,
-        contentType: part.type,
-        data: part.data
-      };
-    } else {
-      deal[part.name] = part.data.toString();
-    }
-  }
-  return deal;
-}
+//   const deal = {};
+//   for (let part of parts) {
+//     if (part.filename) {
+//       deal.logo = {
+//         filename: part.filename,
+//         contentType: part.type,
+//         data: part.data
+//       };
+//     } else {
+//       deal[part.name] = part.data.toString();
+//     }
+//   }
+//   return deal;
+// }
 
-/**
- * Validate the deal data against the schema
- * @param {Object} deal - The deal data to validate
- * @returns {Object} Validation result
- */
-async function validateDealData(deal) {
-  const dealSchema = getSchema();
-  try {
-    await dealSchema.parseAsync(deal);
-    return { success: true };
-  } catch (error) {
-    console.error("Validation Error:", error);
-    if (error.errors && error.errors.length > 0) {
-      // Return detailed error messages from the schema
-      return {
-        success: false,
-        error: "Validation failed",
-        details: error.errors.map(e => ({
-          field: e.path.join('.'),
-          message: e.message
-        }))
-      };
-    }
-    // Fallback for unexpected error structure
-    return { success: false, error: "Invalid deal data: " + error.message };
-  }
-}
+// /**
+//  * Validate the deal data against the schema
+//  * @param {Object} deal - The deal data to validate
+//  * @returns {Object} Validation result
+//  */
+// async function validateDealData(deal) {
+//   const dealSchema = getSchema();
+//   try {
+//     await dealSchema.parseAsync(deal);
+//     return { success: true };
+//   } catch (error) {
+//     console.error("Validation Error:", error);
+//     if (error.errors && error.errors.length > 0) {
+//       // Return detailed error messages from the schema
+//       return {
+//         success: false,
+//         error: "Validation failed",
+//         details: error.errors.map(e => ({
+//           field: e.path.join('.'),
+//           message: e.message
+//         }))
+//       };
+//     }
+//     // Fallback for unexpected error structure
+//     return { success: false, error: "Invalid deal data: " + error.message };
+//   }
+// }
 
 /**
  * Upload the deal logo to S3

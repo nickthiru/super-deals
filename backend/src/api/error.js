@@ -1,9 +1,8 @@
-// backend/src/utils/api/error.js
-
-const addCorsHeader = require("./addCorsHeader.js");
+// const addCorsHeader = require("./add-cors-header.js");
+const Api = require("#src/api/_index.js");
 
 function error(statusCode, message, details = null) {
-  const headers = addCorsHeader();
+  const headers = Api.addCorsHeader();
   const body = {
     error: message
   };
