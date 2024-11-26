@@ -1,7 +1,7 @@
 <script>
   import SectionTitle from "$lib/components/shared/SectionTitle.svelte";
 
-  import Utils from '$lib/api/_index.js';
+  import Utils from '$lib/utils/_index.js';
 
   export let sectionName = "";
 
