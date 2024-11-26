@@ -1,5 +1,5 @@
 import capitalize from "./capitalize.js";
 
-export {
+export default {
   capitalize,
 };

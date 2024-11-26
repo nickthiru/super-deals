@@ -1,7 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import { getSchema } from './schema.js';
 
-import API from '$lib/api/_index.js';
+import Api from '$lib/api/_index.js';
 
 
 export const actions = {
@@ -28,16 +28,19 @@ export const actions = {
       });
     }
 
-    // Handle the validated form data if successful
-    const response = await API.send(fetch, 'merchant/deals', {
+    // Send the validated form data if successful
+    const response = await Api.send(fetch, 'merchant/deals', {
       method: "POST",
       body: formData
     });
+    console.log(`Response Status: ${response.status}`);
+    console.log(`Response StatusText: ${response.statusText}`);
 
-    console.log(`Backend Response: ${JSON.stringify(response, null, 2)}`);
+    const responseBody = await response.json();
+    console.log(`Response Body: ${JSON.stringify(responseBody, null, 2)}`);
 
-    if (response.statusCode !== 200) {
-      return fail(response.statusCode, {
+    if (response.status !== 200) {
+      return fail(response.status, {
         errors: ['Failed to add deal'],
       });
     }
