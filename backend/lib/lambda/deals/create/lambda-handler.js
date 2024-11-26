@@ -12,8 +12,7 @@ const { Buffer } = require('node:buffer');
 const Api = require("#src/api/_index.js");
 
 // Import the deal schema for validation
-// const { getSchema } = require("#schemas/deals/create/schema.js");
-const { getSchema } = require("./schema.js");
+const { getSchema } = require("#schemas/deals/create/schema.js");
 
 // Initialize AWS clients
 const s3Client = new S3Client();

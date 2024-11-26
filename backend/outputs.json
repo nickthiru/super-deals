@@ -15,6 +15,10 @@
     "ExportsOutputRefS3BucketpreprodF8A355A83DEA24D3": "deals-bucket-preprod",
     "ExportsOutputFnGetAttS3BucketpreprodF8A355A8ArnCDAF8F23": "arn:aws:s3:::deals-bucket-preprod"
   },
+  "BackendStackAuthStackE972FEA3": {
+    "UserPoolClientId": "63e1vnt6dsum9cf6nb7a4f80ma",
+    "UserPoolId": "us-east-1_mWXLgSI7J"
+  },
   "BackendStackLambdaStackDealsStack744315FE": {
     "ExportsOutputFnGetAttCreateContructNodejsFunctionD0DEAE44ArnD3253407": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackLambdaStackDe-CreateContructNodejsFunc-cmnRolpZ5emc"
   },
