@@ -10,7 +10,8 @@ class HttpStack extends Stack {
 
     const {
       // auth,
-      lambda,
+      storage,
+      db,
     } = props;
 
 
@@ -36,7 +37,7 @@ class HttpStack extends Stack {
     /*** Authorizer ***/
 
     // const authorizer = new CognitoUserPoolsAuthorizer(this, "CognitoUserPoolsAuthorizer", {
-    //   cognitoUserPools: [authStack.consumerUserPool],
+    //   cognitoUserPools: [auth.userPool],
     //   identitySource: "method.request.header.Authorization",
     // });
     // authorizer._attachToApi(restApi);
@@ -61,10 +62,12 @@ class HttpStack extends Stack {
     /*** Endpoints ***/
 
     new EndpointsConstruct(this, "EndpointsConstruct", {
-      lambda,
+      // auth,
+      storage,
+      db,
       http: {
         restApi,
-        optionsWithCors
+        optionsWithCors,
       }
     });
   }

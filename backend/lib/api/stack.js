@@ -9,12 +9,14 @@ class ApiStack extends Stack {
 
     const {
       // auth,
-      lambda,
+      storage,
+      db,
     } = props;
 
     new HttpStack(this, "HttpStack", {
       // auth,
-      lambda,
+      storage,
+      db,
     });
 
     // this.webSocket = new WebSocketStack(this, "WebSocketStack", {

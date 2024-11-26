@@ -6,12 +6,16 @@ class EndpointsConstruct extends Construct {
     super(scope, id, props);
 
     const {
-      lambda,
+      // auth,
+      storage,
+      db,
       http,
     } = props;
 
     new MerchantConstruct(this, "MerchantConstruct", {
-      lambda,
+      // auth,
+      storage,
+      db,
       http,
     });
   }
