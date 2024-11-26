@@ -3,6 +3,7 @@ const { DbStack } = require('./db/stack');
 const { StorageStack } = require('./storage/stack');
 const { LambdaStack } = require('./lambda/stack');
 const { ApiStack } = require('./api/stack');
+const { AuthStack } = require('./auth/stack');
 
 class BackendStack extends Stack {
   /**
@@ -12,8 +13,6 @@ class BackendStack extends Stack {
    */
   constructor(scope, id, props) {
     super(scope, id, props);
-
-    // // const auth = new AuthStack(this, "AuthStack");
 
     // Staged Resources
     const stages = ['dev', 'preprod'];
@@ -29,13 +28,13 @@ class BackendStack extends Stack {
     });
 
 
-    // LambdaStack is shared
+    const auth = new AuthStack(this, "AuthStack");
+
     const lambda = new LambdaStack(this, "LambdaStack", {
       storage: storageStacks,
       db: dbStacks,
     });
 
-    // ApiStack is shared
     new ApiStack(this, "ApiStack", {
       // auth,
       lambda
