@@ -1,24 +1,11 @@
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
-const { DynamoDBClient, PutItemCommand } = require("@aws-sdk/client-dynamodb");
-const { marshall } = require("@aws-sdk/util-dynamodb");
-const KSUID = require("ksuid");
-// const multipart = require('parse-multipart-data');
-// const { Buffer } = require('node:buffer');
-
-/** @typedef {import('#types/deal-entity').DealEntity} DealItem */
+const { CognitoIdentityProviderClient, SignUpCommand } = require("@aws-sdk/client-cognito-identity-provider");
+const { schema } = require("./schema.js");
 
 // Api object provides internal API-related helper functionality
 // such as standardized success and error responses
 const Api = require("#src/api/_index.js");
 
-// Import the deal schema for validation
-const { schema } = require("./schema.js");
-const validateData = require("#src/utils/validateData.js");
-
-
-// Initialize AWS clients
-// const s3Client = new S3Client();
-// const ddbClient = new DynamoDBClient();
+const cognitoClient = new CognitoIdentityProviderClient();
 
 
 exports.handler = async (event) => {
@@ -27,18 +14,19 @@ exports.handler = async (event) => {
   const stage = event.headers['X-Stage'] || 'dev';
 
   // Parse the environment variables containing stage-specific resource names
-  // const ddbTableNames = JSON.parse(process.env.DDB_TABLE_NAMES);
-  // const s3BucketNames = JSON.parse(process.env.S3_BUCKET_NAMES);
+  const userPoolClientIds = JSON.parse(process.env.CONSUMER_USER_POOL_CLIENT_IDS);
+  const userPoolClientId = userPoolClientIds[stage];
 
-  // const dbTableName = ddbTableNames[stage];
-  // const s3BucketName = s3BucketNames[stage];
-
-  // Parse and validate the multipart form data
-  const signUpFormData = Api.parseMultipartFormData(event);
-  const validationResult = await validateData(schema, signUpFormData);
-  if (!validationResult.success) {
-    return Api.error(400, validationResult.error, validationResult.details);
+  // Parse and validate the form data using Api object
+  let signUpFormData;
+  try {
+    signUpFormData = Api.parseAndValidateFormData(event, schema);
+  } catch (error) {
+    return Api.error(400, error.message);
   }
+
+  // Proceed with the rest of the handler logic using signUpFormData
+  console.log("Validated form data:", signUpFormData);
 
   // Return success response
   const successResponse = Api.success({

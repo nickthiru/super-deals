@@ -9,7 +9,7 @@ class HttpStack extends Stack {
     super(scope, id, props);
 
     const {
-      // auth,
+      auth,
       storage,
       db,
     } = props;
@@ -62,7 +62,7 @@ class HttpStack extends Stack {
     /*** Endpoints ***/
 
     new EndpointsConstruct(this, "EndpointsConstruct", {
-      // auth,
+      auth,
       storage,
       db,
       http: {

@@ -13,8 +13,6 @@ const Api = require("#src/api/_index.js");
 
 // Import the deal schema for validation
 const { schema } = require("./schema.js");
-const validateData = require("#src/utils/validate-data.js");
-
 
 // Initialize AWS clients
 const s3Client = new S3Client();
@@ -34,10 +32,11 @@ exports.handler = async (event) => {
   const s3BucketName = s3BucketNames[stage];
 
   // Parse and validate the multipart form data
-  const createDealFormData = Api.parseMultipartFormData(event);
-  const validationResult = await validateData(schema, createDealFormData);
-  if (!validationResult.success) {
-    return Api.error(400, validationResult.error, validationResult.details);
+  let createDealFormData;
+  try {
+    createDealFormData = Api.parseAndValidateFormData(event, schema);
+  } catch (error) {
+    return Api.error(400, error.message);
   }
 
   // Generate a unique ID for the deal
@@ -45,7 +44,7 @@ exports.handler = async (event) => {
 
   // Upload logo to S3
   let logoS3Key = "";
-  const logoUploadResult = await uploadLogoToS3(deal, dealId, s3BucketName);
+  const logoUploadResult = await uploadLogoToS3(createDealFormData, dealId, s3BucketName);
   if (!logoUploadResult.success) {
     return Api.error(500, logoUploadResult.error);
   } else {
@@ -69,63 +68,11 @@ exports.handler = async (event) => {
 
 
 
-// /**
-//  * Parse multipart form data from the event
-//  * @param {Object} event - The Lambda event object
-//  * @returns {Object} The parsed deal data
-//  */
-// function parseMultipartFormData(event) {
-//   const decodedBody = Buffer.from(event.body, 'base64');
-//   const boundary = event.headers["content-type"].split("boundary=")[1];
-//   const parts = multipart.parse(decodedBody, boundary);
-
-//   const deal = {};
-//   for (let part of parts) {
-//     if (part.filename) {
-//       deal.logo = {
-//         filename: part.filename,
-//         contentType: part.type,
-//         data: part.data
-//       };
-//     } else {
-//       deal[part.name] = part.data.toString();
-//     }
-//   }
-//   return deal;
-// }
-
-// /**
-//  * Validate the deal data against the schema
-//  * @param {Object} deal - The deal data to validate
-//  * @returns {Object} Validation result
-//  */
-// async function validateDealData(deal) {
-//   const dealSchema = getSchema();
-//   try {
-//     await dealSchema.parseAsync(deal);
-//     return { success: true };
-//   } catch (error) {
-//     console.error("Validation Error:", error);
-//     if (error.errors && error.errors.length > 0) {
-//       // Return detailed error messages from the schema
-//       return {
-//         success: false,
-//         error: "Validation failed",
-//         details: error.errors.map(e => ({
-//           field: e.path.join('.'),
-//           message: e.message
-//         }))
-//       };
-//     }
-//     // Fallback for unexpected error structure
-//     return { success: false, error: "Invalid deal data: " + error.message };
-//   }
-// }
-
 /**
  * Upload the deal logo to S3
  * @param {Object} deal - The deal data
  * @param {string} dealId - The unique deal ID
+ * @param {string} s3BucketName - The S3 bucket name
  * @returns {Object} Upload result
  */
 async function uploadLogoToS3(deal, dealId, s3BucketName) {
@@ -149,11 +96,13 @@ async function uploadLogoToS3(deal, dealId, s3BucketName) {
   }
 }
 
+
 /**
  * Save the deal to DynamoDB
  * @param {Object} deal - The deal data
  * @param {string} dealId - The unique deal ID
  * @param {string} logoS3Key - The S3 key for the deal logo
+ * @param {string} dbTableName - The DynamoDB table name
  * @returns {Object} Save result
  */
 async function saveDealToDynamoDB(deal, dealId, logoS3Key, dbTableName) {

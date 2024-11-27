@@ -8,13 +8,13 @@ class ApiStack extends Stack {
     super(scope, id, props);
 
     const {
-      // auth,
+      auth,
       storage,
       db,
     } = props;
 
     new HttpStack(this, "HttpStack", {
-      // auth,
+      auth,
       storage,
       db,
     });

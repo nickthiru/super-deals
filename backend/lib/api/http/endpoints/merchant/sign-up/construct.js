@@ -8,7 +8,7 @@ class SignUpConstruct extends Construct {
     super(scope, id, props);
 
     const {
-      // auth,
+      auth,
       http,
       merchant,
     } = props;
@@ -16,9 +16,8 @@ class SignUpConstruct extends Construct {
 
     const signUp = merchant.addResource("sign-up");
 
-
     const lambda = new LambdaConstruct(this, "LambdaConstruct", {
-      // auth,
+      auth,
     });
 
     new EndpointConstruct(this, "EndpointConstruct", {
