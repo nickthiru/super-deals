@@ -2,6 +2,7 @@ const { Construct } = require("constructs");
 
 const { SignUpConstruct } = require("./sign-up/construct");
 const { DealsConstruct } = require("./deals/construct");
+const { SignInConstruct } = require("./sign-in/construct");
 
 class MerchantConstruct extends Construct {
   constructor(scope, id, props) {
@@ -19,6 +20,12 @@ class MerchantConstruct extends Construct {
 
 
     new SignUpConstruct(this, "SignUpConstruct", {
+      auth,
+      http,
+      merchant,
+    });
+
+    new SignInConstruct(this, "SignInConstruct", {
       auth,
       http,
       merchant,

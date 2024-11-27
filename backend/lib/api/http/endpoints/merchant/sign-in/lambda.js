@@ -32,6 +32,7 @@ class LambdaConstruct extends Construct {
           dev: auth.dev.userPoolClient.userPoolClientId,
           preprod: auth.preprod.userPoolClient.userPoolClientId,
         }),
+        AUTH_FLOW: "USER_PASSWORD_AUTH",
       },
     });
   }
