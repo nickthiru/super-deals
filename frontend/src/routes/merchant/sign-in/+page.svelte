@@ -1,4 +1,4 @@
-<!-- frontend/src/routes/merchant/sign-up/+page.svelte -->
+<!-- frontend/src/routes/merchant/sign-in/+page.svelte -->
 <script>
   import { enhance } from '$app/forms';
 
@@ -6,17 +6,9 @@
   export let form;
 </script>
 
-<h1 id="sign-up-title">Merchant Sign-Up</h1>
+<h1 id="sign-in-title">Merchant Sign-In</h1>
 
-<form method="POST" aria-labelledby="sign-up-title" use:enhance>
-  <label>
-    Business Name
-    <input name="businessName" type="text" required maxlength="255">
-    {#if form?.errors?.businessName}
-      <span class="error">{form.errors.businessName[0]}</span>
-    {/if}
-  </label>
-
+<form method="POST" aria-labelledby="sign-in-title" use:enhance>
   <label>
     Email
     <input name="email" type="email" required>
@@ -33,15 +25,7 @@
     {/if}
   </label>
 
-  <label>
-    Confirm Password
-    <input name="confirmPassword" type="password" required minlength="8">
-    {#if form?.errors?.confirmPassword}
-      <span class="error">{form.errors.confirmPassword[0]}</span>
-    {/if}
-  </label>
-
-  <button type="submit">Sign Up</button>
+  <button type="submit">Sign In</button>
 </form>
 
 <style>

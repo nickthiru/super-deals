@@ -18,7 +18,7 @@ export const actions = {
     }
 
     // Send the validated form data if successful
-    const response = await Api.send(fetch, 'merchant/sign-up', {
+    const response = await Api.send(fetch, 'merchant/sign-in', {
       method: "POST",
       body: formData
     });
