@@ -14,7 +14,7 @@ exports.handler = async (event) => {
   const stage = event.headers['X-Stage'] || 'dev';
 
   // Parse the environment variables containing stage-specific resource names
-  const userPoolClientIds = JSON.parse(process.env.CONSUMER_USER_POOL_CLIENT_IDS);
+  const userPoolClientIds = JSON.parse(process.env.USER_POOL_CLIENT_IDS);
   const userPoolClientId = userPoolClientIds[stage];
 
   // Parse and validate the form data using Api object
@@ -28,11 +28,24 @@ exports.handler = async (event) => {
   // Proceed with the rest of the handler logic using signUpFormData
   console.log("Validated form data:", signUpFormData);
 
+  try {
+    const signUpResponse = await cognitoClient.send(new SignUpCommand({
+      ClientId: userPoolClientId,
+      Username: signUpFormData.emailAddress,
+      Password: signUpFormData.password,
+    }));
+
+    console.log("(+) signUpResponse: " + JSON.stringify(signUpResponse, null, 2));
+
+  } catch (error) {
+    console.log(error);
+  };
+
   // Return success response
   const successResponse = Api.success({
-    message: "User successfully created",
-    userId: userId,
+    message: "User account registered. Needs confirmation via OTP.",
   });
   console.log(`Success Response: ${JSON.stringify(successResponse, null, 2)}`);
+
   return successResponse;
 };

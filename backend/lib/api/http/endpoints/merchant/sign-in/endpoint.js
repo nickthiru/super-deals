@@ -10,7 +10,7 @@ class EndpointConstruct extends Construct {
 
     const {
       http,
-      signUp,
+      signIn,
       lambda,
     } = props;
 
@@ -28,7 +28,7 @@ class EndpointConstruct extends Construct {
       validateRequestParameters: false
     });
 
-    signUp.addMethod("POST", new LambdaIntegration(lambda.function), {
+    signIn.addMethod("POST", new LambdaIntegration(lambda.function), {
       requestValidator,
       requestModels: {
         'application/json': model

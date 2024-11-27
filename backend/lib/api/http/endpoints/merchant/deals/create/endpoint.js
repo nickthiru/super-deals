@@ -15,23 +15,23 @@ class EndpointConstruct extends Construct {
     } = props;
 
 
-    const createModel = new Model(this, `CreateModel`, {
+    const model = new Model(this, `Model`, {
       restApi: http.restApi,
       contentType: 'application/json',
       description: 'Validation model for create deals form',
       schema: jsonSchema
     });
 
-    const createRequestValidator = new RequestValidator(this, `CreateRequestValidator`, {
+    const requestValidator = new RequestValidator(this, `RequestValidator`, {
       restApi: http.restApi,
       validateRequestBody: true,
       validateRequestParameters: false
     });
 
     deals.addMethod("POST", new LambdaIntegration(lambda.function), {
-      requestValidator: createRequestValidator,
+      requestValidator,
       requestModels: {
-        'application/json': createModel
+        'application/json': model
       }
     });
   }
