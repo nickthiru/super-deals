@@ -1,7 +1,7 @@
-// frontend/src/routes/merchant/sign-up/schema.js
-import { z } from 'zod';
-import { zfd } from 'zod-form-data';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+// backend/lib/api/http/endpoints/merchant/sign-up/schema.js
+const { z } = require('zod');
+const { zfd } = require('zod-form-data');
+const { zodToJsonSchema } = require('zod-to-json-schema');
 
 const passwordSchema = z.string().min(8, 'Password must be at least 8 characters long');
 
@@ -22,4 +22,4 @@ const jsonSchema = zodToJsonSchema(schema, {
   target: 'openApi3',
 });
 
-export { schema, jsonSchema };
+module.exports = { schema, jsonSchema };

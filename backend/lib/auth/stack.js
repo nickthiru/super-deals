@@ -1,14 +1,15 @@
 const { Stack, CfnOutput, Duration } = require("aws-cdk-lib");
 const { UserPool, VerificationEmailStyle, AccountRecovery, CfnUserPoolGroup, UserPoolOperation } = require("aws-cdk-lib/aws-cognito");
-const { NodejsFunction } = require("aws-cdk-lib/aws-lambda-nodejs");
 
 
 class AuthStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
-    console.log("(+) Inside 'AuthStack'");
 
-    this.userPool = new UserPool(this, "UserPool", {
+    const { stage } = props;
+
+    this.userPool = new UserPool(this, `UserPool-${stage}`, {
+      userPoolName: `UserPool-${stage}`,
       selfSignUpEnabled: true,
       passwordPolicy: {
         minLength: 8,
@@ -54,7 +55,7 @@ class AuthStack extends Stack {
     this.createUserGroup("MerchantGroup", "Merchant");
     this.createUserGroup("AdminGroup", "Admin");
 
-    this.userPoolClient = this.userPool.addClient("UserPoolClient", {
+    this.userPoolClient = this.userPool.addClient(`UserPoolClient-${stage}`, {
       authFlows: { userPassword: true },
       accessTokenValidity: Duration.hours(8),
       // readAttributes: clientReadAttributes,
@@ -76,16 +77,16 @@ class AuthStack extends Stack {
     /*** Outputs ***/
 
     // For web client Auth service
-    new CfnOutput(this, "UserPoolId", {
+    new CfnOutput(this, `UserPoolId-${stage}`, {
       value: this.userPool.userPoolId,
       description: "Cognito user pool ID used by the web client's auth service",
-      exportName: "UserPoolId"
+      exportName: `UserPoolId${stage}`
     });
 
-    new CfnOutput(this, "UserPoolClientId", {
+    new CfnOutput(this, `UserPoolClientId-${stage}`, {
       value: this.userPoolClient.userPoolClientId,
       description: "Cognito user pool client ID used by the web client's auth service",
-      exportName: "UserPoolClientId"
+      exportName: `UserPoolClientId${stage}`
     });
   }
 

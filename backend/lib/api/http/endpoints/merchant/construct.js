@@ -8,7 +8,7 @@ class MerchantConstruct extends Construct {
     super(scope, id, props);
 
     const {
-      // auth,
+      auth,
       storage,
       db,
       http,
@@ -19,7 +19,7 @@ class MerchantConstruct extends Construct {
 
 
     new SignUpConstruct(this, "SignUpConstruct", {
-      // auth,
+      auth,
       http,
       merchant,
     });
