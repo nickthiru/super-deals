@@ -10,7 +10,8 @@ const schema = zfd.formData({
   password: zfd.text(passwordSchema),
   confirmPassword: zfd.text(passwordSchema).refine((val, ctx) => val === ctx.parent.password, {
     message: 'Passwords must match'
-  })
+  }),
+  userGroup: zfd.text(z.literal('merchant'))
 });
 
 export default schema;

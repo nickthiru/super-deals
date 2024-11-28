@@ -1,10 +1,32 @@
 {
+  "BackendStackDbStackdev245DA190": {
+    "ExportsOutputRefTableV2devB86C8D84839FBB54": "DealsTable-dev",
+    "ExportsOutputFnGetAttTableV2devB86C8D84Arn7249F9F8": "arn:aws:dynamodb:us-east-1:654654543926:table/DealsTable-dev"
+  },
+  "BackendStackStorageStackdev02010C4B": {
+    "ExportsOutputRefS3Bucketdev1ADFBA8971FE73E0": "deals-bucket-dev",
+    "ExportsOutputFnGetAttS3Bucketdev1ADFBA89Arn94B97450": "arn:aws:s3:::deals-bucket-dev"
+  },
+  "BackendStackDbStackpreprod2E397A33": {
+    "ExportsOutputFnGetAttTableV2preprod8E207E62ArnAB77979F": "arn:aws:dynamodb:us-east-1:654654543926:table/DealsTable-preprod",
+    "ExportsOutputRefTableV2preprod8E207E623B5FF413": "DealsTable-preprod"
+  },
+  "BackendStackStorageStackpreprod273CF0DF": {
+    "ExportsOutputRefS3BucketpreprodF8A355A83DEA24D3": "deals-bucket-preprod",
+    "ExportsOutputFnGetAttS3BucketpreprodF8A355A8ArnCDAF8F23": "arn:aws:s3:::deals-bucket-preprod"
+  },
   "BackendStackAuthStackdev9FA1A23E": {
     "UserPoolIddev": "us-east-1_j6SCUQ0xi",
-    "UserPoolClientIddev": "2d7j0c4b38l32ns1cum8p9ql66"
+    "UserPoolClientIddev": "2d7j0c4b38l32ns1cum8p9ql66",
+    "ExportsOutputRefUserPooldevUserPoolClientdev4D65C5D916C789AA": "2d7j0c4b38l32ns1cum8p9ql66"
   },
   "BackendStackAuthStackpreprod084F12C9": {
     "UserPoolIdpreprod": "us-east-1_w7oBo11ai",
+    "ExportsOutputRefUserPoolpreprodUserPoolClientpreprodACB19F2B0408EFD1": "6i42r2cbp0os79iv3qpi2c5aq5",
     "UserPoolClientIdpreprod": "6i42r2cbp0os79iv3qpi2c5aq5"
+  },
+  "BackendStackApiStackHttpStackA5B3EBBB": {
+    "RestApiUrlpreprod": "https://v7bpl7jf88.execute-api.us-east-1.amazonaws.com/preprod/",
+    "RestApiUrldev": "https://v7bpl7jf88.execute-api.us-east-1.amazonaws.com/dev/"
   }
 }
