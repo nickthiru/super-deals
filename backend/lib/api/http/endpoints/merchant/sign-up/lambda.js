@@ -28,6 +28,10 @@ class LambdaConstruct extends Construct {
       depsLockFilePath: require.resolve("#package-lock"),
       environment: {
         // Pass the stage-specific User Pool Client IDs as environment variables
+        USER_POOL_IDS: JSON.stringify({
+          dev: auth.dev.userPool.userPoolId,
+          preprod: auth.preprod.userPool.userPoolId,
+        }),
         USER_POOL_CLIENT_IDS: JSON.stringify({
           dev: auth.dev.userPoolClient.userPoolClientId,
           preprod: auth.preprod.userPoolClient.userPoolClientId,

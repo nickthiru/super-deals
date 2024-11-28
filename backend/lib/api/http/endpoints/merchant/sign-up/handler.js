@@ -1,4 +1,4 @@
-const { CognitoIdentityProviderClient, SignUpCommand } = require("@aws-sdk/client-cognito-identity-provider");
+const { CognitoIdentityProviderClient, SignUpCommand, AdminAddUserToGroupCommand } = require("@aws-sdk/client-cognito-identity-provider");
 const { schema } = require("./schema.js");
 
 // Api object provides internal API-related helper functionality
@@ -14,6 +14,9 @@ exports.handler = async (event) => {
   const stage = event.headers['X-Stage'] || 'dev';
 
   // Parse the environment variables containing stage-specific resource names
+  const userPoolIds = JSON.parse(process.env.USER_POOL_IDS);
+  const userPoolId = userPoolIds[stage];
+
   const userPoolClientIds = JSON.parse(process.env.USER_POOL_CLIENT_IDS);
   const userPoolClientId = userPoolClientIds[stage];
 
@@ -33,9 +36,19 @@ exports.handler = async (event) => {
       ClientId: userPoolClientId,
       Username: signUpFormData.emailAddress,
       Password: signUpFormData.password,
+      UserAttributes: [
+        { Name: "email", Value: signUpFormData.email },
+        { Name: "custom:businessName", Value: signUpFormData.businessName },
+        { Name: "custom:userGroup", Value: signUpFormData.userGroup }
+      ]
     }));
-
     console.log("(+) signUpResponse: " + JSON.stringify(signUpResponse, null, 2));
+
+    await cognitoClient.send(new AdminAddUserToGroupCommand({
+      UserPoolId: userPoolId,
+      Username: signUpFormData.email,
+      GroupName: 'Merchant'
+    }));
 
   } catch (error) {
     console.log(error);

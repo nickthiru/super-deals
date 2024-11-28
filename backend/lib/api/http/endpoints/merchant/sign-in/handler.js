@@ -1,4 +1,4 @@
-const { CognitoIdentityProviderClient, InitiateAuthCommand } = require("@aws-sdk/client-cognito-identity-provider");
+const { CognitoIdentityProviderClient, InitiateAuthCommand, GetUserCommand } = require("@aws-sdk/client-cognito-identity-provider");
 const { schema } = require("./schema.js");
 
 // Api object provides internal API-related helper functionality
@@ -32,6 +32,7 @@ exports.handler = async (event) => {
 
   let accessToken = "";
   let expiresIn = 0;
+  let userAttributes = [];
 
   try {
     const signInResponse = await cognitoClient.send(new InitiateAuthCommand({
@@ -48,6 +49,14 @@ exports.handler = async (event) => {
     accessToken = signInResponse.AuthenticationResult.AccessToken;
     expiresIn = signInResponse.AuthenticationResult.ExpiresIn;
 
+    // Fetch user attributes using the AccessToken
+    const getUserResponse = await cognitoClient.send(new GetUserCommand({
+      AccessToken: accessToken
+    }));
+
+    userAttributes = getUserResponse.UserAttributes;
+    console.log("(+) getUserResponse: " + JSON.stringify(getUserResponse, null, 2));
+
   } catch (error) {
     console.log(error);
   };
@@ -55,8 +64,9 @@ exports.handler = async (event) => {
   // Return success response
   const successResponse = Api.success({
     message: "User is signed in successfully.",
-    accessToken: accessToken,
-    expiresIn: expiresIn
+    accessToken,
+    expiresIn,
+    userAttributes,
   });
   console.log(`Success Response: ${JSON.stringify(successResponse, null, 2)}`);
 

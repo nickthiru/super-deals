@@ -40,6 +40,10 @@ class AuthStack extends Stack {
           mutable: false,
         }
       },
+      customAttributes: {
+        businessName: new StringAttribute({ mutable: true }),
+        userGroup: new StringAttribute({ mutable: true })
+      }
     });
 
     // const clientWriteAttributes = (new cognito.ClientAttributes())
