@@ -1,0 +1,130 @@
+{
+  "resource": "/merchant/deals",
+  "path": "/merchant/deals",
+  "httpMethod": "POST",
+  "headers": {
+    "Accept": "*/*",
+    "Accept-Encoding": "br, gzip, deflate",
+    "Accept-Language": "*",
+    "CloudFront-Forwarded-Proto": "https",
+    "CloudFront-Is-Desktop-Viewer": "true",
+    "CloudFront-Is-Mobile-Viewer": "false",
+    "CloudFront-Is-SmartTV-Viewer": "false",
+    "CloudFront-Is-Tablet-Viewer": "false",
+    "CloudFront-Viewer-ASN": "55836",
+    "CloudFront-Viewer-Country": "IN",
+    "content-type": "multipart/form-data; boundary=----formdata-undici-062801054126",
+    "Host": "mms6a4j564.execute-api.us-east-1.amazonaws.com",
+    "origin": "http://localhost:5173",
+    "sec-fetch-mode": "cors",
+    "User-Agent": "node",
+    "Via": "1.1 afbfd408986dc787ed2a25b327ab1f78.cloudfront.net (CloudFront)",
+    "X-Amz-Cf-Id": "w_cp5x3wXQi6P1FfL3R6uYMMmcHSxvGEMw8ov4avl04E2_ufADCzQA==",
+    "X-Amzn-Trace-Id": "Root=1-670683c1-081b27a94e4aec1c18b0dd06",
+    "X-Forwarded-For": "152.58.227.208, 130.176.184.39",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https"
+  },
+  "multiValueHeaders": {
+    "Accept": [
+      "*/*"
+    ],
+    "Accept-Encoding": [
+      "br, gzip, deflate"
+    ],
+    "Accept-Language": [
+      "*"
+    ],
+    "CloudFront-Forwarded-Proto": [
+      "https"
+    ],
+    "CloudFront-Is-Desktop-Viewer": [
+      "true"
+    ],
+    "CloudFront-Is-Mobile-Viewer": [
+      "false"
+    ],
+    "CloudFront-Is-SmartTV-Viewer": [
+      "false"
+    ],
+    "CloudFront-Is-Tablet-Viewer": [
+      "false"
+    ],
+    "CloudFront-Viewer-ASN": [
+      "55836"
+    ],
+    "CloudFront-Viewer-Country": [
+      "IN"
+    ],
+    "content-type": [
+      "multipart/form-data; boundary=----formdata-undici-062801054126"
+    ],
+    "Host": [
+      "mms6a4j564.execute-api.us-east-1.amazonaws.com"
+    ],
+    "origin": [
+      "http://localhost:5173"
+    ],
+    "sec-fetch-mode": [
+      "cors"
+    ],
+    "User-Agent": [
+      "node"
+    ],
+    "Via": [
+      "1.1 afbfd408986dc787ed2a25b327ab1f78.cloudfront.net (CloudFront)"
+    ],
+    "X-Amz-Cf-Id": [
+      "w_cp5x3wXQi6P1FfL3R6uYMMmcHSxvGEMw8ov4avl04E2_ufADCzQA=="
+    ],
+    "X-Amzn-Trace-Id": [
+      "Root=1-670683c1-081b27a94e4aec1c18b0dd06"
+    ],
+    "X-Forwarded-For": [
+      "152.58.227.208, 130.176.184.39"
+    ],
+    "X-Forwarded-Port": [
+      "443"
+    ],
+    "X-Forwarded-Proto": [
+      "https"
+    ]
+  },
+  "queryStringParameters": null,
+  "multiValueQueryStringParameters": null,
+  "pathParameters": null,
+  "stageVariables": null,
+  "requestContext": {
+    "resourceId": "bfi623",
+    "resourcePath": "/merchant/deals",
+    "httpMethod": "POST",
+    "extendedRequestId": "fYmGOFrhoAMEc1A=",
+    "requestTime": "09/Oct/2024:13:23:13 +0000",
+    "path": "/prod/merchant/deals",
+    "accountId": "654654543926",
+    "protocol": "HTTP/1.1",
+    "stage": "prod",
+    "domainPrefix": "mms6a4j564",
+    "requestTimeEpoch": 1728480193191,
+    "requestId": "a1e2f687-6b62-4361-87fb-4b90032e2563",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "sourceIp": "152.58.227.208",
+      "principalOrgId": null,
+      "accessKey": null,
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "node",
+      "user": null
+    },
+    "domainName": "mms6a4j564.execute-api.us-east-1.amazonaws.com",
+    "deploymentId": "wdjce3",
+    "apiId": "mms6a4j564"
+  },
+  "body": "LS0tLS0tZm9ybWRhdGEtdW5kaWNpLTA2MjgwMTA1NDEyNg0KQ29udGVudC1EaXNwb3NpdGlvbjogZm9ybS1kYXRhOyBuYW1lPSJtZXJjaGFudElkIg0KDQpNY0QNCi0tLS0tLWZvcm1kYXRhLXVuZGljaS0wNjI4MDEwNTQxMjYNCkNvbnRlbnQtRGlzcG9zaXRpb246IGZvcm0tZGF0YTsgbmFtZT0idGl0bGUiDQoNCkFpciBKb3JkYW4gU2hvZXMNCi0tLS0tLWZvcm1kYXRhLXVuZGljaS0wNjI4MDEwNTQxMjYNCkNvbnRlbnQtRGlzcG9zaXRpb246IGZvcm0tZGF0YTsgbmFtZT0ib3JpZ2luYWxQcmljZSINCg0KMTAwDQotLS0tLS1mb3JtZGF0YS11bmRpY2ktMDYyODAxMDU0MTI2DQpDb250ZW50LURpc3Bvc2l0aW9uOiBmb3JtLWRhdGE7IG5hbWU9ImRpc2NvdW50Ig0KDQo1MA0KLS0tLS0tZm9ybWRhdGEtdW5kaWNpLTA2MjgwMTA1NDEyNg0KQ29udGVudC1EaXNwb3NpdGlvbjogZm9ybS1kYXRhOyBuYW1lPSJjYXRlZ29yeSINCg0Kc3BvcnRzDQotLS0tLS1mb3JtZGF0YS11bmRpY2ktMDYyODAxMDU0MTI2DQpDb250ZW50LURpc3Bvc2l0aW9uOiBmb3JtLWRhdGE7IG5hbWU9ImxvZ28iOyBmaWxlbmFtZT0iZGVhbC1sb2dvLnBuZyINCkNvbnRlbnQtVHlwZTogaW1hZ2UvcG5nDQoNColQTkcNChoKAAAADUlIRFIAAABwAAAAcAgGAAAAxuD0SwAAAAFzUkdCAK7OHOkAAAAEZ0FNQQAAsY8L/GEFAAAACXBIWXMAABJ0AAASdAHeZh94AAAGmUlEQVR4Xu2caUgVXxTAz1Nc0twiKKS0rMS1PlgRWZohgpYUKIK4gUiEfqo+VEQFiVYEEhH1IUSzKCGCQBSDEhQNcsMl1FwiMouyRCqjjc5/7uXSP3Os53vzdM7z/ODwfDPzZrm/mTt37rmjBTWAIYuL+mSIwgKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJwwKJ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",
+  "isBase64Encoded": true
+}

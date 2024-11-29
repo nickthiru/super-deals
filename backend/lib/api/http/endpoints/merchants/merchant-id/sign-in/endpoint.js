@@ -9,9 +9,9 @@ class EndpointConstruct extends Construct {
     super(scope, id, props);
 
     const {
-      lambda,
       http,
-      deals,
+      signInResource,
+      lambda,
     } = props;
 
 
@@ -28,7 +28,7 @@ class EndpointConstruct extends Construct {
       validateRequestParameters: false
     });
 
-    deals.addMethod("POST", new LambdaIntegration(lambda.function), {
+    signInResource.addMethod("POST", new LambdaIntegration(lambda.function), {
       requestValidator,
       requestModels: {
         'application/json': model
