@@ -8,11 +8,10 @@ class CreateConstruct extends Construct {
     super(scope, id, props);
 
     const {
-      // auth,
       storage,
       db,
       http,
-      deals,
+      dealsResource,
     } = props;
 
     const lambda = new LambdaConstruct(this, "LambdaConstruct", {
@@ -23,7 +22,7 @@ class CreateConstruct extends Construct {
     new EndpointConstruct(this, "EndpointConstruct", {
       lambda,
       http,
-      deals,
+      dealsResource,
     });
   }
 }

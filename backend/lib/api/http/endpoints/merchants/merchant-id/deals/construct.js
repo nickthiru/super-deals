@@ -6,27 +6,25 @@ class DealsConstruct extends Construct {
     super(scope, id, props);
 
     const {
-      // auth,
       storage,
       db,
       http,
-      merchant,
+      merchantIdResource,
     } = props;
 
 
-    const deals = merchant.addResource("deals");
+    const dealsResource = merchantIdResource.addResource("deals");
 
     new CreateConstruct(this, "CreateConstruct", {
-      // auth,
       storage,
       db,
       http,
-      deals,
+      dealsResource,
     });
 
     // new DeleteEndpointConstruct(this, "DeleteDealEndpointConstruct", {
     //   lambda,
-    //   deals,
+    //   dealsResource,
     // });
   }
 }
