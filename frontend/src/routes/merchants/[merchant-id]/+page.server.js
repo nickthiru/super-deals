@@ -1,7 +1,7 @@
 // frontend/src/routes/merchants/[merchantId]/dashboard/+page.server.js
 import { redirect, error } from '@sveltejs/kit';
 import jwt_decode from 'jwt-decode';
-import { SECRET_KEY } from '$env/static/private'; // Example of private environment variable
+// import { SECRET_KEY } from '$env/static/private'; // Example of private environment variable
 
 export async function load({ params, cookies }) {
   const accessToken = cookies.get('accessToken');
