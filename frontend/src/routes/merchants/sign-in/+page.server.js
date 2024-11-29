@@ -3,7 +3,7 @@ import schema from './schema.js';
 import Api from '$lib/api/_index.js';
 
 export const actions = {
-  default: async ({ request }) => {
+  default: async ({ request, fetch, cookies }) => {
     const formData = await request.formData();
     const data = Object.fromEntries(formData);
 
