@@ -33,15 +33,17 @@ export const actions = {
     const responseBody = await response.json();
     console.log(`Response Body: ${JSON.stringify(responseBody, null, 2)}`);
 
+    const { accessToken, expiresIn, merchantId } = responseBody;
+
     // Set cookies for accessToken and expiresIn
-    cookies.set('accessToken', responseBody.accessToken, {
+    cookies.set('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: responseBody.expiresIn,
+      maxAge: expiresIn,
       path: '/',
     });
 
     /// Redirect to merchant dashboard after successful sign-up
-    throw redirect(303, `/merchants/${responseBody.merchantId}/dashboard`);
+    throw redirect(303, `/merchants/${merchantId}/dashboard`);
   }
 };

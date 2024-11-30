@@ -22,6 +22,8 @@ const ddbClient = new DynamoDBClient();
 exports.handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
 
+  const { merchantId } = event.pathParameters;
+
   const stage = event.headers['X-Stage'] || 'dev';
 
   // Parse the environment variables containing stage-specific resource names
@@ -52,7 +54,7 @@ exports.handler = async (event) => {
   }
 
   // Prepare and save deal to DynamoDB
-  const saveDealResult = await saveDealToDynamoDB(deal, dealId, logoS3Key, dbTableName);
+  const saveDealResult = await saveDealToDynamoDB(deal, dealId, merchantId, logoS3Key, dbTableName);
   if (!saveDealResult.success) {
     return Api.error(500, saveDealResult.error);
   }
@@ -105,7 +107,7 @@ async function uploadLogoToS3(deal, dealId, s3BucketName) {
  * @param {string} dbTableName - The DynamoDB table name
  * @returns {Object} Save result
  */
-async function saveDealToDynamoDB(deal, dealId, logoS3Key, dbTableName) {
+async function saveDealToDynamoDB(deal, dealId, merchantId, logoS3Key, dbTableName) {
   /** @type {DealItem} */
   const dealItem = {
     PK: `DEAL#${dealId}`,
@@ -117,7 +119,7 @@ async function saveDealToDynamoDB(deal, dealId, logoS3Key, dbTableName) {
     Discount: parseFloat(deal.discount),
     Category: deal.category,
     Expiration: deal.expiration,
-    MerchantId: deal.merchantId,
+    MerchantId: merchantId,
     LogoKey: logoS3Key,
     CreatedAt: new Date().toISOString(),
   };
