@@ -5,7 +5,7 @@ import Api from '$lib/api/_index.js';
 
 
 export const actions = {
-  default: async ({ request, fetch }) => {
+  default: async ({ request, fetch, params }) => {
     // Get the form data
     const formData = await request.formData();
 
@@ -28,8 +28,10 @@ export const actions = {
       });
     }
 
+    const merchantId = params['merchant-id'];
+
     // Send the validated form data if successful
-    const response = await Api.send(fetch, 'merchant/deals', {
+    const response = await Api.send(fetch, `merchant/${merchantId}/deals`, {
       method: "POST",
       body: formData
     });

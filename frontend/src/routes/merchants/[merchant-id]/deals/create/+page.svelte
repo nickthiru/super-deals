@@ -8,8 +8,6 @@
 <h1 id="add-deal-title">Add a Deal</h1>
 
 <form method="POST" aria-labelledby="add-deal-title" enctype="multipart/form-data" use:enhance>
-  <input type="hidden" name="merchantId" value="Nike">
-
   <label>
     Deal Title
     <input name="title" type="text" required maxlength="255">

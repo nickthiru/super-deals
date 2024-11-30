@@ -32,7 +32,7 @@ exports.handler = async (event) => {
 
   let accessToken = "";
   let expiresIn = 0;
-  let userAttributes = [];
+  let merchantId = "";
 
   try {
     const signInResponse = await cognitoClient.send(new InitiateAuthCommand({
@@ -53,9 +53,15 @@ exports.handler = async (event) => {
     const getUserResponse = await cognitoClient.send(new GetUserCommand({
       AccessToken: accessToken
     }));
-
-    userAttributes = getUserResponse.UserAttributes;
     console.log("(+) getUserResponse: " + JSON.stringify(getUserResponse, null, 2));
+
+    // Transform userAttributes array into an object for easier access
+    const userAttributesMap = getUserResponse.UserAttributes.reduce((acc, attr) => {
+      acc[attr.Name] = attr.Value;
+      return acc;
+    }, {});
+
+    merchantId = userAttributesMap['custom:merchantId'];
 
   } catch (error) {
     console.log(error);
@@ -66,7 +72,7 @@ exports.handler = async (event) => {
     message: "User is signed in successfully.",
     accessToken,
     expiresIn,
-    userAttributes,
+    merchantId,
   });
   console.log(`Success Response: ${JSON.stringify(successResponse, null, 2)}`);
 

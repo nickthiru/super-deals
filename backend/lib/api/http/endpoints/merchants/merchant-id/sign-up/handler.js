@@ -1,4 +1,5 @@
 const { CognitoIdentityProviderClient, SignUpCommand, AdminAddUserToGroupCommand } = require("@aws-sdk/client-cognito-identity-provider");
+const { v4: uuidv4 } = require('uuid'); // Import UUID library to generate merchantId
 const { schema } = require("./schema.js");
 
 // Api object provides internal API-related helper functionality
@@ -31,6 +32,9 @@ exports.handler = async (event) => {
   // Proceed with the rest of the handler logic using signUpFormData
   console.log("Validated form data:", signUpFormData);
 
+  // Generate a unique merchantId
+  const merchantId = uuidv4();
+
   try {
     const signUpResponse = await cognitoClient.send(new SignUpCommand({
       ClientId: userPoolClientId,
@@ -38,6 +42,7 @@ exports.handler = async (event) => {
       Password: signUpFormData.password,
       UserAttributes: [
         { Name: "email", Value: signUpFormData.email },
+        { Name: 'custom:merchantId', Value: merchantId },
         { Name: "custom:businessName", Value: signUpFormData.businessName },
         { Name: "custom:userGroup", Value: signUpFormData.userGroup }
       ]
