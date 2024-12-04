@@ -1,5 +1,7 @@
 <script>
   import "../app.css";
+  import "material-dynamic-colors";
+  
   import Container from "$lib/components/shared/layout/Container.svelte";
   import NavBar from "$lib/components/shared/NavBar.svelte";
   import AppHeading from "$lib/components/shared/AppHeading.svelte";
