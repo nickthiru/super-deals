@@ -1,5 +1,6 @@
 const { Stack, CfnOutput, Duration } = require("aws-cdk-lib");
-const { UserPool, VerificationEmailStyle, AccountRecovery, CfnUserPoolGroup, UserPoolOperation } = require("aws-cdk-lib/aws-cognito");
+const { UserPool, VerificationEmailStyle, AccountRecovery, CfnUserPoolGroup, UserPoolOperation, StringAttribute } = require("aws-cdk-lib/aws-cognito");
+const { LambdaConstruct } = require("./pre-sign-up/lambda");
 
 
 class AuthStack extends Stack {
@@ -68,14 +69,10 @@ class AuthStack extends Stack {
 
 
     // // Create Lambda function for pre-sign-up logic
-    // this.preSignUpFunction = new NodeJsFunction(this, "PreSignUpFunction", {
-    //   runtime: Runtime.NODEJS_14_X,
-    //   handler: "index.handler",
-    //   code: Code.fromAsset("lambda"),
-    // });
+    // const preSignUpFunction = new LambdaConstruct(this, "PreSignUpFunction");
 
     // // Attach the Lambda function as a trigger to the User Pool
-    // this.userPool.addTrigger(UserPoolOperation.PRE_SIGN_UP, this.preSignUpFunction);
+    // this.userPool.addTrigger(UserPoolOperation.PRE_SIGN_UP, preSignUpFunction);
 
 
     /*** Outputs ***/

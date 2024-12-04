@@ -1,3 +1,4 @@
+// // Create Lambda function for pre-sign-up logic
 const { Construct } = require("constructs");
 const { NodejsFunction } = require("aws-cdk-lib/aws-lambda-nodejs");
 const { Runtime } = require("aws-cdk-lib/aws-lambda");
@@ -10,9 +11,9 @@ class LambdaConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id);
 
-    const {
-      policyStore,
-    } = props;
+    // const {
+    //   policyStore,
+    // } = props;
 
     // Define the Lambda function to create policies
     this.function = new NodejsFunction(this, "NodejsFunction", {
@@ -27,15 +28,6 @@ class LambdaConstruct extends Construct {
       entry: (path.join(__dirname, "./handler.js")),
       handler: "handler",
       depsLockFilePath: require.resolve("#package-lock"),
-      environment: {
-        POLICY_STORE_ID: policyStore.policyStoreId
-      },
-      initialPolicy: [
-        new PolicyStatement({
-          actions: ['verifiedpermissions:CreatePolicy'],
-          resources: ['*'],
-        }),
-      ],
     });
   }
 }

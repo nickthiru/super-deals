@@ -4,6 +4,7 @@ const { StorageStack } = require('./storage/stack');
 // const { LambdaStack } = require('./lambda/stack');
 const { ApiStack } = require('./api/stack');
 const { AuthStack } = require('./auth/stack');
+const { PolicyStack } = require('./policy/stack');
 
 class BackendStack extends Stack {
   /**
@@ -32,10 +33,17 @@ class BackendStack extends Stack {
     // const lambda = new LambdaStack(this, "LambdaStack", {
     // });
 
-    new ApiStack(this, "ApiStack", {
+    const api = new ApiStack(this, "ApiStack", {
+      stages,
       auth: authStacks,
       storage: storageStacks,
       db: dbStacks,
+    });
+
+    // Note that the Amazon Verified Permissions may not be included in the free-tier AWS account
+    new PolicyStack(this, "PolicyStack", {
+      auth: authStacks,
+      api,
     });
   }
 }

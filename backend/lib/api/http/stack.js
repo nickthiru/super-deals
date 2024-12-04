@@ -9,6 +9,7 @@ class HttpStack extends Stack {
     super(scope, id, props);
 
     const {
+      stages,
       auth,
       storage,
       db,
@@ -17,18 +18,16 @@ class HttpStack extends Stack {
 
     /*** HTTP API ***/
 
-    const restApi = new RestApi(this, "RestApi", {
+    this.restApi = new RestApi(this, "RestApi", {
       deploy: false,  // Disable automatic stage creation i.e. prod
       binaryMediaTypes: ["multipart/form-data"],
       cloudWatchRole: true,
     });
 
     // Stages
-    const stages = ['dev', 'preprod'];
-
     stages.forEach(stage => {
       new StageConstruct(this, `StageConstruct-${stage}`, {
-        api: restApi,
+        api: this.restApi,
         stageName: stage,
       });
     });
@@ -36,8 +35,10 @@ class HttpStack extends Stack {
 
     /*** Authorizer ***/
 
+    // const userPools = stages.map(stage => auth[stage].userPool);
+
     // const authorizer = new CognitoUserPoolsAuthorizer(this, "CognitoUserPoolsAuthorizer", {
-    //   cognitoUserPools: [auth.userPool],
+    //   cognitoUserPools: userPools,
     //   identitySource: "method.request.header.Authorization",
     // });
     // authorizer._attachToApi(restApi);
@@ -51,7 +52,7 @@ class HttpStack extends Stack {
     };
 
     // For any Resource that requires authenticated access, attach this to each Method endpoint. 
-    // this.optionsWithAuth = {
+    // const optionsWithAuth = {
     //   authorizationType: AuthorizationType.COGNITO,
     //   authorizer: {
     //     authorizerId: authorizer.authorizerId,
@@ -66,8 +67,9 @@ class HttpStack extends Stack {
       storage,
       db,
       http: {
-        restApi,
+        restApi: this.restApi,
         optionsWithCors,
+        // optionsWithAuth,
       }
     });
   }
