@@ -3,18 +3,18 @@ const { Construct } = require("constructs");
 const { LambdaConstruct } = require("./lambda");
 const { EndpointConstruct } = require("./endpoint");
 
-class SignInConstruct extends Construct {
+class SignUpConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id, props);
 
     const {
       auth,
       http,
-      merchantIdResource,
+      merchantsResource,
     } = props;
 
 
-    const signInResource = merchantIdResource.addResource("sign-in");
+    const signUpResource = merchantsResource.addResource("sign-up");
 
     const lambda = new LambdaConstruct(this, "LambdaConstruct", {
       auth,
@@ -22,10 +22,10 @@ class SignInConstruct extends Construct {
 
     new EndpointConstruct(this, "EndpointConstruct", {
       http,
-      signInResource,
+      signUpResource,
       lambda,
     });
   }
 }
 
-module.exports = { SignInConstruct };
+module.exports = { SignUpConstruct };

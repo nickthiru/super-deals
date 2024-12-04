@@ -1,8 +1,10 @@
 const { Construct } = require("constructs");
 
 const { MerchantIdConstruct } = require("./merchant-id/construct");
+const { SignInConstruct } = require("./sign-in/construct");
+const { SignUpConstruct } = require("./sign-up/construct");
 
-class MerchantConstruct extends Construct {
+class MerchantsConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id, props);
 
@@ -14,16 +16,28 @@ class MerchantConstruct extends Construct {
     } = props;
 
 
-    const merchantResource = http.restApi.root.addResource("merchant", http.optionsWithCors);
+    const merchantsResource = http.restApi.root.addResource("merchants", http.optionsWithCors);
 
     new MerchantIdConstruct(this, "MerchantIdConstruct", {
       auth,
       storage,
       db,
       http,
-      merchantResource,
+      merchantsResource,
+    });
+
+    new SignInConstruct(this, "SignInConstruct", {
+      auth,
+      http,
+      merchantsResource,
+    });
+
+    new SignUpConstruct(this, "SignUpConstruct", {
+      auth,
+      http,
+      merchantsResource,
     });
   }
 }
 
-module.exports = { MerchantConstruct };
+module.exports = { MerchantsConstruct };

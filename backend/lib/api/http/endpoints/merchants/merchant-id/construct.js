@@ -1,7 +1,5 @@
 const { Construct } = require("constructs");
 const { DealsConstruct } = require("./deals/construct");
-const { SignInConstruct } = require("./sign-in/construct");
-const { SignUpConstruct } = require("./sign-up/construct");
 // const { DashboardEndpointConstruct } = require("./dashboard/endpoint");
 
 class MerchantIdConstruct extends Construct {
@@ -9,30 +7,17 @@ class MerchantIdConstruct extends Construct {
     super(scope, id, props);
 
     const {
-      auth,
       storage,
       db,
       http,
-      merchantResource,
+      merchantsResource,
     } = props;
 
-    const merchantIdResource = merchantResource.addResource("{merchantId}");
+    const merchantIdResource = merchantsResource.addResource("{merchantId}");
 
     new DealsConstruct(this, "DealsConstruct", {
       storage,
       db,
-      http,
-      merchantIdResource,
-    });
-
-    new SignInConstruct(this, "SignInConstruct", {
-      auth,
-      http,
-      merchantIdResource,
-    });
-
-    new SignUpConstruct(this, "SignUpConstruct", {
-      auth,
       http,
       merchantIdResource,
     });
