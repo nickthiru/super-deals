@@ -1,7 +1,8 @@
-@import 'beercss/dist/cdn/beer.min.css';
 @import 'open-props/postcss/style';
 /* @import "open-props/normalize.min.css"; */
 /* @import "open-props/normalize.dark.min.css"; */
+
+/* @import 'beercss/dist/cdn/beer.min.css'; */
 
 /*** Base Styles ***/
 
