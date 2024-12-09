@@ -11,7 +11,8 @@ class LambdaConstruct extends Construct {
     super(scope, id);
 
     const {
-      auth,
+      storage,
+      db,
     } = props;
 
     this.function = new NodejsFunction(this, "NodejsFunction", {
@@ -27,16 +28,34 @@ class LambdaConstruct extends Construct {
       handler: "handler",
       depsLockFilePath: require.resolve("#package-lock"),
       environment: {
-        // Pass the stage-specific User Pool Client IDs as environment variables
-        USER_POOL_IDS: JSON.stringify({
-          dev: auth.dev.userPool.userPoolId,
-          preprod: auth.preprod.userPool.userPoolId,
+        // Pass the stage-specific table and bucket names as environment variables
+        DDB_TABLE_NAMES: JSON.stringify({
+          dev: db.dev.table.tableName,
+          preprod: db.preprod.table.tableName,
         }),
-        USER_POOL_CLIENT_IDS: JSON.stringify({
-          dev: auth.dev.userPool.poolClient.userPoolClientId,
-          preprod: auth.preprod.userPool.poolClient.userPoolClientId,
+        S3_BUCKET_NAMES: JSON.stringify({
+          dev: storage.dev.s3Bucket.bucketName,
+          preprod: storage.preprod.s3Bucket.bucketName,
         }),
       },
+      initialPolicy: [
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          resources: [
+            `${storage.dev.s3Bucket.bucketArn}/*`,
+            `${storage.preprod.s3Bucket.bucketArn}/*`,
+          ],
+          actions: ["s3:PutObject"],
+        }),
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          resources: [
+            db.dev.table.tableArn,
+            db.preprod.table.tableArn,
+          ],
+          actions: ["dynamodb:PutItem"],
+        }),
+      ]
     });
   }
 }

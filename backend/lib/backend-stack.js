@@ -3,8 +3,9 @@ const { DbStack } = require('./db/stack');
 const { StorageStack } = require('./storage/stack');
 // const { LambdaStack } = require('./lambda/stack');
 const { ApiStack } = require('./api/stack');
-const { AuthStack } = require('./auth/stack');
-const { PolicyStack } = require('./policy/stack');
+const { AuthStack } = require('./auth/user-pool/stack');
+const { AvpStack } = require('./avp/stack');
+const { IamStack } = require('./iam/stack');
 
 class BackendStack extends Stack {
   /**
@@ -30,8 +31,15 @@ class BackendStack extends Stack {
       authStacks[stage] = new AuthStack(this, `AuthStack-${stage}`, { stage });
     });
 
-    // const lambda = new LambdaStack(this, "LambdaStack", {
-    // });
+    const iam = new IamStack(this, "IamStack", {
+      auth: authStacks,
+    });
+
+    const lambda = new LambdaStack(this, "LambdaStack", {
+      auth: authStacks,
+      storage: storageStacks,
+      db: dbStacks,
+    });
 
     const api = new ApiStack(this, "ApiStack", {
       stages,
@@ -40,8 +48,8 @@ class BackendStack extends Stack {
       db: dbStacks,
     });
 
-    // Note that the Amazon Verified Permissions may not be included in the free-tier AWS account
-    new PolicyStack(this, "PolicyStack", {
+    // Note that Amazon Verified Permissions may not be included in the free-tier AWS account
+    new AvpStack(this, "PolicyStack", {
       auth: authStacks,
       api,
     });

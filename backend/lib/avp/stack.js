@@ -5,7 +5,7 @@ const path = require("path");
 
 // const { LambdaConstruct } = require("./create/lambda");
 
-class PolicyStack extends Stack {
+class AvpStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
@@ -36,7 +36,7 @@ class PolicyStack extends Stack {
     new IdentitySource(this, 'IdentitySource', {
       configuration: {
         cognitoUserPoolConfiguration: {
-          userPool: auth.dev.userPool,
+          userPool: auth.dev.userPool.pool,
           groupConfiguration: {
             groupEntityType: "UserGroup",
           },
@@ -46,8 +46,8 @@ class PolicyStack extends Stack {
       policyStore,
     });
 
-    // policyStore.addPoliciesFromPath(path.join(__dirname, "./policies"));
+    policyStore.addPoliciesFromPath(path.join(__dirname, "./policies"));
   }
 }
 
-module.exports = { PolicyStack };
+module.exports = { AvpStack };

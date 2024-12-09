@@ -19,7 +19,6 @@ class MerchantsConstruct extends Construct {
     const merchantsResource = http.restApi.root.addResource("merchants", http.optionsWithCors);
 
     new MerchantIdConstruct(this, "MerchantIdConstruct", {
-      auth,
       storage,
       db,
       http,

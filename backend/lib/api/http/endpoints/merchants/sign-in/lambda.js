@@ -29,8 +29,8 @@ class LambdaConstruct extends Construct {
       environment: {
         // Pass the stage-specific User Pool Client IDs as environment variables
         USER_POOL_CLIENT_IDS: JSON.stringify({
-          dev: auth.dev.userPoolClient.userPoolClientId,
-          preprod: auth.preprod.userPoolClient.userPoolClientId,
+          dev: auth.dev.userPool.poolClient.userPoolClientId,
+          preprod: auth.preprod.userPool.poolClient.userPoolClientId,
         }),
         AUTH_FLOW: "USER_PASSWORD_AUTH",
       },
