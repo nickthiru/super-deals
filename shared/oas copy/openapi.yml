@@ -1,0 +1,111 @@
+openapi: "3.0.0"
+info:
+  title: Super Deals
+  version: "1.0"
+tags:
+  - name: deals
+    description: Deals service
+components:
+  schemas:
+    $ref: "./schemas/_index.yml"
+  securitySchemes:
+    basic:
+      description: ???
+      type: http
+      scheme: basic
+    jwt:
+      description: JWT bearer token descrpition
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - basic: []
+  - jwt: []
+servers:
+  - url: https://ifq1hc035i.execute-api.us-east-1.amazonaws.com/prod
+paths:
+  # /merchants/sign-up:
+  #   post:
+  #     tags:
+  #       - sign-up
+  #     description: ???
+  #     security: []
+  #     requestBody:
+  #       required: true
+  #       description: ???
+  #       content:
+  #         application/json:
+  #           schema:
+  #             $ref: "#/components/schemas/merchants/SignUpFormSchema"
+  #     responses:
+  #       "200":
+  #         description: ???
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               required:
+  #                 - message
+  #               properties:
+  #                 message:
+  #                   type: string
+  #                   example: "Account registered. Complete sign-up with OTP"
+  # /merchants/sign-in:
+  #   post:
+  #     tags:
+  #       - sign-in
+  #     description: ???
+  #     security:
+  #       - basic: []
+  #     requestBody:
+  #       required: true
+  #       description: ???
+  #       content:
+  #         application/json:
+  #           schema:
+  #             $ref: "#/components/schemas/merchants/SignInFormSchema"
+  #     responses:
+  #       "200":
+  #         description: ???
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               required:
+  #                 - message
+  #               properties:
+  #                 message:
+  #                   type: string
+  #                   example: "Account registered. Complete sign-up with OTP"
+  /merchants/{merchantId}/deals:
+    post:
+      tags:
+        - deals
+      description: Merchant can add a deal to his catalog
+      security:
+        []
+        # - jwt: []
+      requestBody:
+        required: true
+        description: The deal to add
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/merchants/AddDealFormSchema"
+      responses:
+        "200":
+          description: Successfully added the deal
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                  - dealId
+                properties:
+                  message:
+                    type: string
+                    example: "Deal successfully added"
+                  dealId:
+                    type: string
+                    example: "1yn5w7gKp8d7L2M3v4e5T9a6B"

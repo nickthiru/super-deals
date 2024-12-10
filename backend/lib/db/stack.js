@@ -5,10 +5,8 @@ class DbStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const { stage } = props;
-
-    this.table = new TableV2(this, `TableV2-${stage}`, {
-      tableName: `DealsTable-${stage}`,
+    this.table = new TableV2(this, "TableV2", {
+      tableName: "DealsTable",
       partitionKey: {
         name: "PK",
         type: AttributeType.STRING
@@ -30,7 +28,7 @@ class DbStack extends Stack {
           },
         },
       ],
-      removalPolicy: stage === 'prod' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
+      removalPolicy: RemovalPolicy.DESTROY,
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
   };

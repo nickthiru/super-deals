@@ -2,27 +2,45 @@ openapi: "3.0.0"
 info:
   title: Super Deals
   version: "1.0"
+
 tags:
   - name: deals
     description: Deals service
+
 components:
   schemas:
     $ref: "./schemas/_index.yml"
-servers:
-  - url: https://ifq1hc035i.execute-api.us-east-1.amazonaws.com/prod
+  securitySchemes:
+    basic:
+      description: none
+      type: http
+      scheme: basic
+    jwt:
+      description: JWT bearer token descrpition
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - basic: []
+  - jwt: []
+
 paths:
-  /merchant/deals:
+  /merchants/{merchantId}/deals:
     post:
+      summary: CreateDeal
       tags:
         - deals
       description: Merchant can add a deal to his catalog
+      security:
+        # []
+        - jwt: []
       requestBody:
         required: true
         description: The deal to add
         content:
-          multipart/form-data:
+          application/json:
             schema:
-              $ref: "#/components/schemas/DealFormSchema"
+              $ref: "./schemas/CreateDealForm.yml"
       responses:
         "200":
           description: Successfully added the deal

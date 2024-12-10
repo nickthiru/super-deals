@@ -1,10 +1,11 @@
 const { Stack } = require('aws-cdk-lib');
 const { DbStack } = require('./db/stack');
 const { StorageStack } = require('./storage/stack');
-// const { LambdaStack } = require('./lambda/stack');
+const { LambdaStack } = require('./lambda/stack');
 const { ApiStack } = require('./api/stack');
 const { AuthStack } = require('./auth/stack');
-const { PolicyStack } = require('./policy/stack');
+const { AvpStack } = require('./avp/stack');
+const { IamStack } = require('./iam/stack');
 
 class BackendStack extends Stack {
   /**
@@ -15,36 +16,35 @@ class BackendStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    // Staged Resources
-    const stages = ['dev', 'preprod'];
+    const db = new DbStack(this, "DbStack");
 
-    const storageStacks = {};
-    const dbStacks = {};
-    const authStacks = {};
+    const storage = new StorageStack(this, "StorageStack");
 
-    stages.forEach(stage => {
-      dbStacks[stage] = new DbStack(this, `DbStack-${stage}`, { stage });
+    const auth = new AuthStack(this, "AuthStack");
 
-      storageStacks[stage] = new StorageStack(this, `StorageStack-${stage}`, { stage });
-
-      authStacks[stage] = new AuthStack(this, `AuthStack-${stage}`, { stage });
+    const iam = new IamStack(this, "IamStack", {
+      auth,
     });
 
-    // const lambda = new LambdaStack(this, "LambdaStack", {
-    // });
+    // An object to store all the lambda function ARNs to be mapped to the OAS...
+    const lambdaArns = new Map();
+
+    const lambda = new LambdaStack(this, "LambdaStack", {
+      // auth,
+      storage,
+      db,
+      lambdaArns,
+    });
 
     const api = new ApiStack(this, "ApiStack", {
-      stages,
-      auth: authStacks,
-      storage: storageStacks,
-      db: dbStacks,
+      lambdaArns,
     });
 
-    // Note that the Amazon Verified Permissions may not be included in the free-tier AWS account
-    new PolicyStack(this, "PolicyStack", {
-      auth: authStacks,
-      api,
-    });
+    // Note that Amazon Verified Permissions may not be included in the free-tier AWS account
+    // new AvpStack(this, "PolicyStack", {
+    //   auth,
+    //   api,
+    // });
   }
 }
 
