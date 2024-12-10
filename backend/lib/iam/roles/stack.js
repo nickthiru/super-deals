@@ -1,5 +1,5 @@
 const { Stack, CfnOutput } = require("aws-cdk-lib");
-const { CfnIdentityPool } = require("aws-cdk-lib/aws-cognito");
+const { CfnIdentityPool, CfnIdentityPoolRoleAttachment } = require("aws-cdk-lib/aws-cognito");
 const { Role, FederatedPrincipal } = require("aws-cdk-lib/aws-iam");
 
 
@@ -14,7 +14,7 @@ class RolesStack extends Stack {
     this.authenticatedRole = new Role(this, 'CognitoDefaultAuthenticatedRole', {
       assumedBy: new FederatedPrincipal('cognito-identity.amazonaws.com', {
         StringEquals: {
-          'cognito-identity.amazonaws.com:aud': auth.dev.identityPool.pool.ref
+          'cognito-identity.amazonaws.com:aud': auth.identityPool.pool.ref
         },
         'ForAnyValue:StringLike': {
           'cognito-identity.amazonaws.com:amr': 'authenticated'
@@ -27,7 +27,7 @@ class RolesStack extends Stack {
     this.unAuthenticatedRole = new Role(this, 'CognitoDefaultUnauthenticatedRole', {
       assumedBy: new FederatedPrincipal('cognito-identity.amazonaws.com', {
         StringEquals: {
-          'cognito-identity.amazonaws.com:aud': auth.dev.identityPool.pool.ref
+          'cognito-identity.amazonaws.com:aud': auth.identityPool.pool.ref
         },
         'ForAnyValue:StringLike': {
           'cognito-identity.amazonaws.com:amr': 'unauthenticated'
@@ -40,7 +40,7 @@ class RolesStack extends Stack {
     this.adminRole = new Role(this, 'CognitoAdminRole', {
       assumedBy: new FederatedPrincipal('cognito-identity.amazonaws.com', {
         StringEquals: {
-          'cognito-identity.amazonaws.com:aud': auth.dev.identityPool.pool.ref
+          'cognito-identity.amazonaws.com:aud': auth.identityPool.pool.ref
         },
         'ForAnyValue:StringLike': {
           'cognito-identity.amazonaws.com:amr': 'authenticated'
@@ -48,6 +48,21 @@ class RolesStack extends Stack {
       },
         'sts:AssumeRoleWithWebIdentity'
       )
+    });
+
+    new CfnIdentityPoolRoleAttachment(this, 'IdentityPoolRoleAttachment', {
+      identityPoolId: auth.identityPool.pool.ref,
+      roles: {
+        authenticated: this.authenticatedRole.roleArn,
+        unauthenticated: this.unAuthenticatedRole.roleArn,
+      },
+      roleMappings: {
+        adminsMapping: {
+          type: 'Token',
+          ambiguousRoleResolution: "AuthenticatedRole",
+          identityProvider: `${auth.userPool.pool.userPoolProviderName}:${auth.userPool.poolClient.userPoolClientId}`
+        }
+      }
     });
 
     /*** Outputs ***/

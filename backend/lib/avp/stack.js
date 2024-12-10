@@ -36,7 +36,7 @@ class AvpStack extends Stack {
     new IdentitySource(this, 'IdentitySource', {
       configuration: {
         cognitoUserPoolConfiguration: {
-          userPool: auth.dev.userPool.pool,
+          userPool: auth.userPool.pool,
           groupConfiguration: {
             groupEntityType: "UserGroup",
           },

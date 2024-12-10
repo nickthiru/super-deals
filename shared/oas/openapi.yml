@@ -2,15 +2,17 @@ openapi: "3.0.0"
 info:
   title: Super Deals
   version: "1.0"
+
 tags:
   - name: deals
     description: Deals service
+
 components:
   schemas:
     $ref: "./schemas/_index.yml"
   securitySchemes:
     basic:
-      description: ???
+      description: none
       type: http
       scheme: basic
     jwt:
@@ -21,77 +23,24 @@ components:
 security:
   - basic: []
   - jwt: []
-servers:
-  - url: https://ifq1hc035i.execute-api.us-east-1.amazonaws.com/prod
+
 paths:
-  # /merchants/sign-up:
-  #   post:
-  #     tags:
-  #       - sign-up
-  #     description: ???
-  #     security: []
-  #     requestBody:
-  #       required: true
-  #       description: ???
-  #       content:
-  #         application/json:
-  #           schema:
-  #             $ref: "#/components/schemas/merchants/SignUpFormSchema"
-  #     responses:
-  #       "200":
-  #         description: ???
-  #         content:
-  #           application/json:
-  #             schema:
-  #               type: object
-  #               required:
-  #                 - message
-  #               properties:
-  #                 message:
-  #                   type: string
-  #                   example: "Account registered. Complete sign-up with OTP"
-  # /merchants/sign-in:
-  #   post:
-  #     tags:
-  #       - sign-in
-  #     description: ???
-  #     security:
-  #       - basic: []
-  #     requestBody:
-  #       required: true
-  #       description: ???
-  #       content:
-  #         application/json:
-  #           schema:
-  #             $ref: "#/components/schemas/merchants/SignInFormSchema"
-  #     responses:
-  #       "200":
-  #         description: ???
-  #         content:
-  #           application/json:
-  #             schema:
-  #               type: object
-  #               required:
-  #                 - message
-  #               properties:
-  #                 message:
-  #                   type: string
-  #                   example: "Account registered. Complete sign-up with OTP"
   /merchants/{merchantId}/deals:
     post:
+      summary: CreateDeal
       tags:
         - deals
       description: Merchant can add a deal to his catalog
       security:
-        []
-        # - jwt: []
+        # []
+        - jwt: []
       requestBody:
         required: true
         description: The deal to add
         content:
-          multipart/form-data:
+          application/json:
             schema:
-              $ref: "#/components/schemas/merchants/AddDealFormSchema"
+              $ref: "./schemas/CreateDealForm.yml"
       responses:
         "200":
           description: Successfully added the deal

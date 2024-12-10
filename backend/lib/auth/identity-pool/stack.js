@@ -7,26 +7,24 @@ class IdentityPoolStack extends Stack {
     super(scope, id, props);
 
     const {
-      stage,
       userPool,
-      userPoolClient,
     } = props;
 
-    this.pool = new CfnIdentityPool(this, `IdentityPool-${stage}`, {
+    this.pool = new CfnIdentityPool(this, "IdentityPool", {
       allowUnauthenticatedIdentities: true,
       cognitoIdentityProviders: [{
-        clientId: userPoolClient.userPoolClientId,
-        providerName: userPool.userPoolProviderName,
+        clientId: userPool.poolClient.userPoolClientId,
+        providerName: userPool.pool.userPoolProviderName,
       }],
     });
 
     /*** Outputs ***/
 
     // For web client Auth service
-    new CfnOutput(this, `IdentityPoolId-${stage}`, {
+    new CfnOutput(this, "IdentityPoolId", {
       value: this.pool.ref,
       description: "Identity Pool ID",
-      exportName: `IdentityPoolId${stage}`
+      exportName: "IdentityPoolId"
     });
   }
 }

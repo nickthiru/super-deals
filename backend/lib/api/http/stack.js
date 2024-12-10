@@ -1,78 +1,52 @@
 const { Stack } = require("aws-cdk-lib");
-const { RestApi, Cors, CognitoUserPoolsAuthorizer, AuthorizationType } = require("aws-cdk-lib/aws-apigateway");
-const { StageConstruct } = require("./stage/construct");
-const { EndpointsConstruct } = require("./endpoints/construct");
+const { SpecRestApi, ApiDefinition } = require("aws-cdk-lib/aws-apigateway");
 
+const yaml = require('yaml');
+const oasResolver = require('oas-resolver');
+const fs = require('fs');
+const path = require('path');
+
+const Utils = require('#src/utils/_index.js');
 
 class HttpStack extends Stack {
   constructor(scope, id, props) {
-    super(scope, id, props);
-
     const {
-      stages,
-      auth,
-      storage,
-      db,
+      lambdaArns,
     } = props;
 
-
-    /*** HTTP API ***/
-
-    this.restApi = new RestApi(this, "RestApi", {
-      deploy: false,  // Disable automatic stage creation i.e. prod
-      binaryMediaTypes: ["multipart/form-data"],
-      cloudWatchRole: true,
-    });
-
-    // Stages
-    stages.forEach(stage => {
-      new StageConstruct(this, `StageConstruct-${stage}`, {
-        api: this.restApi,
-        stageName: stage,
-      });
-    });
-
-
-    /*** Authorizer ***/
-
-    // const userPools = stages.map(stage => auth[stage].userPool);
-
-    // const authorizer = new CognitoUserPoolsAuthorizer(this, "CognitoUserPoolsAuthorizer", {
-    //   cognitoUserPools: userPools,
-    //   identitySource: "method.request.header.Authorization",
-    // });
-    // authorizer._attachToApi(restApi);
-
-    // Attach this to each root-level Resource
-    const optionsWithCors = {
-      defaultCorsPreflightOptions: {
-        allowOrigins: Cors.ALL_ORIGINS,
-        allowMethods: Cors.ALL_METHODS
-      }
-    };
-
-    // For any Resource that requires authenticated access, attach this to each Method endpoint. 
-    // const optionsWithAuth = {
-    //   authorizationType: AuthorizationType.COGNITO,
-    //   authorizer: {
-    //     authorizerId: authorizer.authorizerId,
-    //   },
-    // };
-
-
-    /*** Endpoints ***/
-
-    new EndpointsConstruct(this, "EndpointsConstruct", {
-      auth,
-      storage,
-      db,
-      http: {
-        restApi: this.restApi,
-        optionsWithCors,
-        // optionsWithAuth,
-      }
-    });
+    super(scope, id, props);
+    this.init(lambdaArns);
   }
+
+  async init(lambdaArns) {
+    const region = process.env.CDK_DEFAULT_REGION;
+    console.log(`Region: ${region}`);
+
+    // Upade OAS with lambda ARNs
+    const oasFile = "../../../oas/openapi.yml";
+    const resolvedOas = await loadAndResolveOas(oasFile);
+    const oasObjectWithLambdaArns = Utils.updateOasWithLambdaArns(resolvedOas.openapi, lambdaArns, region);
+
+    // this.restApi = new SpecRestApi(this, "RestApi", {
+    //   apiDefinition: ApiDefinition.fromInline(oasObjectWithLambdaArns),
+    //   cloudWatchRole: true,
+    // });
+
+    console.log("oasObjectWithLambdaArns: " + JSON.stringify(oasObjectWithLambdaArns, null, 2));
+  }
+}
+
+async function loadAndResolveOas(oasFile) {
+  const oasContent = fs.readFileSync(path.resolve(__dirname, oasFile), 'utf8');
+  const input = yaml.parse(oasContent);
+  const source = path.resolve(__dirname, oasFile);
+  const options = {
+    resolveInternal: true,
+  };
+  const resolvedOas = await oasResolver.resolve(input, source, options);
+  // const yamlOutput = yaml.stringify(resolvedOas.openapi);
+  // console.log(yamlOutput);
+  return resolvedOas;
 }
 
 module.exports = { HttpStack };
