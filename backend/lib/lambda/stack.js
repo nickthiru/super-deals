@@ -9,14 +9,14 @@ class LambdaStack extends Stack {
       // auth,
       storage,
       db,
-      lambdaArns,
+      OasOpIdsToLambdaArns,
     } = props;
 
     new DealsStack(this, "DealsStack", {
       // auth,
       storage,
       db,
-      lambdaArns,
+      OasOpIdsToLambdaArns,
     });
 
 

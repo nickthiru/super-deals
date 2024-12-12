@@ -8,11 +8,11 @@ class ApiStack extends Stack {
     super(scope, id, props);
 
     const {
-      lambdaArns,
+      OasOpIdsToLambdaArns,
     } = props;
 
     this.http = new HttpStack(this, "HttpStack", {
-      lambdaArns,
+      OasOpIdsToLambdaArns,
     });
 
     // this.webSocket = new WebSocketStack(this, "WebSocketStack", {

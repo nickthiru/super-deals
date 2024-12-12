@@ -1,23 +1,20 @@
 {
-  "BackendStackDbStack8670BFC6": {
-    "ExportsOutputFnGetAttTableV26B253703Arn9502DAD0": "arn:aws:dynamodb:us-east-1:654654543926:table/DealsTable",
-    "ExportsOutputRefTableV26B2537034F95C1C6": "DealsTable"
+  "BackendStackAuthStackUserPoolStack10024631": {
+    "UserPoolClientId": "6jgdkp1ldamplgtoe2lrbl4ohj",
+    "UserPoolId": "us-east-1_P69fwEKJV",
+    "ExportsOutputRefUserPoolUserPoolClient40176907044A36CF": "6jgdkp1ldamplgtoe2lrbl4ohj",
+    "ExportsOutputFnGetAttUserPool6BA7E5F2ProviderNameA3E1F80D": "cognito-idp.us-east-1.amazonaws.com/us-east-1_P69fwEKJV"
   },
   "BackendStackStorageStack7364EE02": {
     "ExportsOutputFnGetAttS3Bucket07682993Arn6D6BF9FF": "arn:aws:s3:::deals-bucket",
     "ExportsOutputRefS3Bucket07682993C02DCE6B": "deals-bucket"
   },
-  "BackendStackAuthStackUserPoolStack10024631": {
-    "UserPoolClientId": "fd3ou5gbtq8bb2b6rfl407jmq",
-    "UserPoolId": "us-east-1_vWA68OK9Y",
-    "ExportsOutputRefUserPoolUserPoolClient40176907044A36CF": "fd3ou5gbtq8bb2b6rfl407jmq",
-    "ExportsOutputFnGetAttUserPool6BA7E5F2ProviderNameA3E1F80D": "cognito-idp.us-east-1.amazonaws.com/us-east-1_vWA68OK9Y"
-  },
-  "BackendStackLambdaStackDealsStack744315FE": {
-    "ExportsOutputFnGetAttCreateConstructLambdaConstructNodejsFunction76FC8772Arn7188BB97": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackLambdaStackDe-CreateConstructLambdaCon-xmfepwShvezu"
+  "BackendStackDbStack8670BFC6": {
+    "ExportsOutputFnGetAttTableV26B253703Arn9502DAD0": "arn:aws:dynamodb:us-east-1:654654543926:table/BackendStackDbStack8670BFC6-TableV26B253703-U2QF8T892Z4E",
+    "ExportsOutputRefTableV26B2537034F95C1C6": "BackendStackDbStack8670BFC6-TableV26B253703-U2QF8T892Z4E"
   },
   "BackendStackAuthStackIdentityPoolStack91E94216": {
-    "ExportsOutputRefIdentityPoolF5C140BA": "us-east-1:210cca7a-8c85-4e41-a403-159b7f4bbc62",
-    "IdentityPoolId": "us-east-1:210cca7a-8c85-4e41-a403-159b7f4bbc62"
+    "ExportsOutputRefIdentityPoolF5C140BA": "us-east-1:78b2d61a-3e67-461b-9810-dbb64958722e",
+    "IdentityPoolId": "us-east-1:78b2d61a-3e67-461b-9810-dbb64958722e"
   }
 }

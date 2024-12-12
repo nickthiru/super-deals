@@ -1,2 +1,8 @@
-CreateDealForm:
+MerchantsSignUpForm:
+  $ref: "./SignUpForm.yml"
+MerchantsSignInForm:
+  $ref: "./SignInForm.yml"
+MerchantsCreateDealForm:
   $ref: "./CreateDealForm.yml"
+Error:
+  $ref: "./Error.yml"

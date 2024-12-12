@@ -1,5 +1,5 @@
 const { Stack, CfnOutput } = require("aws-cdk-lib");
-const { CfnIdentityPool, CfnIdentityPoolRoleAttachment } = require("aws-cdk-lib/aws-cognito");
+const { CfnIdentityPoolRoleAttachment } = require("aws-cdk-lib/aws-cognito");
 const { Role, FederatedPrincipal } = require("aws-cdk-lib/aws-iam");
 
 

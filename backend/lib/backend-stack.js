@@ -26,18 +26,20 @@ class BackendStack extends Stack {
       auth,
     });
 
-    // An object to store all the lambda function ARNs to be mapped to the OAS...
-    const lambdaArns = new Map();
+    /*
+    An object to store all the lambda function ARNs mapped to the operation IDs in the resource methods of the OAS. There used to reference the aws_proxy Lambda functions in the uri parameter of the x-amazon-apigateway-integration property.
+    */
+    const OasOpIdsToLambdaArns = new Map();
 
     const lambda = new LambdaStack(this, "LambdaStack", {
       // auth,
       storage,
       db,
-      lambdaArns,
+      OasOpIdsToLambdaArns,
     });
 
     const api = new ApiStack(this, "ApiStack", {
-      lambdaArns,
+      OasOpIdsToLambdaArns,
     });
 
     // Note that Amazon Verified Permissions may not be included in the free-tier AWS account

@@ -9,13 +9,16 @@ class CreateConstruct extends Construct {
     const {
       storage,
       db,
-      lambdaArns,
+      OasOpIdsToLambdaArns,
     } = props;
+
+    const OasOpId = "CreateDeal";
 
     new LambdaConstruct(this, "LambdaConstruct", {
       storage,
       db,
-      lambdaArns,
+      OasOpIdsToLambdaArns,
+      OasOpId,
     });
   }
 }
