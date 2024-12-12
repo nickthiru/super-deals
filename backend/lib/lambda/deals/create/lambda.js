@@ -13,7 +13,8 @@ class LambdaConstruct extends Construct {
     const {
       storage,
       db,
-      lambdaArns,
+      OasOpIdsToLambdaArns,
+      OasOpId,
     } = props;
 
     const fn = new NodejsFunction(this, "NodejsFunction", {
@@ -46,7 +47,7 @@ class LambdaConstruct extends Construct {
       ]
     });
 
-    lambdaArns.set("CreateDeal", fn.functionArn);
+    OasOpIdsToLambdaArns.set(OasOpId, fn.functionArn);
   }
 }
 

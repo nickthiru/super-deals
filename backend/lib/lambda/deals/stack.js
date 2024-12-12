@@ -8,13 +8,13 @@ class DealsStack extends Stack {
     const {
       storage,
       db,
-      lambdaArns,
+      OasOpIdsToLambdaArns,
     } = props;
 
     new CreateConstruct(this, "CreateConstruct", {
       storage,
       db,
-      lambdaArns,
+      OasOpIdsToLambdaArns,
     });
 
     // deals.delete = {};

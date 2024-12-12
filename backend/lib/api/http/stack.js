@@ -11,21 +11,21 @@ const Utils = require('#src/utils/_index.js');
 class HttpStack extends Stack {
   constructor(scope, id, props) {
     const {
-      lambdaArns,
+      OasOpIdsToLambdaArns,
     } = props;
 
     super(scope, id, props);
-    this.init(lambdaArns);
+    this.init(OasOpIdsToLambdaArns);
   }
 
-  async init(lambdaArns) {
+  async init(OasOpIdsToLambdaArns) {
     const region = process.env.CDK_DEFAULT_REGION;
     console.log(`Region: ${region}`);
 
     // Upade OAS with lambda ARNs
     const oasFile = "../../../oas/openapi.yml";
     const resolvedOas = await loadAndResolveOas(oasFile);
-    const oasObjectWithLambdaArns = Utils.updateOasWithLambdaArns(resolvedOas.openapi, lambdaArns, region);
+    const oasObjectWithLambdaArns = this.updateOasAwsIntegrationsWithLambdaArns(resolvedOas.openapi, OasOpIdsToLambdaArns, region);
 
     // this.restApi = new SpecRestApi(this, "RestApi", {
     //   apiDefinition: ApiDefinition.fromInline(oasObjectWithLambdaArns),
@@ -33,6 +33,36 @@ class HttpStack extends Stack {
     // });
 
     console.log("oasObjectWithLambdaArns: " + JSON.stringify(oasObjectWithLambdaArns, null, 2));
+  }
+
+  updateOasAwsIntegrationsWithLambdaArns(oasObject, OasOpIdsToLambdaArns, region) {
+    if (!oasObject || !oasObject.paths) {
+      console.error('Invalid OAS object:', oasObject);
+      return oasObject;
+    }
+
+    const updatedOasObject = clone(oasObject);
+
+    Object.keys(updatedOasObject.paths).forEach(path => {
+      Object.keys(updatedOasObject.paths[path]).forEach(method => {
+        if (method !== 'options') {
+          const integration = updatedOasObject.paths[path][method]['x-amazon-apigateway-integration'];
+          if (integration && integration.uri) {
+            const OasOpIdNameMatch = integration.uri.match(/functions\/\$\{([^}]+)\}/);
+            if (OasOpIdNameMatch) {
+              const OasOpIdName = OasOpIdNameMatch[1];
+              const lambdaArn = OasOpIdsToLambdaArns.get(OasOpIdName);
+              if (lambdaArn) {
+                integration.uri = integration.uri.replace(`functions/\${${OasOpIdName}}`, `functions/${lambdaArn}`);
+              }
+            }
+            integration.uri = integration.uri.replace('${AWS::Region}', region);
+          }
+        }
+      });
+    });
+
+    return updatedOasObject;
   }
 }
 

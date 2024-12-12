@@ -6,7 +6,6 @@ class DbStack extends Stack {
     super(scope, id, props);
 
     this.table = new TableV2(this, "TableV2", {
-      tableName: "DealsTable",
       partitionKey: {
         name: "PK",
         type: AttributeType.STRING
