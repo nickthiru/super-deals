@@ -13,11 +13,9 @@ class LambdaConstruct extends Construct {
     const {
       storage,
       db,
-      OasOpIdsToLambdaArns,
-      OasOpId,
     } = props;
 
-    const fn = new NodejsFunction(this, "NodejsFunction", {
+    this.function = new NodejsFunction(this, "NodejsFunction", {
       bundling: {
         externalModules: ["@aws-sdk"],
         forceDockerBundling: true,
@@ -30,24 +28,35 @@ class LambdaConstruct extends Construct {
       handler: "handler",
       depsLockFilePath: require.resolve("#package-lock"),
       environment: {
-        DDB_TABLE_NAME: db.table.tableName,
-        S3_BUCKET_NAME: storage.s3Bucket.bucketName,
+        // Pass the stage-specific table and bucket names as environment variables
+        DDB_TABLE_NAMES: JSON.stringify({
+          dev: db.dev.table.tableName,
+          preprod: db.preprod.table.tableName,
+        }),
+        S3_BUCKET_NAMES: JSON.stringify({
+          dev: storage.dev.s3Bucket.bucketName,
+          preprod: storage.preprod.s3Bucket.bucketName,
+        }),
       },
       initialPolicy: [
         new PolicyStatement({
           effect: Effect.ALLOW,
-          resources: [`${storage.s3Bucket.bucketArn}/*`],
+          resources: [
+            `${storage.dev.s3Bucket.bucketArn}/*`,
+            `${storage.preprod.s3Bucket.bucketArn}/*`,
+          ],
           actions: ["s3:PutObject"],
         }),
         new PolicyStatement({
           effect: Effect.ALLOW,
-          resources: [db.table.tableArn],
+          resources: [
+            db.dev.table.tableArn,
+            db.preprod.table.tableArn,
+          ],
           actions: ["dynamodb:PutItem"],
         }),
       ]
     });
-
-    OasOpIdsToLambdaArns.set(OasOpId, fn.functionArn);
   }
 }
 

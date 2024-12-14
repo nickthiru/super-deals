@@ -1,6 +1,7 @@
 const { Construct } = require("constructs");
 
 const { LambdaConstruct } = require("./lambda");
+const { EndpointConstruct } = require("./endpoint");
 
 class CreateConstruct extends Construct {
   constructor(scope, id, props) {
@@ -9,16 +10,19 @@ class CreateConstruct extends Construct {
     const {
       storage,
       db,
-      OasOpIdsToLambdaArns,
+      http,
+      dealsResource,
     } = props;
 
-    const OasOpId = "CreateDeal";
-
-    new LambdaConstruct(this, "LambdaConstruct", {
+    const lambda = new LambdaConstruct(this, "LambdaConstruct", {
       storage,
       db,
-      OasOpIdsToLambdaArns,
-      OasOpId,
+    });
+
+    new EndpointConstruct(this, "EndpointConstruct", {
+      lambda,
+      http,
+      dealsResource,
     });
   }
 }

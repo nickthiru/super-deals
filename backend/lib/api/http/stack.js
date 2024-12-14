@@ -1,82 +1,78 @@
 const { Stack } = require("aws-cdk-lib");
-const { SpecRestApi, ApiDefinition } = require("aws-cdk-lib/aws-apigateway");
+const { RestApi, Cors, CognitoUserPoolsAuthorizer, AuthorizationType } = require("aws-cdk-lib/aws-apigateway");
+const { StageConstruct } = require("./stage/construct");
+const { EndpointsConstruct } = require("./endpoints/construct");
 
-const yaml = require('yaml');
-const oasResolver = require('oas-resolver');
-const fs = require('fs');
-const path = require('path');
-
-const Utils = require('#src/utils/_index.js');
 
 class HttpStack extends Stack {
   constructor(scope, id, props) {
+    super(scope, id, props);
+
     const {
-      OasOpIdsToLambdaArns,
+      stages,
+      auth,
+      storage,
+      db,
     } = props;
 
-    super(scope, id, props);
-    this.init(OasOpIdsToLambdaArns);
-  }
 
-  async init(OasOpIdsToLambdaArns) {
-    const region = process.env.CDK_DEFAULT_REGION;
-    console.log(`Region: ${region}`);
+    /*** HTTP API ***/
 
-    // Upade OAS with lambda ARNs
-    const oasFile = "../../../oas/openapi.yml";
-    const resolvedOas = await loadAndResolveOas(oasFile);
-    const oasObjectWithLambdaArns = this.updateOasAwsIntegrationsWithLambdaArns(resolvedOas.openapi, OasOpIdsToLambdaArns, region);
+    this.restApi = new RestApi(this, "RestApi", {
+      deploy: false,  // Disable automatic stage creation i.e. prod
+      binaryMediaTypes: ["multipart/form-data"],
+      cloudWatchRole: true,
+    });
 
-    // this.restApi = new SpecRestApi(this, "RestApi", {
-    //   apiDefinition: ApiDefinition.fromInline(oasObjectWithLambdaArns),
-    //   cloudWatchRole: true,
-    // });
-
-    console.log("oasObjectWithLambdaArns: " + JSON.stringify(oasObjectWithLambdaArns, null, 2));
-  }
-
-  updateOasAwsIntegrationsWithLambdaArns(oasObject, OasOpIdsToLambdaArns, region) {
-    if (!oasObject || !oasObject.paths) {
-      console.error('Invalid OAS object:', oasObject);
-      return oasObject;
-    }
-
-    const updatedOasObject = clone(oasObject);
-
-    Object.keys(updatedOasObject.paths).forEach(path => {
-      Object.keys(updatedOasObject.paths[path]).forEach(method => {
-        if (method !== 'options') {
-          const integration = updatedOasObject.paths[path][method]['x-amazon-apigateway-integration'];
-          if (integration && integration.uri) {
-            const OasOpIdNameMatch = integration.uri.match(/functions\/\$\{([^}]+)\}/);
-            if (OasOpIdNameMatch) {
-              const OasOpIdName = OasOpIdNameMatch[1];
-              const lambdaArn = OasOpIdsToLambdaArns.get(OasOpIdName);
-              if (lambdaArn) {
-                integration.uri = integration.uri.replace(`functions/\${${OasOpIdName}}`, `functions/${lambdaArn}`);
-              }
-            }
-            integration.uri = integration.uri.replace('${AWS::Region}', region);
-          }
-        }
+    // Stages
+    stages.forEach(stage => {
+      new StageConstruct(this, `StageConstruct-${stage}`, {
+        api: this.restApi,
+        stageName: stage,
       });
     });
 
-    return updatedOasObject;
-  }
-}
 
-async function loadAndResolveOas(oasFile) {
-  const oasContent = fs.readFileSync(path.resolve(__dirname, oasFile), 'utf8');
-  const input = yaml.parse(oasContent);
-  const source = path.resolve(__dirname, oasFile);
-  const options = {
-    resolveInternal: true,
-  };
-  const resolvedOas = await oasResolver.resolve(input, source, options);
-  // const yamlOutput = yaml.stringify(resolvedOas.openapi);
-  // console.log(yamlOutput);
-  return resolvedOas;
+    /*** Authorizer ***/
+
+    // const userPools = stages.map(stage => auth[stage].userPool);
+
+    // const authorizer = new CognitoUserPoolsAuthorizer(this, "CognitoUserPoolsAuthorizer", {
+    //   cognitoUserPools: userPools,
+    //   identitySource: "method.request.header.Authorization",
+    // });
+    // authorizer._attachToApi(restApi);
+
+    // Attach this to each root-level Resource
+    const optionsWithCors = {
+      defaultCorsPreflightOptions: {
+        allowOrigins: Cors.ALL_ORIGINS,
+        allowMethods: Cors.ALL_METHODS
+      }
+    };
+
+    // For any Resource that requires authenticated access, attach this to each Method endpoint. 
+    // const optionsWithAuth = {
+    //   authorizationType: AuthorizationType.COGNITO,
+    //   authorizer: {
+    //     authorizerId: authorizer.authorizerId,
+    //   },
+    // };
+
+
+    /*** Endpoints ***/
+
+    new EndpointsConstruct(this, "EndpointsConstruct", {
+      auth,
+      storage,
+      db,
+      http: {
+        restApi: this.restApi,
+        optionsWithCors,
+        // optionsWithAuth,
+      }
+    });
+  }
 }
 
 module.exports = { HttpStack };

@@ -7,7 +7,10 @@ class UserPoolStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    this.pool = new UserPool(this, "UserPool", {
+    const { stage } = props;
+
+    this.pool = new UserPool(this, `UserPool-${stage}`, {
+      userPoolName: `UserPool-${stage}`,
       selfSignUpEnabled: true,
       passwordPolicy: {
         minLength: 8,
@@ -57,7 +60,7 @@ class UserPoolStack extends Stack {
     this.createUserGroup("MerchantGroup", "Merchant");
     this.createUserGroup("AdminGroup", "Admin");
 
-    this.poolClient = this.pool.addClient("UserPoolClient", {
+    this.poolClient = this.pool.addClient(`UserPoolClient-${stage}`, {
       authFlows: { userPassword: true },
       accessTokenValidity: Duration.hours(8),
       // readAttributes: clientReadAttributes,
@@ -75,16 +78,16 @@ class UserPoolStack extends Stack {
     /*** Outputs ***/
 
     // For web client Auth service
-    new CfnOutput(this, "UserPoolId", {
+    new CfnOutput(this, `UserPoolId-${stage}`, {
       value: this.pool.userPoolId,
       description: "Cognito user pool ID used by the web client's auth service",
-      exportName: "UserPoolId"
+      exportName: `UserPoolId${stage}`
     });
 
-    new CfnOutput(this, "UserPoolClientId", {
+    new CfnOutput(this, `UserPoolClientId-${stage}`, {
       value: this.poolClient.userPoolClientId,
       description: "Cognito user pool client ID used by the web client's auth service",
-      exportName: "UserPoolClientId"
+      exportName: `UserPoolClientId${stage}`
     });
   }
 

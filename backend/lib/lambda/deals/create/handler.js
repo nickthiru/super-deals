@@ -24,9 +24,14 @@ exports.handler = async (event) => {
 
   const { merchantId } = event.pathParameters;
 
+  const stage = event.headers['X-Stage'] || 'dev';
+
   // Parse the environment variables containing stage-specific resource names
-  const ddbTableName = process.env.DDB_TABLE_NAME;
-  const s3BucketName = process.env.S3_BUCKET_NAME;
+  const ddbTableNames = JSON.parse(process.env.DDB_TABLE_NAMES);
+  const s3BucketNames = JSON.parse(process.env.S3_BUCKET_NAMES);
+
+  const dbTableName = ddbTableNames[stage];
+  const s3BucketName = s3BucketNames[stage];
 
   // Parse and validate the multipart form data
   let createDealFormData;
@@ -49,7 +54,7 @@ exports.handler = async (event) => {
   }
 
   // Prepare and save deal to DynamoDB
-  const saveDealResult = await saveDealToDynamoDB(deal, dealId, merchantId, logoS3Key, ddbTableName);
+  const saveDealResult = await saveDealToDynamoDB(deal, dealId, merchantId, logoS3Key, dbTableName);
   if (!saveDealResult.success) {
     return Api.error(500, saveDealResult.error);
   }
@@ -102,7 +107,7 @@ async function uploadLogoToS3(deal, dealId, s3BucketName) {
  * @param {string} dbTableName - The DynamoDB table name
  * @returns {Object} Save result
  */
-async function saveDealToDynamoDB(deal, dealId, merchantId, logoS3Key, ddbTableName) {
+async function saveDealToDynamoDB(deal, dealId, merchantId, logoS3Key, dbTableName) {
   /** @type {DealItem} */
   const dealItem = {
     PK: `DEAL#${dealId}`,
@@ -124,7 +129,7 @@ async function saveDealToDynamoDB(deal, dealId, merchantId, logoS3Key, ddbTableN
     console.log("(+) Saving deal to DynamoDB...")
     await ddbClient.send(
       new PutItemCommand({
-        TableName: ddbTableName,
+        TableName: dbTableName,
         Item: marshall(dealItem),
       })
     );

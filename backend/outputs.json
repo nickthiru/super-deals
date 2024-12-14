@@ -1,20 +1,31 @@
 {
-  "BackendStackAuthStackUserPoolStack10024631": {
-    "UserPoolClientId": "6jgdkp1ldamplgtoe2lrbl4ohj",
-    "UserPoolId": "us-east-1_P69fwEKJV",
-    "ExportsOutputRefUserPoolUserPoolClient40176907044A36CF": "6jgdkp1ldamplgtoe2lrbl4ohj",
-    "ExportsOutputFnGetAttUserPool6BA7E5F2ProviderNameA3E1F80D": "cognito-idp.us-east-1.amazonaws.com/us-east-1_P69fwEKJV"
+  "BackendStackDbStack8670BFC6": {
+    "ExportsOutputFnGetAttTableV26B253703Arn9502DAD0": "arn:aws:dynamodb:us-east-1:654654543926:table/BackendStackDbStack8670BFC6-TableV26B253703-U2QF8T892Z4E",
+    "ExportsOutputRefTableV26B2537034F95C1C6": "BackendStackDbStack8670BFC6-TableV26B253703-U2QF8T892Z4E"
   },
   "BackendStackStorageStack7364EE02": {
     "ExportsOutputFnGetAttS3Bucket07682993Arn6D6BF9FF": "arn:aws:s3:::deals-bucket",
     "ExportsOutputRefS3Bucket07682993C02DCE6B": "deals-bucket"
   },
-  "BackendStackDbStack8670BFC6": {
-    "ExportsOutputFnGetAttTableV26B253703Arn9502DAD0": "arn:aws:dynamodb:us-east-1:654654543926:table/BackendStackDbStack8670BFC6-TableV26B253703-U2QF8T892Z4E",
-    "ExportsOutputRefTableV26B2537034F95C1C6": "BackendStackDbStack8670BFC6-TableV26B253703-U2QF8T892Z4E"
+  "BackendStackAuthStackUserPoolStack10024631": {
+    "UserPoolClientId": "6jgdkp1ldamplgtoe2lrbl4ohj",
+    "UserPoolId": "us-east-1_P69fwEKJV",
+    "ExportsOutputRefUserPoolUserPoolClient40176907044A36CF": "6jgdkp1ldamplgtoe2lrbl4ohj",
+    "ExportsOutputRefUserPool6BA7E5F296FD7236": "us-east-1_P69fwEKJV",
+    "ExportsOutputFnGetAttUserPool6BA7E5F2ProviderNameA3E1F80D": "cognito-idp.us-east-1.amazonaws.com/us-east-1_P69fwEKJV"
   },
   "BackendStackAuthStackIdentityPoolStack91E94216": {
     "ExportsOutputRefIdentityPoolF5C140BA": "us-east-1:78b2d61a-3e67-461b-9810-dbb64958722e",
     "IdentityPoolId": "us-east-1:78b2d61a-3e67-461b-9810-dbb64958722e"
+  },
+  "BackendStackLambdaStackDealsStack744315FE": {
+    "ExportsOutputFnGetAttCreateConstructLambdaConstructNodejsFunction76FC8772Arn7188BB97": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackLambdaStackDe-CreateConstructLambdaCon-4hs1xodlLBmV"
+  },
+  "BackendStackLambdaStackAccountsStackDDC80896": {
+    "ExportsOutputFnGetAttSignInConstructLambdaConstructNodejsFunction50A94C43ArnCF9FCD13": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackLambdaStackAc-SignInConstructLambdaCon-yjp43XFv2HXO",
+    "ExportsOutputFnGetAttConfrimSignUpConstructLambdaConstructNodejsFunctionC170A299Arn08045DB8": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackLambdaStackAc-ConfrimSignUpConstructLa-7aRKeS3VWzlE"
+  },
+  "BackendStackApiStackHttpStackA5B3EBBB": {
+    "RestApiEndpoint0551178A": "https://wrol5g8zb9.execute-api.us-east-1.amazonaws.com/prod/"
   }
 }
