@@ -1,4 +1,5 @@
 node_modules
+lib_SpecRestApi
 
 # CDK asset staging directory
 .cdk.staging

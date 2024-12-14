@@ -11,6 +11,12 @@ components:
   schemas:
     $ref: "./schemas/_index.yml"
 
+  # parameters:
+  #   $ref: "./parameters/_index.yml"
+
+  responses:
+    $ref: "./responses/_index.yml"
+
   securitySchemes:
     basic:
       description: Basic authentication with username and password
@@ -27,14 +33,35 @@ security:
   - jwt: []
 
 paths:
-  /merchants/sign-up:
-    $ref: "./resources/merchants/sign-up.yml"
+  # Accounts service
+  /accounts/sign-up:
+    $ref: "./resources/accounts/sign-up.yml"
 
-  /merchants/sign-in:
-    $ref: "./resources/merchants/sign-in.yml"
+  /accounts/sign-in:
+    $ref: "./resources/accounts/sign-in.yml"
 
-  /merchants/{merchantId}/deals:
-    $ref: "./resources/merchants/create-deal.yml"
+  /accounts/confirm-sign-up:
+    $ref: "./resources/accounts/confirm-sign-up.yml"
+
+  # Deals service
+  /deals?merchantId={merchantId}:
+    $ref: "./resources/deals/create-deal.yml"
+
+x-amazon-apigateway-request-validators:
+  all:
+    validateRequestBody: true
+    validateRequestParameters: true
+  params:
+    validateRequestParameters: true
+    validateRequestBody: false
+  body:
+    validateRequestBody: true
+    validateRequestParameters: false
+  none:
+    validateRequestBody: false
+    validateRequestParameters: false
+
+x-amazon-apigateway-request-validator: all
 
 x-amazon-apigateway-cors:
   allowOrigin: "*"
@@ -42,3 +69,6 @@ x-amazon-apigateway-cors:
     - Content-Type
   allowMethods:
     - "*"
+
+x-amazon-apigateway-binary-media-types:
+  - image/jpeg
