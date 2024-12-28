@@ -1,16 +1,15 @@
-const { Stack, CfnOutput, Duration } = require("aws-cdk-lib");
+const { Stack, CfnOutput, RemovalPolicy, Duration } = require("aws-cdk-lib");
 const { UserPool, VerificationEmailStyle, AccountRecovery, CfnUserPoolGroup, UserPoolOperation, StringAttribute } = require("aws-cdk-lib/aws-cognito");
-const { LambdaConstruct } = require("./pre-sign-up/lambda");
-
 
 class UserPoolStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const { stage } = props;
+    const {
+      stage,
+    } = props;
 
-    this.pool = new UserPool(this, `UserPool-${stage}`, {
-      userPoolName: `UserPool-${stage}`,
+    this.pool = new UserPool(this, `UserPool`, {
       selfSignUpEnabled: true,
       passwordPolicy: {
         minLength: 8,
@@ -43,8 +42,10 @@ class UserPoolStack extends Stack {
       },
       customAttributes: {
         businessName: new StringAttribute({ mutable: true }),
-        userGroup: new StringAttribute({ mutable: true })
-      }
+        userGroup: new StringAttribute({ mutable: false }),
+        merchantId: new StringAttribute({ mutable: false }),
+      },
+      removalPolicy: stage === "prod" ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
     });
 
     // const clientWriteAttributes = (new cognito.ClientAttributes())
@@ -55,12 +56,7 @@ class UserPoolStack extends Stack {
     //   .withStandardAttributes({ emailVerified: true })
     //   .withCustomAttributes('pointsEarned');
 
-    // Create user groups
-    this.createUserGroup("ConsumerGroup", "Consumer");
-    this.createUserGroup("MerchantGroup", "Merchant");
-    this.createUserGroup("AdminGroup", "Admin");
-
-    this.poolClient = this.pool.addClient(`UserPoolClient-${stage}`, {
+    this.poolClient = this.pool.addClient(`UserPoolClient`, {
       authFlows: { userPassword: true },
       accessTokenValidity: Duration.hours(8),
       // readAttributes: clientReadAttributes,
@@ -78,25 +74,18 @@ class UserPoolStack extends Stack {
     /*** Outputs ***/
 
     // For web client Auth service
-    new CfnOutput(this, `UserPoolId-${stage}`, {
+    new CfnOutput(this, `UserPoolId`, {
       value: this.pool.userPoolId,
       description: "Cognito user pool ID used by the web client's auth service",
-      exportName: `UserPoolId${stage}`
+      exportName: `UserPoolId`
     });
 
-    new CfnOutput(this, `UserPoolClientId-${stage}`, {
+    new CfnOutput(this, `UserPoolClientId`, {
       value: this.poolClient.userPoolClientId,
       description: "Cognito user pool client ID used by the web client's auth service",
-      exportName: `UserPoolClientId${stage}`
-    });
-  }
-
-  createUserGroup(id, groupName) {
-    new CfnUserPoolGroup(this, id, {
-      userPoolId: this.pool.userPoolId,
-      groupName: groupName,
+      exportName: `UserPoolClientId`
     });
   }
 }
 
-module.exports = { UserPoolStack };
+module.exports = UserPoolStack;

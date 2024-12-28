@@ -27,6 +27,7 @@ const config = {
 			'$playwright-tests': './tests',
 			'$schemas': './src/schemas',
 			'$types': './src/types',
+			'$store': './src/store',
 		}
 	},
 };

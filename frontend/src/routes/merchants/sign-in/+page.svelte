@@ -1,4 +1,3 @@
-<!-- frontend/src/routes/merchant/sign-in/+page.svelte -->
 <script>
   import { enhance } from '$app/forms';
 

@@ -1,10 +1,10 @@
 import backendOutputs from '../../../../backend/outputs.json';
 
 // const REST_API_URL = backendOutputs["BackendStackApiStackHttpStackA5B3EBBB"][`RestApiUrl${process.env.STAGE}`];
-const REST_API_URL = backendOutputs["BackendStackApiStackHttpStackA5B3EBBB"]["RestApiEndpoint0551178A"];
+const REST_API_URL = backendOutputs["BackendStackdevApiStackHttpStackA56AECB6"]["RestApiUrldev"];
 console.log(`REST_API_URL: ${REST_API_URL}`);
 
-export default async function send(fetch, path, options) {
+export default async function send(fetch, path, options = {}) {
   const url = `${REST_API_URL}${path}`;
   console.log(`URL: ${url}`);
 

@@ -1,6 +1,6 @@
 const { Stack } = require("aws-cdk-lib");
-const { RolesStack } = require("./roles/stack");
 
+const RolesStack = require("./roles/stack");
 
 class IamStack extends Stack {
   constructor(scope, id, props) {
@@ -8,12 +8,14 @@ class IamStack extends Stack {
 
     const {
       auth,
+      storage,
     } = props;
 
-    new RolesStack(this, "RolesStack", {
+    this.roles = new RolesStack(this, "RolesStack", {
       auth,
+      storage,
     });
   }
 }
 
-module.exports = { IamStack };
+module.exports = IamStack;

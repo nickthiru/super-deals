@@ -1,18 +1,18 @@
 // frontend/src/routes/merchants/[merchantId]/dashboard/+page.server.js
 import { redirect, error } from '@sveltejs/kit';
-import jwt_decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 // import { SECRET_KEY } from '$env/static/private'; // Example of private environment variable
 
 export async function load({ params, cookies }) {
   const accessToken = cookies.get('accessToken');
 
   if (!accessToken) {
-    throw redirect(303, '/merchant/sign-in');
+    throw redirect(303, '/merchants/sign-in');
   }
 
   try {
     // Verify token using the secret key (if applicable)
-    const decodedToken = jwt_decode(accessToken);
+    const decodedToken = jwtDecode(accessToken);
     const user = {
       id: decodedToken.sub,
       type: decodedToken['custom:userType'],
@@ -25,9 +25,9 @@ export async function load({ params, cookies }) {
     }
 
     // Fetch merchant-specific data here, if needed
-    const merchantData = await fetchMerchantData(user.merchantId, accessToken);
+    // const merchantData = await fetchMerchantData(user.merchantId, accessToken);
 
-    return { user, merchantData };
+    // return { user, merchantData };
 
   } catch (err) {
     console.error('Invalid token:', err);
@@ -36,16 +36,16 @@ export async function load({ params, cookies }) {
   }
 }
 
-async function fetchMerchantData(merchantId, token) {
-  const response = await fetch(`${process.env.API_URL}/merchant/${merchantId}`, {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  });
+// async function fetchMerchantData(merchantId, token) {
+//   const response = await fetch(`${process.env.API_URL}/merchant/${merchantId}`, {
+//     headers: {
+//       'Authorization': `Bearer ${token}`
+//     }
+//   });
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch merchant data');
-  }
+//   if (!response.ok) {
+//     throw new Error('Failed to fetch merchant data');
+//   }
 
-  return await response.json();
-}
+//   return await response.json();
+// }

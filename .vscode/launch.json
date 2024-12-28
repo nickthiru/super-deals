@@ -12,7 +12,9 @@
       "args": ["${relativeFile}"],
       "env": {
         "S3_BUCKET_NAME": "deals-bucket-dev",
-        "DDB_TABLE_NAME": "DealsTable-dev"
+        "DDB_TABLE_NAME": "DealsTable-dev",
+        "USER_POOL_ID": "us-east-1_EnvkdZN7X",
+        "USER_POOL_CLIENT_ID": "5gbi6017t6bei8elnkr4v9hns0"
       }
     },
     {

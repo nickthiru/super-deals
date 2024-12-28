@@ -1,11 +1,13 @@
 import { fail, redirect } from '@sveltejs/kit';
+
 import schema from './schema.js';
 import Api from '$lib/api/_index.js';
 
 export const actions = {
-  default: async ({ request, fetch, cookies }) => {
+  default: async ({ request, fetch, cookies, event }) => {
     const formData = await request.formData();
     const data = Object.fromEntries(formData);
+    console.log('Received Form Data:', data); // Log the form data
 
     // Validate form data
     const validationResult = schema.safeParse(data);
@@ -17,9 +19,12 @@ export const actions = {
     }
 
     // Send the validated form data if successful
-    const response = await Api.send(fetch, 'merchant/sign-in', {
+    const response = await Api.send(fetch, 'accounts/sign-in', event, {
       method: "POST",
-      body: formData
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json'
+      },
     });
     console.log(`Response Status: ${response.status}`);
     console.log(`Response StatusText: ${response.statusText}`);
@@ -33,17 +38,25 @@ export const actions = {
     const responseBody = await response.json();
     console.log(`Response Body: ${JSON.stringify(responseBody, null, 2)}`);
 
-    const { accessToken, expiresIn, merchantId } = responseBody;
+    // Set the access token as a secure HTTP-only cookie
+    if (responseBody.accessToken) {
+      cookies.set('accessToken', responseBody.accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+      });
 
-    // Set cookies for accessToken and expiresIn
-    cookies.set('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: expiresIn,
-      path: '/',
-    });
+      cookies.set('merchantId', responseBody.merchantId, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+      });
+    }
 
-    /// Redirect to merchant dashboard after successful sign-up
-    throw redirect(303, `/merchants/${merchantId}/dashboard`);
+    redirect(303, `/merchants/${responseBody.merchantId}`);
   }
 };

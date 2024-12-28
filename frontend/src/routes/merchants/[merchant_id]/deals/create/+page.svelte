@@ -1,13 +1,29 @@
 <script>
   import { enhance } from '$app/forms';
+  import SecureLS from 'secure-ls';
+  import { onMount } from 'svelte';
+  import { merchantId } from '../../../store';
+  import { get } from 'svelte/store';
+
+  let ls;
+
+  onMount(() => {
+    ls = new SecureLS();
+
+    merchantId.set(get(ls).merchantId);
+  });
 
   /** @type {import('./$types').ActionData} */
   export let form;
+
+  function handleEnhance({ formData }) {
+    formData.append('merchantId', get(merchantId));
+  }
 </script>
 
 <h1 id="add-deal-title">Add a Deal</h1>
 
-<form method="POST" aria-labelledby="add-deal-title" enctype="multipart/form-data" use:enhance>
+<form method="POST" aria-labelledby="add-deal-title" enctype="multipart/form-data" use:enhance={handleEnhance}>
   <label>
     Deal Title
     <input name="title" type="text" required maxlength="255">

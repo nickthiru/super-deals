@@ -1,7 +1,6 @@
 const { Stack, CfnOutput } = require("aws-cdk-lib");
-const { CfnIdentityPool } = require("aws-cdk-lib/aws-cognito");
-const { Role, FederatedPrincipal } = require("aws-cdk-lib/aws-iam");
-
+const { Role, FederatedPrincipal, PolicyStatement, Effect } = require("aws-cdk-lib/aws-iam");
+const { CfnIdentityPoolRoleAttachment } = require("aws-cdk-lib/aws-cognito");
 
 class RolesStack extends Stack {
   constructor(scope, id, props) {
@@ -9,6 +8,7 @@ class RolesStack extends Stack {
 
     const {
       auth,
+      storage,
     } = props;
 
     this.authenticatedRole = new Role(this, 'CognitoDefaultAuthenticatedRole', {
@@ -37,7 +37,7 @@ class RolesStack extends Stack {
       )
     });
 
-    this.adminRole = new Role(this, 'CognitoAdminRole', {
+    this.merchantRole = new Role(this, 'CognitoAdminRole', {
       assumedBy: new FederatedPrincipal('cognito-identity.amazonaws.com', {
         StringEquals: {
           'cognito-identity.amazonaws.com:aud': auth.dev.identityPool.pool.ref
@@ -48,17 +48,33 @@ class RolesStack extends Stack {
       },
         'sts:AssumeRoleWithWebIdentity'
       )
+    })
+      .addToPolicy(new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: [
+          "s3:PutObject",
+        ],
+        resources: ["*"], // TODO: arn:${Partition}:s3:::${storage.dev.bucket.bucketName}/${ObjectName}
+      }));
+
+
+    /*** Attachments ***/
+
+    new CfnIdentityPoolRoleAttachment(this, 'IdentityPoolRoleAttachment', {
+      identityPoolId: auth.dev.identityPool.pool.ref,
+      roles: {
+        authenticated: this.authenticatedRole.roleArn,
+        unauthenticated: this.unAuthenticatedRole.roleArn,
+      },
+      roleMappings: {
+        adminsMapping: {
+          type: 'Token',
+          ambiguousRoleResolution: "AuthenticatedRole",
+          identityProvider: `${auth.dev.userPool.pool.userPoolProviderName}:${auth.dev.userPool.poolClient.userPoolClientId}`,
+        },
+      },
     });
-
-    /*** Outputs ***/
-
-    // For web client Auth service
-    // new CfnOutput(this, `IdentityPoolId-${stage}`, {
-    //   value: this.identityPool.ref,
-    //   description: "Identity Pool ID",
-    //   exportName: `IdentityPoolId${stage}`
-    // });
   }
 }
 
-module.exports = { RolesStack };
+module.exports = RolesStack;

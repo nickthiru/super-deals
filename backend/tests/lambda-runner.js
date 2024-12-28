@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const { handler } = require("#lib/lambda/accounts/sign-up/handler.js");
+const { handler } = require("../lib/lambda/accounts/sign-up/handler.js");
 const eventDataFilePath = "../lib/lambda/accounts/sign-up/event.json";
 
 const main = async () => {
@@ -14,7 +14,7 @@ const main = async () => {
 
   const response = await handler(event, {});
 
-  // console.log("(+) response: " + JSON.stringify(response, null, 2));
+  console.log("(+) response: " + JSON.stringify(response, null, 2));
 }
 
 main();
