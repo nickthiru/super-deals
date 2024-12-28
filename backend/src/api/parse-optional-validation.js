@@ -9,7 +9,7 @@ const { z } = require('zod');
  * @param {Object} schema - The Zod schema for validation
  * @returns {Object} The validated form data
  */
-function parseWithOptionalValidation(event, schema = null) {
+function parseEventWithOptionalValidation(event, schema = null) {
   const contentType = event.headers["content-type"];
 
   if (contentType.startsWith("multipart/form-data")) {
@@ -52,4 +52,4 @@ function parseWithOptionalValidation(event, schema = null) {
   return data;
 }
 
-module.exports = { parseWithOptionalValidation };
+module.exports = { parseEventWithOptionalValidation };

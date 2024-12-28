@@ -1,8 +1,7 @@
 import { fail } from '@sveltejs/kit';
+
 import { getSchema } from './schema.js';
-
 import Api from '$lib/api/_index.js';
-
 
 export const actions = {
   default: async ({ request, fetch, params }) => {
@@ -33,7 +32,7 @@ export const actions = {
     // Send the validated form data if successful
     const response = await Api.send(fetch, `merchant/${merchantId}/deals`, {
       method: "POST",
-      body: formData
+      body: formData,
     });
     console.log(`Response Status: ${response.status}`);
     console.log(`Response StatusText: ${response.statusText}`);

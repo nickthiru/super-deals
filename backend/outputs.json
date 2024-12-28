@@ -1,31 +1,29 @@
 {
-  "BackendStackDbStack8670BFC6": {
-    "ExportsOutputFnGetAttTableV26B253703Arn9502DAD0": "arn:aws:dynamodb:us-east-1:654654543926:table/BackendStackDbStack8670BFC6-TableV26B253703-U2QF8T892Z4E",
-    "ExportsOutputRefTableV26B2537034F95C1C6": "BackendStackDbStack8670BFC6-TableV26B253703-U2QF8T892Z4E"
+  "BackendStackdevDbStack47506585": {
+    "ExportsOutputFnGetAttTableV26B253703Arn9502DAD0": "arn:aws:dynamodb:us-east-1:654654543926:table/BackendStackdevDbStack47506585-TableV26B253703-5C1WCNB0NLOR",
+    "ExportsOutputRefTableV26B2537034F95C1C6": "BackendStackdevDbStack47506585-TableV26B253703-5C1WCNB0NLOR"
   },
-  "BackendStackStorageStack7364EE02": {
-    "ExportsOutputFnGetAttS3Bucket07682993Arn6D6BF9FF": "arn:aws:s3:::deals-bucket",
-    "ExportsOutputRefS3Bucket07682993C02DCE6B": "deals-bucket"
+  "BackendStackdevAuthStackUserPoolStack194876D6": {
+    "ExportsOutputFnGetAttUserPool6BA7E5F2Arn686ACC00": "arn:aws:cognito-idp:us-east-1:654654543926:userpool/us-east-1_EnvkdZN7X",
+    "UserPoolClientId": "5gbi6017t6bei8elnkr4v9hns0",
+    "UserPoolId": "us-east-1_EnvkdZN7X",
+    "ExportsOutputRefUserPoolUserPoolClient40176907044A36CF": "5gbi6017t6bei8elnkr4v9hns0",
+    "ExportsOutputRefUserPool6BA7E5F296FD7236": "us-east-1_EnvkdZN7X",
+    "ExportsOutputFnGetAttUserPool6BA7E5F2ProviderNameA3E1F80D": "cognito-idp.us-east-1.amazonaws.com/us-east-1_EnvkdZN7X"
   },
-  "BackendStackAuthStackUserPoolStack10024631": {
-    "UserPoolClientId": "6jgdkp1ldamplgtoe2lrbl4ohj",
-    "UserPoolId": "us-east-1_P69fwEKJV",
-    "ExportsOutputRefUserPoolUserPoolClient40176907044A36CF": "6jgdkp1ldamplgtoe2lrbl4ohj",
-    "ExportsOutputRefUserPool6BA7E5F296FD7236": "us-east-1_P69fwEKJV",
-    "ExportsOutputFnGetAttUserPool6BA7E5F2ProviderNameA3E1F80D": "cognito-idp.us-east-1.amazonaws.com/us-east-1_P69fwEKJV"
+  "BackendStackdevLambdaStackDealsStackF7A38705": {
+    "ExportsOutputFnGetAttCreateConstructNodejsFunctionF17405C2ArnA5407F5F": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackdevLambdaStac-CreateConstructNodejsFun-LCI58aKfHYtl"
   },
-  "BackendStackAuthStackIdentityPoolStack91E94216": {
-    "ExportsOutputRefIdentityPoolF5C140BA": "us-east-1:78b2d61a-3e67-461b-9810-dbb64958722e",
-    "IdentityPoolId": "us-east-1:78b2d61a-3e67-461b-9810-dbb64958722e"
+  "BackendStackdevAuthStackIdentityPoolStackDD35B90A": {
+    "ExportsOutputRefIdentityPoolF5C140BA": "us-east-1:82d6b747-ef7f-4372-8298-3a65f83cd668",
+    "IdentityPoolId": "us-east-1:82d6b747-ef7f-4372-8298-3a65f83cd668"
   },
-  "BackendStackLambdaStackDealsStack744315FE": {
-    "ExportsOutputFnGetAttCreateConstructLambdaConstructNodejsFunction76FC8772Arn7188BB97": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackLambdaStackDe-CreateConstructLambdaCon-4hs1xodlLBmV"
+  "BackendStackdevLambdaStackAccountsStack0C967C56": {
+    "ExportsOutputFnGetAttConfrimSignUpConstructNodejsFunction4A149FE0Arn1C685403": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackdevLambdaStac-ConfrimSignUpConstructNo-kDKM5Kg3liKW",
+    "ExportsOutputFnGetAttSignInConstructNodejsFunction7370E2A7Arn51A5C982": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackdevLambdaStac-SignInConstructNodejsFun-b0x7p0Llv27m",
+    "ExportsOutputFnGetAttSignUpConstructNodejsFunction75CDDCFBArnDCC898BC": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackdevLambdaStac-SignUpConstructNodejsFun-sixxsxBn6Eg5"
   },
-  "BackendStackLambdaStackAccountsStackDDC80896": {
-    "ExportsOutputFnGetAttSignInConstructLambdaConstructNodejsFunction50A94C43ArnCF9FCD13": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackLambdaStackAc-SignInConstructLambdaCon-yjp43XFv2HXO",
-    "ExportsOutputFnGetAttConfrimSignUpConstructLambdaConstructNodejsFunctionC170A299Arn08045DB8": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackLambdaStackAc-ConfrimSignUpConstructLa-7aRKeS3VWzlE"
-  },
-  "BackendStackApiStackHttpStackA5B3EBBB": {
-    "RestApiEndpoint0551178A": "https://wrol5g8zb9.execute-api.us-east-1.amazonaws.com/prod/"
+  "BackendStackdevApiStackHttpStackA56AECB6": {
+    "RestApiUrldev": "https://f6pefqv1mk.execute-api.us-east-1.amazonaws.com/dev/"
   }
 }

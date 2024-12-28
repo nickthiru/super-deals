@@ -1,9 +1,6 @@
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { DynamoDBClient, PutItemCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall } = require("@aws-sdk/util-dynamodb");
 const KSUID = require("ksuid");
-// const multipart = require('parse-multipart-data');
-// const { Buffer } = require('node:buffer');
 
 /** @typedef {import('#types/deal-entity').DealEntity} DealItem */
 
@@ -11,50 +8,33 @@ const KSUID = require("ksuid");
 // such as standardized success and error responses
 const Api = require("#src/api/_index.js");
 
-// Import the deal schema for validation
-const { schema } = require("./schema.js");
-
 // Initialize AWS clients
-const s3Client = new S3Client();
 const ddbClient = new DynamoDBClient();
-
 
 exports.handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
 
   const { merchantId } = event.pathParameters;
 
-  const stage = event.headers['X-Stage'] || 'dev';
+  // const stage = event.headers['X-Stage'] || 'dev';
+
+  data = JSON.parse(event.body);
+
+  // !!!!! VALIDATE expiration VALUE !!!!!
+  // try {
+  //   schema.validate(data);
+  // } catch (error) {
+  //   return Api.error(400, error.message);
+  // }
 
   // Parse the environment variables containing stage-specific resource names
-  const ddbTableNames = JSON.parse(process.env.DDB_TABLE_NAMES);
-  const s3BucketNames = JSON.parse(process.env.S3_BUCKET_NAMES);
-
-  const dbTableName = ddbTableNames[stage];
-  const s3BucketName = s3BucketNames[stage];
-
-  // Parse and validate the multipart form data
-  let createDealFormData;
-  try {
-    createDealFormData = Api.parseAndValidateFormData(event, schema);
-  } catch (error) {
-    return Api.error(400, error.message);
-  }
+  const tableName = JSON.parse(process.env.TABLE_NAME);
 
   // Generate a unique ID for the deal
   const dealId = KSUID.randomSync(new Date()).string;
 
-  // Upload logo to S3
-  let logoS3Key = "";
-  const logoUploadResult = await uploadLogoToS3(createDealFormData, dealId, s3BucketName);
-  if (!logoUploadResult.success) {
-    return Api.error(500, logoUploadResult.error);
-  } else {
-    logoS3Key = logoUploadResult.logoS3Key
-  }
-
   // Prepare and save deal to DynamoDB
-  const saveDealResult = await saveDealToDynamoDB(deal, dealId, merchantId, logoS3Key, dbTableName);
+  const saveDealResult = await saveDealToDynamoDB(data, dealId, merchantId, tableName);
   if (!saveDealResult.success) {
     return Api.error(500, saveDealResult.error);
   }
@@ -71,35 +51,6 @@ exports.handler = async (event) => {
 
 
 /**
- * Upload the deal logo to S3
- * @param {Object} deal - The deal data
- * @param {string} dealId - The unique deal ID
- * @param {string} s3BucketName - The S3 bucket name
- * @returns {Object} Upload result
- */
-async function uploadLogoToS3(deal, dealId, s3BucketName) {
-
-  const logoS3Key = `merchants/${deal.merchantId}/deals/DEAL#${dealId}/logo/${deal.logo.filename}`;
-
-  try {
-    console.log(`(+) Uploading logo to Bucket: ${s3BucketName}`);
-    await s3Client.send(
-      new PutObjectCommand({
-        Bucket: s3BucketName,
-        Key: logoS3Key,
-        Body: deal.logo.data,
-        ContentType: deal.logo.contentType,
-      })
-    );
-    return { success: true, logoS3Key: logoS3Key };
-  } catch (error) {
-    console.error("S3 Error:", error);
-    return { success: false, error: error.message };
-  }
-}
-
-
-/**
  * Save the deal to DynamoDB
  * @param {Object} deal - The deal data
  * @param {string} dealId - The unique deal ID
@@ -107,20 +58,20 @@ async function uploadLogoToS3(deal, dealId, s3BucketName) {
  * @param {string} dbTableName - The DynamoDB table name
  * @returns {Object} Save result
  */
-async function saveDealToDynamoDB(deal, dealId, merchantId, logoS3Key, dbTableName) {
+async function saveDealToDynamoDB(data, dealId, merchantId, tableName) {
   /** @type {DealItem} */
   const dealItem = {
     PK: `DEAL#${dealId}`,
     SK: `DEAL#${dealId}`,
     EntityType: "Deal",
     Id: dealId,
-    Title: deal.title,
+    Title: data.title,
     OriginalPrice: parseFloat(deal.originalPrice),
     Discount: parseFloat(deal.discount),
     Category: deal.category,
     Expiration: deal.expiration,
     MerchantId: merchantId,
-    LogoKey: logoS3Key,
+    LogoFileKey: data.logoFileKey,
     CreatedAt: new Date().toISOString(),
   };
   console.log("dealItem: " + JSON.stringify(dealItem, null, 2));
@@ -129,7 +80,7 @@ async function saveDealToDynamoDB(deal, dealId, merchantId, logoS3Key, dbTableNa
     console.log("(+) Saving deal to DynamoDB...")
     await ddbClient.send(
       new PutItemCommand({
-        TableName: dbTableName,
+        TableName: tableName,
         Item: marshall(dealItem),
       })
     );

@@ -5,10 +5,11 @@ class DbStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const { stage } = props;
+    const {
+      stage,
+    } = props;
 
-    this.table = new TableV2(this, `TableV2-${stage}`, {
-      tableName: `DealsTable-${stage}`,
+    this.table = new TableV2(this, "TableV2", {
       partitionKey: {
         name: "PK",
         type: AttributeType.STRING
@@ -30,10 +31,10 @@ class DbStack extends Stack {
           },
         },
       ],
-      removalPolicy: stage === 'prod' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
+      removalPolicy: stage === "prod" ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
   };
 }
 
-module.exports = { DbStack };
+module.exports = DbStack;

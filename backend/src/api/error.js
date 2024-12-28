@@ -1,8 +1,7 @@
-// const addCorsHeader = require("./add-cors-header.js");
-// const Api = require("#src/api/_index.js");
+const addCorsHeader = require("./add-cors-header.js");
 
 function error(statusCode, message, details = null) {
-  // const headers = Api.addCorsHeader();
+  const headers = addCorsHeader();
   const body = {
     error: message
   };
@@ -11,7 +10,7 @@ function error(statusCode, message, details = null) {
   }
   const response = {
     statusCode,
-    // headers,
+    headers,
     body: JSON.stringify(body)
   };
   console.log(`Error Response: ${JSON.stringify(response, null, 2)}`);
