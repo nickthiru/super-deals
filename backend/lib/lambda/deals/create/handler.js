@@ -14,8 +14,6 @@ const ddbClient = new DynamoDBClient();
 exports.handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
 
-  const { merchantId } = event.pathParameters;
-
   // const stage = event.headers['X-Stage'] || 'dev';
 
   data = JSON.parse(event.body);
@@ -34,7 +32,7 @@ exports.handler = async (event) => {
   const dealId = KSUID.randomSync(new Date()).string;
 
   // Prepare and save deal to DynamoDB
-  const saveDealResult = await saveDealToDynamoDB(data, dealId, merchantId, tableName);
+  const saveDealResult = await saveDealToDynamoDB(data, dealId, tableName);
   if (!saveDealResult.success) {
     return Api.error(500, saveDealResult.error);
   }
@@ -58,7 +56,7 @@ exports.handler = async (event) => {
  * @param {string} dbTableName - The DynamoDB table name
  * @returns {Object} Save result
  */
-async function saveDealToDynamoDB(data, dealId, merchantId, tableName) {
+async function saveDealToDynamoDB(data, dealId, tableName) {
   /** @type {DealItem} */
   const dealItem = {
     PK: `DEAL#${dealId}`,
@@ -70,7 +68,7 @@ async function saveDealToDynamoDB(data, dealId, merchantId, tableName) {
     Discount: parseFloat(deal.discount),
     Category: deal.category,
     Expiration: deal.expiration,
-    MerchantId: merchantId,
+    MerchantId: data.userId,
     LogoFileKey: data.logoFileKey,
     CreatedAt: new Date().toISOString(),
   };
@@ -84,7 +82,9 @@ async function saveDealToDynamoDB(data, dealId, merchantId, tableName) {
         Item: marshall(dealItem),
       })
     );
+
     return { success: true };
+
   } catch (error) {
     console.error("DynamoDB Error:", error);
     return { success: false, error: "Error saving deal: " + error.message };

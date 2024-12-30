@@ -1,5 +1,5 @@
 const { Stack } = require("aws-cdk-lib");
-const { RestApi, Cors, CognitoUserPoolsAuthorizer, AuthorizationType } = require("aws-cdk-lib/aws-apigateway");
+const { RestApi, Cors, CognitoUserPoolsAuthorizer, AuthorizationType, EndpointType, MethodLoggingLevel } = require("aws-cdk-lib/aws-apigateway");
 
 const StageConstruct = require("./stage/construct");
 const EndpointsConstruct = require("./endpoints/construct");
@@ -14,10 +14,11 @@ class HttpStack extends Stack {
       lambda,
     } = props;
 
-
     /*** HTTP API ***/
 
     this.restApi = new RestApi(this, "RestApi", {
+      description: "API Gateway for the application",
+      endpointTypes: [EndpointType.REGIONAL],
       deploy: false,  // Disable automatic stage creation i.e. prod
       // binaryMediaTypes: ["multipart/form-data"],
       cloudWatchRole: true,

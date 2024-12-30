@@ -1,6 +1,6 @@
 const { Construct } = require("constructs");
-const { Deployment, Stage, LogGroupLogDestination, AccessLogFormat } = require("aws-cdk-lib/aws-apigateway");
-const { LogGroup } = require("aws-cdk-lib/aws-logs");
+const { Deployment, Stage, LogGroupLogDestination, AccessLogFormat, MethodLoggingLevel } = require("aws-cdk-lib/aws-apigateway");
+const { LogGroup, RetentionDays } = require("aws-cdk-lib/aws-logs");
 const { CfnOutput, } = require("aws-cdk-lib");
 
 class StageConstruct extends Construct {
@@ -12,8 +12,14 @@ class StageConstruct extends Construct {
       stageName
     } = props;
 
-    const logGroup = new LogGroup(this, `LogGroup-${stageName}`, {
+    const accessLogGroup = new LogGroup(this, `LogGroup-${stageName}`, {
       logGroupName: `/aws/apigateway/${api.restApiId}/${stageName}`,
+      retention: RetentionDays.ONE_WEEK
+    });
+
+    const executionLogGroup = new LogGroup(this, `ExecutionLogGroup-${stageName}`, {
+      logGroupName: `/aws/apigateway/${api.restApiId}/${stageName}/execution`,
+      retention: RetentionDays.ONE_WEEK
     });
 
     const deployment = new Deployment(this, `Deployment-${stageName}`, {
@@ -23,7 +29,7 @@ class StageConstruct extends Construct {
     const stage = new Stage(this, `Stage-${stageName}`, {
       deployment,
       stageName,
-      accessLogDestination: new LogGroupLogDestination(logGroup),
+      accessLogDestination: new LogGroupLogDestination(accessLogGroup),
       accessLogFormat: AccessLogFormat.jsonWithStandardFields({
         caller: false,
         httpMethod: true,
@@ -35,16 +41,17 @@ class StageConstruct extends Construct {
         status: true,
         user: true,
       }),
-      // tracingEnabled: true, // Enable X-Ray Tracing if needed
-      // methodSettings: [
-      //   {
-      //     loggingLevel: "INFO",
-      //     dataTraceEnabled: true,
-      //     metricsEnabled: true,
-      //     resourcePath: "/*",
-      //     httpMethod: "*",
-      //   },
-      // ],
+      methodSettings: [
+        {
+          loggingLevel: MethodLoggingLevel.INFO,
+          dataTraceEnabled: true,
+          metricsEnabled: true,
+          resourcePath: "/*",
+          httpMethod: "*",
+          throttlingBurstLimit: 10,
+          throttlingRateLimit: 5,
+        },
+      ],
     });
 
     // Set the default deployment stage

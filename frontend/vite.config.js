@@ -5,6 +5,7 @@ import path from 'path';
 export default defineConfig({
 	plugins: [sveltekit()],
 	server: {
+		// https: true,
 		fs: {
 			// Allow serving files from one level up to the project root
 			allow: ['..'],

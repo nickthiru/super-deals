@@ -3,18 +3,11 @@
 
   /** @type {import('./$types').ActionData} */
   export let form;
-  export let data;
-
-  $: ({ username } = data);
-
-  function handleEnhance({ formData }) {
-    formData.append('username', username);
-  }
 </script>
 
 <h1 id="confirm-sign-up-title">Confirm Sign-Up</h1>
 
-<form method="POST" aria-labelledby="confirm-sign-up-title" use:enhance={handleEnhance}>
+<form method="POST" aria-labelledby="confirm-sign-up-title" use:enhance>
   <label>
     Confirmation Code
     <input name="confirmationCode" type="text" required>

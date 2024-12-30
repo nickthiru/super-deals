@@ -1,4 +1,4 @@
-const { CognitoIdentityProviderClient, InitiateAuthCommand, GetUserCommand } = require("@aws-sdk/client-cognito-identity-provider");
+const { CognitoIdentityProviderClient, InitiateAuthCommand } = require("@aws-sdk/client-cognito-identity-provider");
 
 // Api object provides internal API-related helper functionality
 // such as standardized success and error responses
@@ -13,7 +13,7 @@ exports.handler = async (event) => {
 
   const data = JSON.parse(event.body);
 
-  const userPoolClientId = process.env.CONSUMER_USER_POOL_CLIENT_ID;
+  const userPoolClientId = process.env.USER_POOL_CLIENT_ID;
   const authFlow = process.env.AUTH_FLOW;
 
   try {
@@ -27,37 +27,23 @@ exports.handler = async (event) => {
     }));
     console.log("(+) signInResponse: " + JSON.stringify(signInResponse, null, 2));
 
-    var accessToken = signInResponse.AuthenticationResult.AccessToken;
-    var expiresIn = signInResponse.AuthenticationResult.ExpiresIn;
-    // var refreshToken = signInResponse.AuthenticationResult.RefreshToken;
+    const { AccessToken, ExpiresIn, RefreshToken, IdToken } = signInResponse.AuthenticationResult;
 
-    // Fetch user attributes using the AccessToken
-    const getUserResponse = await cognitoClient.send(new GetUserCommand({
-      AccessToken: accessToken
-    }));
-    console.log("(+) getUserResponse: " + JSON.stringify(getUserResponse, null, 2));
+    // Return success response
+    const successResponse = Api.success({
+      message: "User is signed in successfully.",
+      accessToken: AccessToken,
+      idToken: IdToken,
+      refreshToken: RefreshToken,
+      expiresIn: ExpiresIn,
+    });
+    console.log(`Success Response: ${JSON.stringify(successResponse, null, 2)}`);
 
-    // Transform userAttributes array into an object for easier access
-    const userAttributesMap = getUserResponse.UserAttributes.reduce((acc, attr) => {
-      acc[attr.Name] = attr.Value;
-      return acc;
-    }, {});
-
-    var merchantId = userAttributesMap['custom:merchantId'];
+    return successResponse;
 
   } catch (error) {
-    console.log(error);
+    console.error("Sign-in error:", error);
+
+    return Api.error(error.message || "An error occurred during sign-in", error.$metadata?.httpStatusCode || 500);
   };
-
-  // Return success response
-  const successResponse = Api.success({
-    message: "User is signed in successfully.",
-    accessToken,
-    expiresIn,
-    refreshToken,
-    merchantId,
-  });
-  console.log(`Success Response: ${JSON.stringify(successResponse, null, 2)}`);
-
-  return successResponse;
 };

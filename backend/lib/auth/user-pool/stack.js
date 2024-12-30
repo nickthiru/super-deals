@@ -43,7 +43,6 @@ class UserPoolStack extends Stack {
       customAttributes: {
         businessName: new StringAttribute({ mutable: true }),
         userGroup: new StringAttribute({ mutable: false }),
-        merchantId: new StringAttribute({ mutable: false }),
       },
       removalPolicy: stage === "prod" ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
     });

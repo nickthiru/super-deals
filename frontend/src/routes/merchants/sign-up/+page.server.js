@@ -9,6 +9,11 @@ export const actions = {
     const data = Object.fromEntries(formData);
     console.log('Received Form Data:', data); // Log the form data
 
+    // Add the userGroup to the (form) data
+    data.userGroup = 'merchants';
+
+    console.log('Form Data (with username):', data);
+
     // Validate form data
     const validationResult = schema.safeParse(data);
 
@@ -27,7 +32,6 @@ export const actions = {
       },
     });
     console.log(`Response Status: ${response.status}`);
-    console.log(`Response StatusText: ${response.statusText}`);
 
     if (response.status !== 200) {
       return fail(response.status, {
@@ -39,7 +43,7 @@ export const actions = {
     console.log(`Response Body: ${JSON.stringify(responseBody, null, 2)}`);
 
     // After successful sign-up
-    cookies.set('username', responseBody.username, {
+    cookies.set('username', data.email, {
       path: '/',
       httpOnly: true,
       sameSite: 'strict',

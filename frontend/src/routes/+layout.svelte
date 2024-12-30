@@ -9,8 +9,11 @@
     const publicRoutes = [
       '/public',
       '/merchants/sign-up',
+      '/merchants/post-sign-up',
+      '/merchants/confirm-sign-up',
       '/merchants/sign-in',
       '/customers/sign-up',
+      '/customers/confirm-sign-up',
       '/customers/sign-in',
       '/admins/sign-in'
     ];
