@@ -39,11 +39,13 @@ async function handleAuth({ event, resolve }) {
   const isPublicRoute = publicRoutes.some(route => route.test(event.url.pathname));
 
   const accessToken = event.cookies.get('accessToken');
+  console.log('Access Token:', accessToken ? 'Present' : 'Not present');
   let user = null;
 
   if (accessToken) {
     try {
       const decodedToken = jwtDecode(accessToken);
+      console.log('Decoded Token:', decodedToken);
 
       // Server-side expiration check
       const currentTime = Math.floor(Date.now() / 1000);
@@ -52,10 +54,10 @@ async function handleAuth({ event, resolve }) {
       }
 
       user = {
-        id: decodedToken.sub,
+        userId: decodedToken.sub,
         groups: decodedToken['cognito:groups'],
-        merchantId: decodedToken['custom:merchantId'],
       };
+      console.log('User object:', user);
 
     } catch (error) {
       console.error('Invalid or expired token:', error);
@@ -65,27 +67,43 @@ async function handleAuth({ event, resolve }) {
 
   if (!isPublicRoute) {
     const protectedRoutes = [
-      { pattern: /^\/merchants\/([^/]+)\/.*/, requiredGroup: 'merchant', redirectPath: '/merchants/sign-in', idType: 'merchantId' },
-      { pattern: /^\/customers\/([^/]+)\/.*/, requiredGroup: 'customer', redirectPath: '/customers/sign-in', idType: 'customerId' },
-      { pattern: /^\/admins\/([^/]+)\/.*/, requiredGroup: 'admin', redirectPath: '/admins/sign-in', idType: 'adminId' },
+      { pattern: /^\/merchants\/([^/]+)\/?$/, requiredGroup: 'merchants', redirectPath: '/merchants/sign-in', idType: 'userId' },
+      { pattern: /^\/customers\/([^/]+)\/?$/, requiredGroup: 'customers', redirectPath: '/customers/sign-in', idType: 'userId' },
+      { pattern: /^\/admins\/([^/]+)\/?$/, requiredGroup: 'admins', redirectPath: '/admins/sign-in', idType: 'userId' },
     ];
 
     for (const { pattern, requiredGroup, redirectPath, idType } of protectedRoutes) {
+      console.log('Checking route:', event.url.pathname);
+
       const match = event.url.pathname.match(pattern);
       if (match) {
-        if (!user || !user.groups || !user.groups.includes(requiredGroup)) {
+        console.log('Matched route:', { pattern: pattern.toString(), requiredGroup, redirectPath, idType });
+        console.log('User:', user);
+        console.log('User groups:', user ? user.groups : 'No user');
+        console.log('Required group:', requiredGroup);
+
+        if (!user || !user.groups || !user.groups.some(group => group.toLowerCase() === requiredGroup.toLowerCase())) {
+          console.log('Authorization failed: user does not have required group');
           throw redirect(303, redirectPath);
         }
 
         const requestedUserId = match[1]; // The captured user ID from the URL
+        console.log('Requested User ID:', requestedUserId);
+        console.log('User ID:', user[idType]);
+
         if (user[idType] !== requestedUserId) {
-          // User is trying to access a resource that doesn't belong to them
+          console.log('Authorization failed: user ID mismatch');
           throw redirect(303, '/unauthorized');
         }
 
+        console.log('Authorization successful');
         break; // Exit the loop if we've found a matching route
+      } else {
+        console.log('Route did not match');
       }
     }
+
+    console.log('Finished checking protected routes');
   }
 
   // Set the user in event.locals only if we have a valid user

@@ -9,7 +9,7 @@ const schema = zfd.formData(
     email: zfd.text(z.string().email('Invalid email address')),
     password: zfd.text(passwordSchema),
     confirmPassword: zfd.text(passwordSchema),
-    userGroup: zfd.text(z.literal('merchant'))
+    userGroup: zfd.text(z.literal('merchants'))
   }).refine(data => {
     console.log('Refine data:', data);
     return data.password === data.confirmPassword;

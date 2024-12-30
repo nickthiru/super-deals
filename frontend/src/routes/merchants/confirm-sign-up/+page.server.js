@@ -3,17 +3,16 @@ import { fail, redirect } from '@sveltejs/kit';
 import schema from './schema.js';
 import Api from '$lib/api/_index.js';
 
-export const load = ({ cookies }) => {
-  return {
-    username: cookies.get('username')
-  };
-};
-
 export const actions = {
-  default: async ({ request, fetch }) => {
+  default: async ({ request, fetch, cookies }) => {
     const formData = await request.formData();
     const data = Object.fromEntries(formData);
     console.log('Received Form Data:', data); // Log the form data
+
+    // Add the username from the cookie to the form data
+    data.username = cookies.get('username');
+
+    console.log('Form Data (with username):', data);
 
     // Validate form data
     const validationResult = schema.safeParse(data);

@@ -3,7 +3,7 @@ const { zfd } = require('zod-form-data');
 const { zodToJsonSchema } = require('zod-to-json-schema');
 
 const schema = zodToJsonSchema(
-  zfd.formData({
+  z.object({
     email: zfd.text(z.string().email('Invalid email address')),
     password: zfd.text(z.string().min(8, 'Password must be at least 8 characters long'))
   }),

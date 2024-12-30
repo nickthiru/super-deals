@@ -3,12 +3,6 @@ const { z } = require('zod');
 const { zodToJsonSchema } = require('zod-to-json-schema');
 
 /**
- * Allowed file types for the deal logo.
- * @type {readonly string[]}
- */
-const allowedFileTypes = ['jpg', 'jpeg', 'png', 'gif'];
-
-/**
  * Enum values for the deal category.
  * @type {readonly string[]}
  */
@@ -28,8 +22,8 @@ const categoryEnum = [
  * @returns {import('zod').ZodType<DealFormSchema>}
  */
 const schema = zodToJsonSchema(
-  zfd.formData({
-    merchantId: zfd.text(z.string().min(1, 'Merchant ID is required')),
+  z.object({
+    userId: zfd.text(z.string().min(1, 'User ID is required')),
     title: zfd.text(z.string().min(1, 'Title is required').max(255, 'Title must be 255 characters or less')),
     originalPrice: zfd.numeric(z.number().min(1, 'Original Price is required').positive('Original Price must be a positive number')),
     discount: zfd.numeric(z.number().min(1, 'Discount is required').max(100, 'Discount must be between 1 and 100')),

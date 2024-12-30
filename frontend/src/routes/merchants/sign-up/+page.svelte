@@ -40,9 +40,6 @@
     {/if}
   </label>
 
-  <!-- Hidden field for user group information -->
-  <input type="hidden" name="userGroup" value="merchant">
-
   <button type="submit">Sign Up</button>
 </form>
 

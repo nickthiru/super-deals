@@ -1,5 +1,4 @@
 const { CognitoIdentityProviderClient, SignUpCommand, AdminAddUserToGroupCommand } = require("@aws-sdk/client-cognito-identity-provider");
-const { v4: uuidv4 } = require('uuid'); // Import UUID library to generate merchantId
 
 // Api object provides internal API-related helper functionality
 // such as standardized success and error responses
@@ -17,9 +16,6 @@ exports.handler = async (event) => {
   const userPoolId = process.env.USER_POOL_ID;
   const userPoolClientId = process.env.USER_POOL_CLIENT_ID;
 
-  // Generate a unique merchantId
-  const merchantId = uuidv4();
-
   try {
     const signUpResponse = await cognitoClient.send(new SignUpCommand({
       ClientId: userPoolClientId,
@@ -27,7 +23,6 @@ exports.handler = async (event) => {
       Password: data.password,
       UserAttributes: [
         { Name: "email", Value: data.email },
-        { Name: 'custom:merchantId', Value: merchantId },
         { Name: "custom:businessName", Value: data.businessName },
         { Name: "custom:userGroup", Value: data.userGroup }
       ]
@@ -40,16 +35,21 @@ exports.handler = async (event) => {
       GroupName: 'Merchants'
     }));
 
+
+    // Return success response
+    const successResponse = Api.success({
+      username: data.email,
+      message: "User account registered. Needs confirmation via OTP.",
+    });
+    console.log(`Success Response: ${JSON.stringify(successResponse, null, 2)}`);
+
+    return successResponse;
+
   } catch (error) {
     console.log(error);
-  };
 
-  // Return success response
-  const successResponse = Api.success({
-    username: data.email,
-    message: "User account registered. Needs confirmation via OTP.",
-  });
-  console.log(`Success Response: ${JSON.stringify(successResponse, null, 2)}`);
+    const errorResponse = Api.error(400, error.message || "Failed to register user account");
 
-  return successResponse;
+    return errorResponse;
+  }
 };

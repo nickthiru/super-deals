@@ -16,7 +16,7 @@ class AccountsStack extends Stack {
       auth,
     });
 
-    this.confirmSignUp = new ConfirmSignUpConstruct(this, "ConfrimSignUpConstruct", {
+    this.confirmSignUp = new ConfirmSignUpConstruct(this, "ConfirmSignUpConstruct", {
       auth,
     });
 
