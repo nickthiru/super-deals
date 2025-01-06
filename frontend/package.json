@@ -44,6 +44,7 @@
 	"dependencies": {
 		"@aws-sdk/client-cognito-identity": "^3.716.0",
 		"@aws-sdk/client-s3": "^3.717.0",
+		"@aws-sdk/credential-providers": "^3.716.0",
 		"@testing-library/jest-dom": "^6.6.2",
 		"@testing-library/svelte": "^5.2.4",
 		"@testing-library/user-event": "^14.5.2",

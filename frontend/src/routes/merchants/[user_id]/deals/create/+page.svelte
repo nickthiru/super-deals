@@ -1,73 +1,71 @@
 <script>
   import { enhance } from '$app/forms';
   import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-  import KSUID from "ksuid";
-  
-  import generateTempCredentials from '$lib/utils';
-  import backendOutputs from '../../../../backend/outputs.json';
+
+  import backendOutputs from '$backend-outputs';
   
   /** @type {import('./$types').PageData} */
-  export let { accessToken } = data;
+  export let data;
 
   /** @type {import('./$types').ActionData} */
   export let form;
 
+  const { 
+    userId, 
+    tempCredentials,
+    dealId,
+   } = data;
+
+   console.log('userId in +page.svelte:', userId);
+
+  const s3BucketName = backendOutputs.BackendStackdevStorageStack55F9793E.S3BucketName;
+
   async function handleEnhance({ formData }) {
     // Get the file from the form data
     const file = formData.get('logo');
+
+    // Generate a unique key for the file
+    const fileKey = `merchants/${userId}/deals/DEAL#${dealId}/logo/${file.name}`;
+    console.log('fileKey in handleEnhance:', fileKey);
     
-    if (file instanceof File) {
-      // Get the Cognito Identity Pool ID from outputs.json
-      const cognitoIdentityPoolId = backendOutputs.BackendStackdevAuthStackIdentityPoolStackDD35B90A.IdentityPoolId;
-
-      // Get the S3 bucket name from outputs.json
-      const s3BucketName = backendOutputs.BackendStackdevStorageStack55F9793E.S3BucketName;
-
-      // Generate temporary credentials
-      const credentials = await generateTempCredentials(accessToken, cognitoIdentityPoolId);
-
-      // Initialize S3 client
-      const s3Client = new S3Client({
-        region: "us-east-1",
-        credentials: credentials
-      });
-
-      // Generate a unique ID for the deal
-      const dealId = KSUID.randomSync(new Date()).string;
-
-      // Generate a unique key for the file
-      const fileKey = `merchants/${userId}/deals/DEAL#${dealId}/logo/${file.name}`;
-
+    if (file instanceof File && tempCredentials) {
       try {
+        const s3Client = new S3Client({
+          region: 'us-east-1',  // Preferably, this needs to be read from a config file
+          credentials: tempCredentials,
+        });
+
         console.log(`(+) Uploading logo to Bucket: ${s3BucketName}`);
-        await s3Client.send(
-          new PutObjectCommand({
+        await s3Client.send(new PutObjectCommand({
             Bucket: s3BucketName,
             Key: fileKey,
+            ACL: 'public-read',
             Body: file,
           })
         );
 
+        // Remove the file from formData
+        formData.delete('logo');
+        
         // Replace the file in formData with the S3 key
         formData.set('logoFileKey', fileKey);
 
-      } catch (error) {
+        // Add dealId to formData
+        formData.set('dealId', dealId);
 
+      } catch (error) {
         console.error("Error uploading file to S3", error);
-        // Handle error (maybe set an error in formData)
       }
     }
 
-    // You can add more processing here if needed
-
-    return async ({ result, update }) => {
-      // Handle the result of the form submission
-      if (result.type === 'success') {
-        // Maybe update some client-side state
-      }
-      // Always update the form to show any server-side errors
-      await update();
-    };
+    // return async ({ result, update }) => {
+    //   // Handle the result of the form submission
+    //   if (result.type === 'success') {
+    //     // Maybe update some client-side state
+    //   }
+    //   // Always update the form to show any server-side errors
+    //   await update();
+    // };
   }
 </script>
 

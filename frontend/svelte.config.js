@@ -28,6 +28,7 @@ const config = {
 			'$schemas': './src/schemas',
 			'$types': './src/types',
 			'$store': './src/store',
+			'$backend-outputs': '../backend/outputs.json'
 		}
 	},
 };

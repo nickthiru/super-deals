@@ -24,6 +24,7 @@ const categoryEnum = [
 const schema = zodToJsonSchema(
   z.object({
     userId: zfd.text(z.string().min(1, 'User ID is required')),
+    dealId: zfd.text(z.string().min(1, 'Deal ID is required')),
     title: zfd.text(z.string().min(1, 'Title is required').max(255, 'Title must be 255 characters or less')),
     originalPrice: zfd.numeric(z.number().min(1, 'Original Price is required').positive('Original Price must be a positive number')),
     discount: zfd.numeric(z.number().min(1, 'Discount is required').max(100, 'Discount must be between 1 and 100')),

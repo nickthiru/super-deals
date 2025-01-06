@@ -2,6 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 
 import schema from './schema.js';
 import Api from '$lib/api/_index.js';
+import Utils from '$lib/utils/_index.js';
 
 export const actions = {
   default: async ({ request, fetch, cookies }) => {
@@ -42,14 +43,16 @@ export const actions = {
     const responseBody = await response.json();
     console.log(`Response Body: ${JSON.stringify(responseBody, null, 2)}`);
 
-    // After successful sign-up
-    cookies.set('username', data.email, {
-      path: '/',
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: process.env.NODE_ENV === 'prod',
-      maxAge: 60 * 5 // 5 minutes, just enough time to complete confirmation
-    });
+    const maxAge = 60 * 5; // 5 minutes, just enough time to complete confirmation
+
+    Utils.createCookie(cookies, "username", data.email, maxAge);
+    // cookies.set('username', data.email, {
+    //   path: '/',
+    //   httpOnly: true,
+    //   sameSite: 'strict',
+    //   secure: process.env.NODE_ENV === 'prod',
+    //   maxAge: 60 * 5 // 5 minutes, just enough time to complete confirmation
+    // });
 
     return redirect(303, '/merchants/post-sign-up');
   }

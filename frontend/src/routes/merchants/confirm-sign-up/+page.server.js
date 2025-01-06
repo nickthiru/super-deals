@@ -48,6 +48,9 @@ export const actions = {
     //   message: responseBody.message,
     // };
 
+    // Delete the username cookie after successful confirmation
+    // cookies.delete('username');
+
     // Redirect to the sign-in page after successful confirmation
     throw redirect(303, `/merchants/sign-in`);
   }

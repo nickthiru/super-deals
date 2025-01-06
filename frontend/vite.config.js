@@ -29,6 +29,7 @@ export default defineConfig({
 			// '$backend': path.resolve(__dirname, '../backend'),
 			'$schemas': path.resolve(__dirname, './src/schemas'),
 			'$types': path.resolve(__dirname, './src/types'),
+			'$backend-outputs': path.resolve(__dirname, '../backend/outputs.json'),
 		}
 	},
 	optimizeDeps: {
