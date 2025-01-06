@@ -3,6 +3,7 @@ import { jwtDecode } from 'jwt-decode';
 
 import schema from './schema.js';
 import Api from '$lib/api/_index.js';
+import Utils from '$lib/utils/_index.js';
 
 export const actions = {
   default: async ({ request, fetch, cookies }) => {
@@ -39,45 +40,60 @@ export const actions = {
     const responseBody = await response.json();
     console.log(`Response Body: ${JSON.stringify(responseBody, null, 2)}`);
 
+    const {
+      accessToken,
+      idToken,
+      refreshToken,
+      expiresIn
+    } = responseBody;
+
     if (responseBody) {
       console.log('Attempting to set tokens in cookie');
 
-      cookies.set('accessToken', responseBody.accessToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7, // 1 week
-      });
+      const maxAge = (60 * 60 * 24 * 7);  // 1 week
+
+      Utils.createCookie(cookies, "accessToken", accessToken, maxAge);
+      // cookies.set('accessToken', responseBody.accessToken, {
+      //   httpOnly: true,
+      //   secure: true,
+      //   sameSite: 'strict',
+      //   path: '/',
+      //   maxAge: 60 * 60 * 24 * 7, // 1 week
+      // });
       console.log('AccessToken cookie set:', cookies.get('accessToken'));
 
-      cookies.set('idToken', responseBody.idToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7, // 1 week
-      });
+      Utils.createCookie(cookies, "idToken", idToken, maxAge);
+      // cookies.set('idToken', responseBody.idToken, {
+      //   httpOnly: true,
+      //   secure: true,
+      //   sameSite: 'strict',
+      //   path: '/',
+      //   maxAge: 60 * 60 * 24 * 7, // 1 week
+      // });
       console.log('idToken cookie set:', cookies.get('idToken'));
 
-      cookies.set('refreshToken', responseBody.refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7, // 1 week
-      });
+      Utils.createCookie(cookies, "refreshToken", refreshToken, maxAge);
+      // cookies.set('refreshToken', responseBody.refreshToken, {
+      //   httpOnly: true,
+      //   secure: true,
+      //   sameSite: 'strict',
+      //   path: '/',
+      //   maxAge: 60 * 60 * 24 * 7, // 1 week
+      // });
+      console.log('refreshToken cookie set:', cookies.get('refreshToken'));
 
-      cookies.set('expiresIn', responseBody.expiresIn, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7, // 1 week
-      });
+      Utils.createCookie(cookies, "expiresIn", expiresIn, maxAge);
+      // cookies.set('expiresIn', responseBody.expiresIn, {
+      //   httpOnly: true,
+      //   secure: true,
+      //   sameSite: 'strict',
+      //   path: '/',
+      //   maxAge: 60 * 60 * 24 * 7, // 1 week
+      // });
+      console.log('expiresIn cookie set:', cookies.get('expiresIn'));
 
       // Decode the access token to get the sub (user ID)
-      const decodedToken = jwtDecode(responseBody.idToken);
+      const decodedToken = jwtDecode(idToken);
       const userId = decodedToken.sub;
 
       // Redirect to the merchant's dashboard using the userId from the token

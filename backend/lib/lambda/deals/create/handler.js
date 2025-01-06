@@ -28,11 +28,8 @@ exports.handler = async (event) => {
   // Parse the environment variables containing stage-specific resource names
   const tableName = JSON.parse(process.env.TABLE_NAME);
 
-  // Generate a unique ID for the deal
-  const dealId = KSUID.randomSync(new Date()).string;
-
   // Prepare and save deal to DynamoDB
-  const saveDealResult = await saveDealToDynamoDB(data, dealId, tableName);
+  const saveDealResult = await saveDealToDynamoDB(data, tableName);
   if (!saveDealResult.success) {
     return Api.error(500, saveDealResult.error);
   }
@@ -51,18 +48,16 @@ exports.handler = async (event) => {
 /**
  * Save the deal to DynamoDB
  * @param {Object} deal - The deal data
- * @param {string} dealId - The unique deal ID
- * @param {string} logoS3Key - The S3 key for the deal logo
  * @param {string} dbTableName - The DynamoDB table name
  * @returns {Object} Save result
  */
-async function saveDealToDynamoDB(data, dealId, tableName) {
+async function saveDealToDynamoDB(data, tableName) {
   /** @type {DealItem} */
   const dealItem = {
-    PK: `DEAL#${dealId}`,
-    SK: `DEAL#${dealId}`,
+    PK: `DEAL#${data.dealId}`,
+    SK: `DEAL#${data.dealId}`,
     EntityType: "Deal",
-    Id: dealId,
+    Id: data.dealId,
     Title: data.title,
     OriginalPrice: parseFloat(deal.originalPrice),
     Discount: parseFloat(deal.discount),

@@ -38,7 +38,7 @@ class RolesStack extends Stack {
       )
     });
 
-    this.merchants = new Role(this, 'CognitoAdminRole', {
+    this.merchants = new Role(this, 'CognitoMerchantsRole', {
       assumedBy: new FederatedPrincipal('cognito-identity.amazonaws.com', {
         StringEquals: {
           'cognito-identity.amazonaws.com:aud': identityPool.pool.ref
@@ -55,11 +55,16 @@ class RolesStack extends Stack {
         actions: [
           "s3:PutObject",
         ],
-        resources: ["*"], // TODO: arn:${Partition}:s3:::${storage.bucket.bucketName}/${ObjectName}
+        resources: [`${storage.s3Bucket.bucketArn}/*`], // TODO: arn:${Partition}:s3:::${storage.bucket.bucketName}/${ObjectName}
+        // conditions: {
+        //   "DateLessThan": {
+        //     "aws:CurrentTime": '${aws:CurrentTime+3600}' // 1 hour from now
+        //   }
+        // },
       }));
 
 
-    /*** Attachments ***/
+    /*** Permission for Switch to Role ***/
 
     new CfnIdentityPoolRoleAttachment(this, 'IdentityPoolRoleAttachment', {
       identityPoolId: identityPool.pool.ref,

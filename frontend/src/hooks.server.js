@@ -2,6 +2,10 @@ import { redirect } from '@sveltejs/kit';
 import { jwtDecode } from 'jwt-decode';
 // import { csrf } from '@sveltejs/kit';
 
+import Utils from '$lib/utils/_index.js';
+
+import { isPublicRoute, findProtectedRoute } from '$lib/config/routes.js';
+
 // export const handle = csrf(handleAuth); // Use the csrf middleware when it's time to deploy to AWS
 export const handle = handleAuth;
 
@@ -14,102 +18,166 @@ export async function handleFetch({ event, request, fetch }) {
   return fetch(request);
 }
 
-export async function getSession({ locals }) {
+/** @type {import('@sveltejs/kit').HandleServerError} */
+export function handleError({ error, event }) {
+  console.error('Server error:', error, 'Stack:', error?.stack, 'Event:', event);
   return {
-    user: locals.user
+    message: 'An unexpected error occurred.',
+    code: error?.code ?? 'UNKNOWN'
   };
 }
 
 
 
 async function handleAuth({ event, resolve }) {
+  console.log('\n--- New Request ---');
+  try {
+    console.log('handleAuth started for path:', event.url.pathname);
+    const idToken = event.cookies.get('idToken');
+    console.log('ID Token:', idToken ? 'Present' : 'Not present');
 
-  const publicRoutes = [
-    /^\/public\/?$/,
-    /^\/merchants\/sign-up\/?$/,
-    /^\/merchants\/sign-in\/?$/,
-    /^\/merchants\/confirm-sign-up\/?$/,
-    /^\/customers\/sign-up\/?$/,
-    /^\/customers\/sign-in\/?$/,
-    /^\/customers\/confirm-sign-up\/?$/,
-    /^\/admins\/sign-in\/?$/,
-  ];
+    const currentPath = event.url.pathname;
 
-  // Check if the current route is public
-  const isPublicRoute = publicRoutes.some(route => route.test(event.url.pathname));
+    // Check if the current path matches any public route
+    const publicRoute = isPublicRoute(currentPath);
+    console.log('Is public route:', publicRoute);
 
-  const accessToken = event.cookies.get('accessToken');
-  console.log('Access Token:', accessToken ? 'Present' : 'Not present');
-  let user = null;
-
-  if (accessToken) {
-    try {
-      const decodedToken = jwtDecode(accessToken);
-      console.log('Decoded Token:', decodedToken);
-
-      // Server-side expiration check
-      const currentTime = Math.floor(Date.now() / 1000);
-      if (decodedToken.exp < currentTime) {
-        throw new Error('Token expired');
-      }
-
-      user = {
-        userId: decodedToken.sub,
-        groups: decodedToken['cognito:groups'],
-      };
-      console.log('User object:', user);
-
-    } catch (error) {
-      console.error('Invalid or expired token:', error);
-      event.cookies.delete('accessToken', { path: '/' });
-    }
-  }
-
-  if (!isPublicRoute) {
-    const protectedRoutes = [
-      { pattern: /^\/merchants\/([^/]+)\/?$/, requiredGroup: 'merchants', redirectPath: '/merchants/sign-in', idType: 'userId' },
-      { pattern: /^\/customers\/([^/]+)\/?$/, requiredGroup: 'customers', redirectPath: '/customers/sign-in', idType: 'userId' },
-      { pattern: /^\/admins\/([^/]+)\/?$/, requiredGroup: 'admins', redirectPath: '/admins/sign-in', idType: 'userId' },
-    ];
-
-    for (const { pattern, requiredGroup, redirectPath, idType } of protectedRoutes) {
-      console.log('Checking route:', event.url.pathname);
-
-      const match = event.url.pathname.match(pattern);
-      if (match) {
-        console.log('Matched route:', { pattern: pattern.toString(), requiredGroup, redirectPath, idType });
-        console.log('User:', user);
-        console.log('User groups:', user ? user.groups : 'No user');
-        console.log('Required group:', requiredGroup);
-
-        if (!user || !user.groups || !user.groups.some(group => group.toLowerCase() === requiredGroup.toLowerCase())) {
-          console.log('Authorization failed: user does not have required group');
-          throw redirect(303, redirectPath);
+    // Function to delete all auth-related cookies
+    const deleteAuthCookies = () => {
+      const cookiesToDelete = ['idToken', 'accessToken', 'refreshToken', 'username', 'expiresIn', 'tempCredentials'];
+      cookiesToDelete.forEach(cookieName => {
+        console.log(`Attempting to delete cookie: ${cookieName}`);
+        console.log(`Before deletion, ${cookieName} value:`, event.cookies.get(cookieName));
+        try {
+          Utils.deleteCookie(event.cookies, cookieName);
+          console.log(`After deletion attempt, ${cookieName} value:`, event.cookies.get(cookieName));
+        } catch (deletionError) {
+          console.error(`Error deleting cookie ${cookieName}:`, deletionError);
         }
+      });
 
-        const requestedUserId = match[1]; // The captured user ID from the URL
-        console.log('Requested User ID:', requestedUserId);
-        console.log('User ID:', user[idType]);
+      // Double-check all cookies
+      cookiesToDelete.forEach(cookieName => {
+        const cookieValue = event.cookies.get(cookieName);
+        console.log(`After deletion attempt, ${cookieName} is ${cookieValue ? 'still present' : 'successfully deleted'}`);
+      });
 
-        if (user[idType] !== requestedUserId) {
-          console.log('Authorization failed: user ID mismatch');
-          throw redirect(303, '/unauthorized');
-        }
+      // Specific check for tempCredentials
+      const tempCredentialsAfterDeletion = event.cookies.get('tempCredentials');
+      console.log('tempCredentials after deletion:', tempCredentialsAfterDeletion || 'successfully deleted');
+    };
 
-        console.log('Authorization successful');
-        break; // Exit the loop if we've found a matching route
-      } else {
-        console.log('Route did not match');
-      }
+    // If no idToken is present, delete all auth cookies
+    if (!idToken) {
+      console.log('No idToken found. Deleting all auth cookies.');
+      deleteAuthCookies();
     }
 
-    console.log('Finished checking protected routes');
-  }
+    if (!idToken && !publicRoute) {
+      console.log('No idToken found and not a public route. Redirecting to /public');
+      return new Response(null, {
+        status: 302,
+        headers: { Location: '/public' }
+      });
+    }
 
-  // Set the user in event.locals only if we have a valid user
-  if (user) {
-    event.locals.user = user;
-  }
+    if (idToken) {
+      try {
+        const decodedToken = jwtDecode(idToken);
+        console.log('Decoded Token:', decodedToken);
 
-  return await resolve(event);
+        // Server-side expiration check
+        const currentTime = Math.floor(Date.now() / 1000);
+        if (decodedToken.exp < currentTime) {
+          console.log('Token expired');
+          throw new Error('Token expired');
+        }
+
+        event.locals.user = {
+          userId: decodedToken.sub,
+          groups: decodedToken['cognito:groups'] || [],
+        };
+        console.log('User object:', event.locals.user);
+
+        // Check protected routes
+        const matchedProtectedRoute = findProtectedRoute(currentPath);
+        if (matchedProtectedRoute) {
+          console.log('Matched protected route:', matchedProtectedRoute);
+          const userGroups = event.locals.user.groups;
+          if (!userGroups.includes(matchedProtectedRoute.requiredGroup)) {
+            console.log('User not in required group. Redirecting to:', matchedProtectedRoute.redirectPath);
+            throw redirect(302, matchedProtectedRoute.redirectPath);
+          }
+          console.log('User authorized for protected route');
+        }
+
+      } catch (error) {
+        console.error('Error processing token:', error);
+
+        deleteAuthCookies();
+
+        event.locals.user = null;
+
+        // // Delete all authentication-related cookies
+        // const cookiesToDelete = ['idToken', 'accessToken', 'refreshToken', 'username', 'expiresIn', 'tempCredentials'];
+
+        // cookiesToDelete.forEach(cookieName => {
+        //   console.log(`Attempting to delete cookie: ${cookieName}`);
+        //   try {
+        //     Utils.deleteCookie(event.cookies, cookieName);
+        //     console.log(`Successfully deleted cookie: ${cookieName}`);
+        //   } catch (deletionError) {
+        //     console.error(`Error deleting cookie ${cookieName}:`, deletionError);
+        //   }
+        // });
+
+        // // Double-check all cookies
+        // cookiesToDelete.forEach(cookieName => {
+        //   const cookieValue = event.cookies.get(cookieName);
+        //   console.log(`After deletion attempt, ${cookieName} is ${cookieValue ? 'still present' : 'successfully deleted'}`);
+        // });
+
+        // // Specific check for tempCredentials
+        // const tempCredentialsAfterDeletion = event.cookies.get('tempCredentials');
+        // if (tempCredentialsAfterDeletion) {
+        //   console.error('Failed to delete tempCredentials cookie. Current value:', tempCredentialsAfterDeletion);
+        // } else {
+        //   console.log('tempCredentials cookie successfully deleted');
+        // }
+
+        // event.locals.user = null;
+
+        if (!publicRoute) {
+          console.log('Not a public route. Redirecting to /public');
+          return new Response(null, {
+            status: 302,
+            headers: { Location: '/public' }
+          });
+        }
+      }
+    } else {
+      console.log('No idToken found');
+
+      event.locals.user = null;
+
+      if (!publicRoute) {
+        console.log('Not a public route. Redirecting to /public');
+        throw redirect(302, '/public');
+      }
+    }
+
+    console.log('Calling resolve function');
+    const tempCredentialsBeforeResolve = event.cookies.get('tempCredentials');
+    console.log('Before resolve - tempCredentials:', tempCredentialsBeforeResolve || 'not found');
+    const result = await resolve(event);
+    console.log('Resolve function completed');
+
+    return result;
+
+  } catch (error) {
+    console.error('Unhandled error in hooks:', error);
+    return new Response('Internal Server Error', { status: 500 });
+  } finally {
+    console.log('handleAuth completed');
+  }
 }
