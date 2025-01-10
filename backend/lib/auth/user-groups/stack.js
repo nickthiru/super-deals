@@ -8,7 +8,6 @@ class UserGroupsStack extends Stack {
 
     const {
       userPool,
-      roles,
     } = props;
 
     new CfnUserPoolGroup(this, "CustomersGroup", {
@@ -19,7 +18,6 @@ class UserGroupsStack extends Stack {
     new CfnUserPoolGroup(this, "MerchantsGroup", {
       userPoolId: userPool.pool.userPoolId,
       groupName: "Merchants",
-      roleArn: roles.merchants.roleArn,
     });
 
     new CfnUserPoolGroup(this, "AdminsGroup", {

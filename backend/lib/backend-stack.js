@@ -5,8 +5,8 @@ const StorageStack = require('./storage/stack');
 const AuthStack = require('./auth/stack');
 const LambdaStack = require('./lambda/stack');
 const ApiStack = require('./api/stack');
-// const IamStack = require('./iam/stack');
-// const PermissionsStack = require('./permissions/stack');
+const PermissionsStack = require('./permissions/stack');
+const IamStack = require('./iam/stack');
 
 class BackendStack extends Stack {
   /**
@@ -31,7 +31,10 @@ class BackendStack extends Stack {
 
     const auth = new AuthStack(this, "AuthStack", {
       stage,
-      storage,
+    });
+
+    const iam = new IamStack(this, "IamStack", {
+      auth,
     });
 
     const lambda = new LambdaStack(this, "LambdaStack", {
@@ -39,22 +42,18 @@ class BackendStack extends Stack {
       db,
     });
 
-    const api = new ApiStack(this, "ApiStack", {
-      auth,
-      stage,
-      lambda,
+    const permissions = new PermissionsStack(this, "PermissionsStack", {
+      iam,
+      storage,
+      dealsResourceServer: auth.userPool.dealsResourceServer.resourceServer,
     });
 
-    // const iam = new IamStack(this, "IamStack", {
-    //   auth: authStacks,
-    //   storage: storageStacks,
-    // });
-
-    // Note that Amazon Verified Permissions may not be included in the free-tier AWS account
-    // new PermissionsStack(this, "PermissionsStack", {
-    //   auth: authStacks,
-    //   api,
-    // });
+    new ApiStack(this, "ApiStack", {
+      auth,
+      stage,
+      lambda,  // For HTTP API Lambda proxy integration
+      permissions,
+    });
   }
 }
 

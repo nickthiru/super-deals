@@ -1,4 +1,4 @@
-const { Stack, CfnOutput } = require("aws-cdk-lib");
+const { Stack, CfnOutput, CfnJson } = require("aws-cdk-lib");
 const { Role, FederatedPrincipal, PolicyStatement, Effect } = require("aws-cdk-lib/aws-iam");
 const { CfnIdentityPoolRoleAttachment } = require("aws-cdk-lib/aws-cognito");
 
@@ -8,13 +8,12 @@ class RolesStack extends Stack {
 
     const {
       auth,
-      storage,
     } = props;
 
-    this.authenticatedRole = new Role(this, 'CognitoDefaultAuthenticatedRole', {
+    this.authenticated = new Role(this, 'CognitoDefaultAuthenticatedRole', {
       assumedBy: new FederatedPrincipal('cognito-identity.amazonaws.com', {
         StringEquals: {
-          'cognito-identity.amazonaws.com:aud': auth.dev.identityPool.pool.ref
+          'cognito-identity.amazonaws.com:aud': auth.identityPool.pool.ref
         },
         'ForAnyValue:StringLike': {
           'cognito-identity.amazonaws.com:amr': 'authenticated'
@@ -24,10 +23,10 @@ class RolesStack extends Stack {
       )
     });
 
-    this.unAuthenticatedRole = new Role(this, 'CognitoDefaultUnauthenticatedRole', {
+    this.unAuthenticated = new Role(this, 'CognitoDefaultUnauthenticatedRole', {
       assumedBy: new FederatedPrincipal('cognito-identity.amazonaws.com', {
         StringEquals: {
-          'cognito-identity.amazonaws.com:aud': auth.dev.identityPool.pool.ref
+          'cognito-identity.amazonaws.com:aud': auth.identityPool.pool.ref
         },
         'ForAnyValue:StringLike': {
           'cognito-identity.amazonaws.com:amr': 'unauthenticated'
@@ -37,10 +36,10 @@ class RolesStack extends Stack {
       )
     });
 
-    this.merchantRole = new Role(this, 'CognitoAdminRole', {
+    this.merchant = new Role(this, 'CognitoMerchantRole', {
       assumedBy: new FederatedPrincipal('cognito-identity.amazonaws.com', {
         StringEquals: {
-          'cognito-identity.amazonaws.com:aud': auth.dev.identityPool.pool.ref
+          'cognito-identity.amazonaws.com:aud': auth.identityPool.pool.ref
         },
         'ForAnyValue:StringLike': {
           'cognito-identity.amazonaws.com:amr': 'authenticated'
@@ -49,30 +48,37 @@ class RolesStack extends Stack {
         'sts:AssumeRoleWithWebIdentity'
       )
     })
-      .addToPolicy(new PolicyStatement({
-        effect: Effect.ALLOW,
-        actions: [
-          "s3:PutObject",
-        ],
-        resources: ["*"], // TODO: arn:${Partition}:s3:::${storage.dev.bucket.bucketName}/${ObjectName}
-      }));
 
+    /*** Role Attachments ***/
 
-    /*** Attachments ***/
+    // Create a CfnJson resource to handle the dynamic provider name
+    const roleMappingsKey = new CfnJson(this, 'ProviderNameKey', {
+      value: auth.userPool.pool.userPoolProviderName
+    });
 
     new CfnIdentityPoolRoleAttachment(this, 'IdentityPoolRoleAttachment', {
-      identityPoolId: auth.dev.identityPool.pool.ref,
+      identityPoolId: auth.identityPool.pool.ref,
       roles: {
-        authenticated: this.authenticatedRole.roleArn,
-        unauthenticated: this.unAuthenticatedRole.roleArn,
+        authenticated: this.authenticated.roleArn,
+        unauthenticated: this.unAuthenticated.roleArn,
       },
       roleMappings: {
-        adminsMapping: {
-          type: 'Token',
-          ambiguousRoleResolution: "AuthenticatedRole",
-          identityProvider: `${auth.dev.userPool.pool.userPoolProviderName}:${auth.dev.userPool.poolClient.userPoolClientId}`,
-        },
-      },
+        [roleMappingsKey.ref]: {
+          type: 'Rules',
+          ambiguousRoleResolution: 'Deny',
+          identityProvider: `${auth.userPool.pool.userPoolProviderName}:${auth.userPool.poolClient.userPoolClientId}`,
+          rulesConfiguration: {
+            rules: [
+              {
+                claim: 'cognito:groups',
+                matchType: 'Contains',
+                value: 'Merchants',
+                roleArn: this.merchant.roleArn
+              }
+            ]
+          }
+        }
+      }
     });
   }
 }

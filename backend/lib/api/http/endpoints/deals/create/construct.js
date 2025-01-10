@@ -14,7 +14,6 @@ class CreateConstruct extends Construct {
       dealsResource,
     } = props;
 
-
     const model = new Model(this, `Model`, {
       restApi: http.restApi,
       contentType: 'application/json',
@@ -34,7 +33,7 @@ class CreateConstruct extends Construct {
       requestModels: {
         'application/json': model
       },
-      ...http.optionsWithAuth,
+      ...http.optionsWithAuth.writeDealsAuth, // Use write scope for deal creation
     });
   }
 }

@@ -1,34 +1,30 @@
 {
   "BackendStackdevDbStack47506585": {
-    "ExportsOutputFnGetAttTableV26B253703Arn9502DAD0": "arn:aws:dynamodb:us-east-1:654654543926:table/BackendStackdevDbStack47506585-TableV26B253703-5C1WCNB0NLOR",
-    "ExportsOutputRefTableV26B2537034F95C1C6": "BackendStackdevDbStack47506585-TableV26B253703-5C1WCNB0NLOR"
-  },
-  "BackendStackdevAuthStackUserPoolStack194876D6": {
-    "ExportsOutputFnGetAttUserPool6BA7E5F2Arn686ACC00": "arn:aws:cognito-idp:us-east-1:654654543926:userpool/us-east-1_g8hxbmeQo",
-    "UserPoolClientId": "5b9iqhkucjq3nfrg3t843vuuuu",
-    "UserPoolId": "us-east-1_g8hxbmeQo",
-    "ExportsOutputRefUserPoolUserPoolClient40176907044A36CF": "5b9iqhkucjq3nfrg3t843vuuuu",
-    "ExportsOutputRefUserPool6BA7E5F296FD7236": "us-east-1_g8hxbmeQo",
-    "ExportsOutputFnGetAttUserPool6BA7E5F2ProviderNameA3E1F80D": "cognito-idp.us-east-1.amazonaws.com/us-east-1_g8hxbmeQo"
+    "ExportsOutputFnGetAttTableV26B253703Arn9502DAD0": "arn:aws:dynamodb:us-east-1:654654543926:table/BackendStackdevDbStack47506585-TableV26B253703-16ERITIHQCW9U",
+    "ExportsOutputRefTableV26B2537034F95C1C6": "BackendStackdevDbStack47506585-TableV26B253703-16ERITIHQCW9U"
   },
   "BackendStackdevStorageStack55F9793E": {
-    "ExportsOutputFnGetAttS3Bucket07682993Arn6D6BF9FF": "arn:aws:s3:::backendstackdevstoragestack55f979-s3bucket07682993-z5qxszzvrfo3",
-    "S3BucketArn": "arn:aws:s3:::backendstackdevstoragestack55f979-s3bucket07682993-z5qxszzvrfo3",
-    "S3BucketName": "backendstackdevstoragestack55f979-s3bucket07682993-z5qxszzvrfo3"
+    "ExportsOutputFnGetAttS3Bucket07682993Arn6D6BF9FF": "arn:aws:s3:::backendstackdevstoragestack55f979-s3bucket07682993-yjzlevw3yeaq",
+    "S3BucketArn": "arn:aws:s3:::backendstackdevstoragestack55f979-s3bucket07682993-yjzlevw3yeaq",
+    "S3BucketName": "backendstackdevstoragestack55f979-s3bucket07682993-yjzlevw3yeaq"
+  },
+  "BackendStackdevAuthStackUserPoolStack194876D6": {
+    "ExportsOutputFnGetAttUserPool6BA7E5F2Arn686ACC00": "arn:aws:cognito-idp:us-east-1:654654543926:userpool/us-east-1_KPPAAk38o",
+    "UserPoolClientId": "24peau2m193o9t3i31cds3el8l",
+    "UserPoolId": "us-east-1_KPPAAk38o",
+    "ExportsOutputRefUserPoolUserPoolClient40176907044A36CF": "24peau2m193o9t3i31cds3el8l",
+    "ExportsOutputRefUserPool6BA7E5F296FD7236": "us-east-1_KPPAAk38o",
+    "UserPoolDomainName": "super-deals-dev",
+    "ExportsOutputFnGetAttUserPool6BA7E5F2ProviderNameA3E1F80D": "cognito-idp.us-east-1.amazonaws.com/us-east-1_KPPAAk38o"
   },
   "BackendStackdevLambdaStackDealsStackF7A38705": {
-    "ExportsOutputFnGetAttCreateConstructNodejsFunctionF17405C2ArnA5407F5F": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackdevLambdaStac-CreateConstructNodejsFun-LCI58aKfHYtl"
+    "ExportsOutputFnGetAttCreateConstructNodejsFunctionF17405C2ArnA5407F5F": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackdevLambdaStac-CreateConstructNodejsFun-N2bd949mGgWA"
   },
   "BackendStackdevAuthStackIdentityPoolStackDD35B90A": {
-    "ExportsOutputRefIdentityPoolF5C140BA": "us-east-1:85bc9cb9-bb50-4e4f-ac78-8fb455d6e53d",
-    "IdentityPoolId": "us-east-1:85bc9cb9-bb50-4e4f-ac78-8fb455d6e53d"
-  },
-  "BackendStackdevLambdaStackAccountsStack0C967C56": {
-    "ExportsOutputFnGetAttConfirmSignUpConstructNodejsFunction50813109ArnE97CD994": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackdevLambdaStac-ConfirmSignUpConstructNo-TNdraTduvKUa",
-    "ExportsOutputFnGetAttSignInConstructNodejsFunction7370E2A7Arn51A5C982": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackdevLambdaStac-SignInConstructNodejsFun-1TYzjjlBjyhr",
-    "ExportsOutputFnGetAttSignUpConstructNodejsFunction75CDDCFBArnDCC898BC": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackdevLambdaStac-SignUpConstructNodejsFun-8Cahhwp72oSF"
+    "ExportsOutputRefIdentityPoolF5C140BA": "us-east-1:0717bde2-dd6e-4127-b031-c3daee3dd49d",
+    "IdentityPoolId": "us-east-1:0717bde2-dd6e-4127-b031-c3daee3dd49d"
   },
   "BackendStackdevApiStackHttpStackA56AECB6": {
-    "RestApiUrldev": "https://8rm4msrm3g.execute-api.us-east-1.amazonaws.com/dev/"
+    "RestApiUrldev": "https://3bpt3gf1i2.execute-api.us-east-1.amazonaws.com/dev/"
   }
 }

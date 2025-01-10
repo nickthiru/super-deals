@@ -12,9 +12,11 @@ const publicRoutes = [
   /^\/merchants\/sign-up\/?$/,
   /^\/merchants\/sign-in\/?$/,
   /^\/merchants\/confirm-sign-up\/?$/,
+  /^\/merchants\/post-sign-up\/?$/,
   /^\/customers\/sign-up\/?$/,
   /^\/customers\/sign-in\/?$/,
   /^\/customers\/confirm-sign-up\/?$/,
+  /^\/customers\/post-sign-up\/?$/,
   /^\/admins\/sign-in\/?$/,
   /^\/favicon\.ico$/
 ];

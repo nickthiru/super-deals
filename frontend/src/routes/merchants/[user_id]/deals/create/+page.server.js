@@ -1,96 +1,84 @@
 import { fail, error } from '@sveltejs/kit';
 import { jwtDecode } from 'jwt-decode';
 import KSUID from "ksuid";
+import { fetchAuthSession } from 'aws-amplify/auth';
+import { S3Client } from "@aws-sdk/client-s3";
 
 import backendOutputs from '$backend-outputs';
 import getSchema from './schema.js';
 import Api from '$lib/api/_index.js';
 import Utils from '$lib/utils/_index.js';
 
+/**
+ * Server-side load function for the deal creation page
+ * Validates user authentication, authorization, and prepares necessary credentials
+ * @param {{ cookies: Object, locals: { user?: { userId?: string }, session?: Object } }} params
+ * @returns {Promise<{ userId: string, credentials: Object, dealId?: string }>}
+ */
 export async function load({ cookies, locals }) {
   console.log('Load function started');
   try {
-    console.log('tempCredentials at start of load:', cookies.get('tempCredentials'));
-
     const idToken = cookies.get('idToken');
     if (!idToken) {
       console.error('No idToken found in cookies');
       throw error(401, 'Not authenticated');
     }
 
-    const { user } = locals;
+    const { user, session } = locals;
     if (!user || !user.userId) {
       console.error('User not found in locals:', locals);
       throw error(401, 'User not found in locals');
     }
     console.log('userId in load function:', user.userId);
 
-    let tempCredentials = cookies.get('tempCredentials');
-    if (tempCredentials) {
-      try {
-        // tempCredentials = JSON.parse(tempCredentials);
-        // console.log('Parsed tempCredentials:', tempCredentials);
-
-        console.log('tempCredentials:', tempCredentials);
-
-        if (tempCredentials.expiration && new Date(tempCredentials.expiration) > new Date()) {
-          console.log('tempCredentials still valid');
-          return {
-            userId: user.userId,
-            tempCredentials
-          };
-        } else {
-          console.log('Deleting expired tempCredentials');
-          Utils.deleteCookie(cookies, 'tempCredentials');
-          console.log('tempCredentials after deletion:', cookies.get('tempCredentials'));
-        }
-      } catch (parseError) {
-        console.error('Error parsing tempCredentials:', parseError);
-      }
+    // Check if user has merchant permissions and can write deals
+    if (!Utils.auth.isMerchant(session) || !Utils.auth.canWriteDeals(session)) {
+      console.error('User lacks merchant or deal write permissions:', user.userId);
+      throw error(403, 'Insufficient permissions to create deals');
     }
 
-    const cognitoUserPoolId = backendOutputs.BackendStackdevAuthStackUserPoolStack194876D6.UserPoolId;
-    const cognitoIdentityPoolId = backendOutputs.BackendStackdevAuthStackIdentityPoolStackDD35B90A.IdentityPoolId;
-
     try {
-      tempCredentials = await Utils.generateTempCredentials(idToken, cognitoUserPoolId, cognitoIdentityPoolId);
-      console.log('Generated new tempCredentials:', tempCredentials);
-
-      const maxAge = calculateMaxAge(tempCredentials.expiration);
-      console.log('Calculated maxAge:', maxAge);
-
-      Utils.createCookie(cookies, 'tempCredentials', tempCredentials, maxAge);
-      console.log('tempCredentials cookie set');
+      // Get credentials from Amplify
+      const { credentials } = await fetchAuthSession();
+      if (!credentials) {
+        throw new Error('Failed to get AWS credentials');
+      }
 
       // Generate a unique ID for the deal
       const dealId = KSUID.randomSync(new Date()).string;
 
       return {
         userId: user.userId,
-        tempCredentials,
+        credentials,
         dealId,
+        s3BucketName: backendOutputs.BackendStackdevStorageStack55F9793E.S3BucketName
       };
     } catch (credError) {
-      console.error('Error generating temporary credentials:', credError);
-      throw error(500, 'Error generating temporary credentials');
+      console.error('Error getting AWS credentials:', credError);
+      throw error(500, 'Error getting AWS credentials');
     }
   } catch (loadError) {
     console.error('Unexpected error in load function:', loadError, 'Stack:', loadError?.stack);
     throw error(500, 'An unexpected error occurred during page load');
-  } finally {
-    console.log('tempCredentials at end of load:', cookies.get('tempCredentials'));
-    console.log('Load function completed');
   }
 }
 
 export const actions = {
-  default: async ({ request, fetch, cookies }) => {
+  /**
+   * @param {{ request: Request, fetch: Function, cookies: Object, locals: { session?: Object } }} params
+   * @returns {Promise<void>}
+   */
+  default: async ({ request, fetch, cookies, locals }) => {
     console.log('Action function started');
     try {
-      const formData = await request.formData();
-      const data = Object.fromEntries(formData);
-      console.log('Received form data:', data);
+      const { session } = locals;
 
+      // Verify merchant permissions and scopes
+      if (!Utils.auth.isMerchant(session) || !Utils.auth.canWriteDeals(session)) {
+        return fail(403, { error: 'Insufficient permissions to create deals' });
+      }
+
+      const formData = await request.formData();
       const idToken = cookies.get('idToken');
       if (!idToken) {
         console.error('No idToken found in cookies');
@@ -101,13 +89,13 @@ export const actions = {
         });
       }
 
-      const schema = getSchema();
-      console.log('Schema retrieved');
-
       try {
         const decodedToken = jwtDecode(idToken);
-        data.userId = decodedToken.sub;
-        console.log('Decoded token and added userId to form data');
+        formData.set('userId', decodedToken.sub);
+        console.log('Added userId to form data');
+
+        const schema = getSchema();
+        console.log('Schema retrieved');
 
         const result = schema.safeParse(formData);
         console.log("Validation result:", JSON.stringify(result, null, 2));
@@ -115,10 +103,8 @@ export const actions = {
         if (!result.success) {
           console.error('Form validation failed:', result.error);
           const errors = result.error.flatten().fieldErrors;
-          const returnData = { ...data };
-          delete returnData.logo;
           return fail(400, {
-            data: returnData,
+            data: Object.fromEntries(formData),
             errors,
           });
         }
@@ -126,7 +112,10 @@ export const actions = {
         console.log('Sending request to API');
         const response = await Api.send(fetch, "deals", {
           method: "POST",
-          body: formData,
+          body: JSON.stringify(Object.fromEntries(formData)),
+          headers: {
+            'Content-Type': 'application/json'
+          },
         });
         console.log(`Response Status: ${response.status}`);
         console.log(`Response StatusText: ${response.statusText}`);
@@ -159,10 +148,4 @@ export const actions = {
       console.log('Action function completed');
     }
   }
-}
-
-function calculateMaxAge(expirationDate) {
-  const now = new Date();
-  const expiration = new Date(expirationDate);
-  return Math.max(0, Math.floor((expiration - now) / 1000));
 }

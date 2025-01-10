@@ -1,9 +1,22 @@
 const { Stack } = require("aws-cdk-lib");
-const { RestApi, Cors, CognitoUserPoolsAuthorizer, AuthorizationType, EndpointType, MethodLoggingLevel } = require("aws-cdk-lib/aws-apigateway");
+const { RestApi, EndpointType, Cors, CognitoUserPoolsAuthorizer, AuthorizationType, MethodLoggingLevel } = require("aws-cdk-lib/aws-apigateway");
 
 const StageConstruct = require("./stage/construct");
 const EndpointsConstruct = require("./endpoints/construct");
+const AuthorizationConstruct = require("./authorization/construct");
 
+/**
+ * @typedef {Object} HttpStackProps
+ * @property {string} stage - Stage name (e.g., 'dev', 'prod')
+ * @property {import('../../auth/stack').AuthStack} auth - Auth stack
+ * @property {import('../../lambda/stack').LambdaStack} lambda - Lambda stack
+ * @property {import('../../permissions/stack').PermissionsStack} permissions - Permissions stack
+ */
+
+/**
+ * Stack for managing HTTP API Gateway
+ * Handles API endpoints, authorization, and stages
+ */
 class HttpStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
@@ -12,6 +25,7 @@ class HttpStack extends Stack {
       stage,
       auth,
       lambda,
+      permissions,
     } = props;
 
     /*** HTTP API ***/
@@ -30,22 +44,12 @@ class HttpStack extends Stack {
       stageName: stage,
     });
 
-    /*** Authorizer ***/
-
-    const authorizer = new CognitoUserPoolsAuthorizer(this, "CognitoUserPoolsAuthorizer", {
-      cognitoUserPools: [auth.userPool.pool],
-      identitySource: "method.request.header.Authorization",
+    /*** Authorization ***/
+    const authorization = new AuthorizationConstruct(this, 'Authorization', {
+      restApi: this.restApi,
+      auth,
+      permissions,
     });
-    authorizer._attachToApi(this.restApi);
-
-    // For any Resource that requires authenticated access, attach this to each Method endpoint. 
-    const optionsWithAuth = {
-      authorizationType: AuthorizationType.COGNITO,
-      authorizer: {
-        authorizerId: authorizer.authorizerId,
-      },
-    };
-
 
     /*** CORS ***/
 
@@ -57,7 +61,6 @@ class HttpStack extends Stack {
       }
     };
 
-
     /*** Endpoints ***/
 
     new EndpointsConstruct(this, "EndpointsConstruct", {
@@ -65,7 +68,7 @@ class HttpStack extends Stack {
       http: {
         restApi: this.restApi,
         optionsWithCors,
-        optionsWithAuth,
+        optionsWithAuth: authorization.authOptions.deals,
       }
     });
   }

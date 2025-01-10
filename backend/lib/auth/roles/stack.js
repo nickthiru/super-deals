@@ -1,4 +1,4 @@
-const { Stack, CfnOutput } = require("aws-cdk-lib");
+const { Stack } = require("aws-cdk-lib");
 const { Role, FederatedPrincipal, PolicyStatement, Effect } = require("aws-cdk-lib/aws-iam");
 const { CfnIdentityPoolRoleAttachment } = require("aws-cdk-lib/aws-cognito");
 
@@ -7,11 +7,11 @@ class RolesStack extends Stack {
     super(scope, id, props);
 
     const {
-      storage,
       userPool,
       identityPool,
     } = props;
 
+    // Create authenticated role
     this.authenticated = new Role(this, 'CognitoDefaultAuthenticatedRole', {
       assumedBy: new FederatedPrincipal('cognito-identity.amazonaws.com', {
         StringEquals: {
@@ -25,6 +25,7 @@ class RolesStack extends Stack {
       )
     });
 
+    // Create unauthenticated role
     this.unAuthenticated = new Role(this, 'CognitoDefaultUnauthenticatedRole', {
       assumedBy: new FederatedPrincipal('cognito-identity.amazonaws.com', {
         StringEquals: {
@@ -38,7 +39,8 @@ class RolesStack extends Stack {
       )
     });
 
-    this.merchants = new Role(this, 'CognitoMerchantsRole', {
+    // Create merchants role
+    this.merchants = new Role(this, 'MerchantsRole', {
       assumedBy: new FederatedPrincipal('cognito-identity.amazonaws.com', {
         StringEquals: {
           'cognito-identity.amazonaws.com:aud': identityPool.pool.ref
@@ -49,23 +51,9 @@ class RolesStack extends Stack {
       },
         'sts:AssumeRoleWithWebIdentity'
       )
-    })
-      .addToPolicy(new PolicyStatement({
-        effect: Effect.ALLOW,
-        actions: [
-          "s3:PutObject",
-        ],
-        resources: [`${storage.s3Bucket.bucketArn}/*`], // TODO: arn:${Partition}:s3:::${storage.bucket.bucketName}/${ObjectName}
-        // conditions: {
-        //   "DateLessThan": {
-        //     "aws:CurrentTime": '${aws:CurrentTime+3600}' // 1 hour from now
-        //   }
-        // },
-      }));
+    });
 
-
-    /*** Permission for Switch to Role ***/
-
+    // Create role mappings
     new CfnIdentityPoolRoleAttachment(this, 'IdentityPoolRoleAttachment', {
       identityPoolId: identityPool.pool.ref,
       roles: {
@@ -73,9 +61,9 @@ class RolesStack extends Stack {
         unauthenticated: this.unAuthenticated.roleArn,
       },
       roleMappings: {
-        adminsMapping: {
+        roleMapping: {
           type: 'Token',
-          ambiguousRoleResolution: "AuthenticatedRole",
+          ambiguousRoleResolution: 'AuthenticatedRole',
           identityProvider: `${userPool.pool.userPoolProviderName}:${userPool.poolClient.userPoolClientId}`,
         },
       },

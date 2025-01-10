@@ -1,9 +1,5 @@
 const { Construct } = require("constructs");
 
-const SignUpConstruct = require("./sign-up/construct");
-const ConfirmSignUpConstruct = require("./confirm-sign-up/construct");
-const SignInConstruct = require("./sign-in/construct");
-
 class AccountsConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id, props);
@@ -13,25 +9,12 @@ class AccountsConstruct extends Construct {
       lambda,
     } = props;
 
+    // Create the accounts resource but don't add auth endpoints
+    // since they're now handled by Cognito/Amplify directly
     const accountsResource = http.restApi.root.addResource("accounts", http.optionsWithCors);
 
-    new SignUpConstruct(this, "SignUpConstruct", {
-      http,
-      lambda,
-      accountsResource,
-    });
-
-    new ConfirmSignUpConstruct(this, "ConfirmSignUpConstruct", {
-      http,
-      lambda,
-      accountsResource,
-    });
-
-    new SignInConstruct(this, "SignInConstruct", {
-      http,
-      lambda,
-      accountsResource,
-    });
+    // Add any non-auth related account endpoints here
+    // For example: profile updates, account settings, etc.
   }
 }
 

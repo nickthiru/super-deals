@@ -8,12 +8,10 @@ class IamStack extends Stack {
 
     const {
       auth,
-      storage,
     } = props;
 
     this.roles = new RolesStack(this, "RolesStack", {
       auth,
-      storage,
     });
   }
 }

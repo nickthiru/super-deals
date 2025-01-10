@@ -44,8 +44,8 @@ class StorageStack extends Stack {
         ignorePublicAcls: false,
         restrictPublicBuckets: false
       },
-      versioned: true, // Enable versioning
-      encryption: BucketEncryption.S3_MANAGED, // Use S3-managed encryption
+      versioned: true,
+      encryption: BucketEncryption.S3_MANAGED,
     });
 
     // Output the bucket name

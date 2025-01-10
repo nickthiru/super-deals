@@ -1,5 +1,15 @@
 const { Stack, CfnOutput, RemovalPolicy, Duration } = require("aws-cdk-lib");
-const { UserPool, VerificationEmailStyle, AccountRecovery, CfnUserPoolGroup, UserPoolOperation, StringAttribute } = require("aws-cdk-lib/aws-cognito");
+const { 
+  UserPool, 
+  VerificationEmailStyle, 
+  AccountRecovery, 
+  UserPoolOperation, 
+  StringAttribute,
+  OAuthScope,
+  UserPoolDomain
+} = require("aws-cdk-lib/aws-cognito");
+
+const DealsResourceServerConstruct = require("./resource-servers/deals/construct");
 
 class UserPoolStack extends Stack {
   constructor(scope, id, props) {
@@ -47,32 +57,42 @@ class UserPoolStack extends Stack {
       removalPolicy: stage === "prod" ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
     });
 
-    // const clientWriteAttributes = (new cognito.ClientAttributes())
-    //   .withStandardAttributes({ fullname: true, email: true })
-    //   .withCustomAttributes('favouritePizza', 'favouriteBeverage');
-
-    // const clientReadAttributes = clientWriteAttributes
-    //   .withStandardAttributes({ emailVerified: true })
-    //   .withCustomAttributes('pointsEarned');
-
-    this.poolClient = this.pool.addClient(`UserPoolClient`, {
-      authFlows: { userPassword: true },
-      accessTokenValidity: Duration.hours(8),
-      // readAttributes: clientReadAttributes,
-      // writeAttributes: clientWriteAttributes,
+    // Create Cognito domain
+    this.domain = new UserPoolDomain(this, 'UserPoolDomain', {
+      userPool: this.pool,
+      cognitoDomain: {
+        domainPrefix: `super-deals-${stage}`
+      }
     });
 
+    // Create app client with OAuth scopes
+    this.poolClient = this.pool.addClient(`UserPoolClient`, {
+      generateSecret: true,
+      authFlows: {
+        userPassword: true,
+        adminUserPassword: true,
+      },
+      accessTokenValidity: Duration.hours(8),
+      oAuth: {
+        flows: {
+          authorizationCodeGrant: true,
+        },
+        scopes: [
+          OAuthScope.OPENID,
+          OAuthScope.EMAIL,
+          OAuthScope.PROFILE,
+        ],
+        callbackUrls: ['http://localhost:5173'],
+      },
+      preventUserExistenceErrors: true,
+    });
 
-    // // Create Lambda function for pre-sign-up logic
-    // const preSignUpFunction = new LambdaConstruct(this, "PreSignUpFunction");
-
-    // // Attach the Lambda function as a trigger to the User Pool
-    // this.pool.addTrigger(UserPoolOperation.PRE_SIGN_UP, preSignUpFunction);
-
+    // Create Deals Resource Server
+    this.dealsResourceServer = new DealsResourceServerConstruct(this, 'DealsResourceServer', {
+      userPool: this.pool,
+    });
 
     /*** Outputs ***/
-
-    // For web client Auth service
     new CfnOutput(this, `UserPoolId`, {
       value: this.pool.userPoolId,
       description: "Cognito user pool ID used by the web client's auth service",
@@ -83,6 +103,12 @@ class UserPoolStack extends Stack {
       value: this.poolClient.userPoolClientId,
       description: "Cognito user pool client ID used by the web client's auth service",
       exportName: `UserPoolClientId`
+    });
+
+    new CfnOutput(this, `UserPoolDomainName`, {
+      value: this.domain.domainName,
+      description: "Cognito domain for OAuth flows",
+      exportName: `UserPoolDomainName`
     });
   }
 }
