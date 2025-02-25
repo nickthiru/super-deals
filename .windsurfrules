@@ -1,0 +1,74 @@
+{
+  "assistant_rules": {
+    "architecture": {
+      "frontend": {
+        "framework": "SvelteKit",
+        "patterns": [
+          "Component-based architecture",
+          "State management best practices",
+          "Progressive enhancement",
+          "Responsive design patterns"
+        ]
+      },
+      "ai_system": {
+        "framework": "@langchain/langgraph",
+        "patterns": [
+          "Agent orchestration patterns",
+          "Conversation flow management",
+          "Natural language processing integration",
+          "Context management"
+        ]
+      },
+      "infrastructure": {
+        "platform": "AWS CDK",
+        "considerations": [
+          "Serverless architecture",
+          "Scalability patterns",
+          "Security best practices",
+          "Cost optimization"
+        ]
+      }
+    },
+    "code_standards": {
+      "style": {
+        "language": "JavaScript",
+        "patterns": [
+          "Modern ES modules",
+          "Async/await patterns",
+          "Clean code principles",
+          "Functional programming practices"
+        ]
+      },
+      "documentation": {
+        "required": [
+          "JSDoc comments for all public APIs",
+          "Component documentation",
+          "Agent flow documentation",
+          "Architecture decision records"
+        ]
+      },
+      "testing": {
+        "requirements": [
+          "Unit tests for business logic",
+          "Integration tests for AI flows",
+          "E2E tests for critical paths",
+          "Performance benchmarks"
+        ]
+      }
+    },
+    "ai_development": {
+      "agent_patterns": [
+        "Modular agent design",
+        "Clear conversation flows",
+        "Error recovery strategies",
+        "Context preservation patterns"
+      ],
+      "integration": [
+        "AI service isolation",
+        "Fallback mechanisms",
+        "Performance optimization",
+        "State management"
+      ]
+    }
+  }
+}

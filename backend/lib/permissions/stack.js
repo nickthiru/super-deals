@@ -72,26 +72,18 @@ class PermissionsStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const {
-      iam,
-      storage,
-      dealsResourceServer,
-    } = props;
+    const { iam, storage, auth } = props;
 
     // OAuth permissions integrated with existing UserPool
-    this.oauth = new OAuthPermissionsConstruct(this, 'OAuthPermissions', {
-      dealsResourceServer,
+    this.oauth = new OAuthPermissionsConstruct(this, "OAuthPermissions", {
+      auth,
     });
 
     // Create S3 access policy for merchants
     const merchantS3Policy = new PolicyStatement({
       effect: Effect.ALLOW,
-      actions: [
-        's3:PutObject',
-      ],
-      resources: [
-        `${storage.s3Bucket.bucketArn}/merchants/*`
-      ],
+      actions: ["s3:PutObject"],
+      resources: [`${storage.s3Bucket.bucketArn}/merchants/*`],
     });
 
     // Attach the policy only to the merchant role

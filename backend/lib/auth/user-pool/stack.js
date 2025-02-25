@@ -1,23 +1,20 @@
 const { Stack, CfnOutput, RemovalPolicy, Duration } = require("aws-cdk-lib");
-const { 
-  UserPool, 
-  VerificationEmailStyle, 
-  AccountRecovery, 
-  UserPoolOperation, 
+const {
+  UserPool,
+  VerificationEmailStyle,
+  AccountRecovery,
   StringAttribute,
   OAuthScope,
-  UserPoolDomain
+  UserPoolDomain,
 } = require("aws-cdk-lib/aws-cognito");
 
-const DealsResourceServerConstruct = require("./resource-servers/deals/construct");
+const ResourceServersStack = require("./resource-servers/stack");
 
 class UserPoolStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const {
-      stage,
-    } = props;
+    const { stage } = props;
 
     this.pool = new UserPool(this, `UserPool`, {
       selfSignUpEnabled: true,
@@ -29,7 +26,7 @@ class UserPoolStack extends Stack {
         requireSymbols: true,
       },
       signInAliases: {
-        email: true
+        email: true,
       },
       autoVerify: {
         email: true,
@@ -40,7 +37,8 @@ class UserPoolStack extends Stack {
       signInCaseSensitive: false,
       userVerification: {
         emailSubject: "Verify you email",
-        emailBody: "Thanks for signing up to our awesome app! Your verification code is {####}. This code is valid for 24 hours.",
+        emailBody:
+          "Thanks for signing up to our awesome app! Your verification code is {####}. This code is valid for 24 hours.",
         emailStyle: VerificationEmailStyle.CODE,
       },
       accountRecovery: AccountRecovery.EMAIL_ONLY,
@@ -48,21 +46,22 @@ class UserPoolStack extends Stack {
         email: {
           required: true,
           mutable: false,
-        }
+        },
       },
       customAttributes: {
         businessName: new StringAttribute({ mutable: true }),
         userGroup: new StringAttribute({ mutable: false }),
       },
-      removalPolicy: stage === "prod" ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
+      removalPolicy:
+        stage === "prod" ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
     });
 
     // Create Cognito domain
-    this.domain = new UserPoolDomain(this, 'UserPoolDomain', {
+    this.domain = new UserPoolDomain(this, "UserPoolDomain", {
       userPool: this.pool,
       cognitoDomain: {
-        domainPrefix: `super-deals-${stage}`
-      }
+        domainPrefix: `super-deals-${stage}`,
+      },
     });
 
     // Create app client with OAuth scopes
@@ -77,38 +76,40 @@ class UserPoolStack extends Stack {
         flows: {
           authorizationCodeGrant: true,
         },
-        scopes: [
-          OAuthScope.OPENID,
-          OAuthScope.EMAIL,
-          OAuthScope.PROFILE,
-        ],
-        callbackUrls: ['http://localhost:5173'],
+        scopes: [OAuthScope.OPENID, OAuthScope.EMAIL, OAuthScope.PROFILE],
+        callbackUrls: ["http://localhost:5173"],
       },
       preventUserExistenceErrors: true,
     });
 
-    // Create Deals Resource Server
-    this.dealsResourceServer = new DealsResourceServerConstruct(this, 'DealsResourceServer', {
-      userPool: this.pool,
-    });
+    /*** Resource Servers ***/
+    this.resourceServers = new ResourceServersStack(
+      this,
+      "ResourceServersStack",
+      {
+        userPool: this.pool,
+        stage,
+      }
+    );
 
     /*** Outputs ***/
     new CfnOutput(this, `UserPoolId`, {
       value: this.pool.userPoolId,
       description: "Cognito user pool ID used by the web client's auth service",
-      exportName: `UserPoolId`
+      exportName: `UserPoolId`,
     });
 
     new CfnOutput(this, `UserPoolClientId`, {
       value: this.poolClient.userPoolClientId,
-      description: "Cognito user pool client ID used by the web client's auth service",
-      exportName: `UserPoolClientId`
+      description:
+        "Cognito user pool client ID used by the web client's auth service",
+      exportName: `UserPoolClientId`,
     });
 
     new CfnOutput(this, `UserPoolDomainName`, {
       value: this.domain.domainName,
       description: "Cognito domain for OAuth flows",
-      exportName: `UserPoolDomainName`
+      exportName: `UserPoolDomainName`,
     });
   }
 }

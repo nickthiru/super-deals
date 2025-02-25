@@ -1,4 +1,3 @@
-/*
 Story: Add a deal
 
   As a merchant
@@ -111,5 +110,3 @@ FRONTEND:
       Page Server
 
         Submit form
-
-*/

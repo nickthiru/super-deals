@@ -1,5 +1,5 @@
-const { Construct } = require('constructs');
-const DealsOAuthPermissionsConstruct = require('./deals/construct');
+const { Construct } = require("constructs");
+const DealsOAuthPermissionsConstruct = require("./deals/construct");
 
 /**
  * @typedef {Object} OAuthPermissionsProps
@@ -14,11 +14,11 @@ class OAuthPermissionsConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id);
 
-    const { dealsResourceServer } = props;
+    const { auth } = props;
 
     // Deals permissions
-    this.deals = new DealsOAuthPermissionsConstruct(this, 'Deals', {
-      resourceServer: dealsResourceServer,
+    this.deals = new DealsOAuthPermissionsConstruct(this, "Deals", {
+      resourceServer: auth.userPool.resourceServers.deals.resourceServer,
     });
 
     // Future service permissions can be added here
