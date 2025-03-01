@@ -1,4 +1,6 @@
 import adapter from "@sveltejs/adapter-auto";
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+
 // import { readFileSync } from "fs";
 // import { join } from "path";
 // import { fileURLToPath } from "url";
@@ -11,7 +13,6 @@ import adapter from "@sveltejs/adapter-auto";
 // console.log(`backendOutputs: ${JSON.stringify(backendOutputs, null, 2)}`);
 // console.log(`STAGE: ${process.env.STAGE}`);
 // console.log(`REST_API_URL: ${backendOutputs["BackendStackApiStackHttpStackA5B3EBBB"][`RestApiUrl${process.env.STAGE}`]}`);
-
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -28,9 +29,12 @@ const config = {
 			'$schemas': './src/schemas',
 			'$types': './src/types',
 			'$store': './src/store',
-			'$backend-outputs': '../backend/outputs.json'
+			'$backend-outputs': '../backend/outputs.json',
+			'$lib': './src/lib',
+			'$lib/*': './src/lib/*'
 		}
 	},
+	preprocess: vitePreprocess()
 };
 
 export default config;

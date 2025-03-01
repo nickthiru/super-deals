@@ -1,11 +1,42 @@
 <script>
   import { signInWithRedirect } from 'aws-amplify/auth';
   import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
   
   let email = '';
   let password = '';
+  /** @type {string | null} */
   let error = null;
   let isLoading = false;
+
+  onMount(() => {
+    // Ensure we're running in the browser
+    if (typeof window !== 'undefined') {
+      // Check if we have a code parameter in the URL (OAuth redirect)
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      if (code) {
+        // Handle the OAuth redirect
+        handleOAuthRedirect();
+      }
+    }
+  });
+
+  /**
+   * Handle OAuth redirect after successful sign-in
+   */
+  async function handleOAuthRedirect() {
+    try {
+      isLoading = true;
+      await signInWithRedirect();
+      goto('/merchants/dashboard');
+    } catch (err) {
+      console.error('OAuth redirect error:', err);
+      error = 'Failed to complete sign in. Please try again.';
+    } finally {
+      isLoading = false;
+    }
+  }
 
   /**
    * Handle merchant sign-in using Amplify
@@ -17,103 +48,107 @@
     isLoading = true;
 
     try {
-      await signInWithRedirect({
-        username: email,
-        password,
-        provider: 'Cognito'
-      });
+      // Use signInWithRedirect without credentials for OAuth flow
+      await signInWithRedirect();
     } catch (err) {
       console.error('Sign in error:', err);
-      error = err.message || 'Failed to sign in. Please try again.';
+      error = err instanceof Error ? err.message : 'Failed to sign in. Please try again.';
       isLoading = false;
     }
   }
 </script>
 
-<h1 id="sign-in-title">Merchant Sign-In</h1>
+<div class="merchant-sign-in">
+  <h1 id="sign-in-title">Merchant Sign-In</h1>
 
-<form on:submit={handleSignIn} aria-labelledby="sign-in-title">
-  <label>
-    Email
-    <input 
-      bind:value={email}
-      type="email" 
-      required
-      disabled={isLoading}
-    >
-  </label>
+  <form on:submit={handleSignIn} aria-labelledby="sign-in-title">
+    <label>
+      Email
+      <input 
+        bind:value={email}
+        type="email" 
+        required
+        disabled={isLoading}
+      >
+    </label>
 
-  <label>
-    Password
-    <input 
-      bind:value={password}
-      type="password" 
-      required 
-      minlength="8"
-      disabled={isLoading}
-    >
-  </label>
+    <label>
+      Password
+      <input 
+        bind:value={password}
+        type="password" 
+        required 
+        minlength="8"
+        disabled={isLoading}
+      >
+    </label>
 
-  {#if error}
-    <p class="error">{error}</p>
-  {/if}
-
-  <button type="submit" disabled={isLoading}>
-    {#if isLoading}
-      Signing in...
-    {:else}
-      Sign In
+    {#if error}
+      <p class="error">{error}</p>
     {/if}
-  </button>
-</form>
+
+    <button type="submit" disabled={isLoading}>
+      {#if isLoading}
+        Signing in...
+      {:else}
+        Sign In
+      {/if}
+    </button>
+  </form>
+</div>
 
 <style>
+  .merchant-sign-in {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: var(--container-padding);
+  }
+
   form {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    max-width: 400px;
-    margin: 0 auto;
+    gap: var(--size-4);
   }
 
   label {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--size-2);
   }
 
   input {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: var(--size-2);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-2);
   }
 
   input:disabled {
-    background-color: #f5f5f5;
+    background-color: var(--surface-secondary);
     cursor: not-allowed;
   }
 
   .error {
-    color: tomato;
+    color: var(--status-error);
     margin: 0;
   }
 
   button {
-    padding: 0.5rem 1rem;
-    background: #4CAF50;
-    color: white;
+    padding: var(--size-2) var(--size-4);
+    background: var(--interactive-primary);
+    color: var(--text-inverse);
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-2);
     cursor: pointer;
-    font-size: 1rem;
+    font-size: var(--font-size-1);
+    transition: background var(--transition-base);
   }
 
   button:hover:not(:disabled) {
-    background: #45a049;
+    background: var(--interactive-primary-hover);
   }
 
   button:disabled {
-    background: #cccccc;
+    background: var(--surface-tertiary);
     cursor: not-allowed;
   }
 </style>

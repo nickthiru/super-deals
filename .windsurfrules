@@ -8,7 +8,145 @@
           "State management best practices",
           "Progressive enhancement",
           "Responsive design patterns"
-        ]
+        ],
+        "css_framework": {
+          "primary": "Tailwind CSS",
+          "patterns": [
+            "Utility-first CSS approach",
+            "Component-specific customizations",
+            "Consistent design tokens",
+            "Responsive utilities"
+          ],
+          "configuration": {
+            "customization": {
+              "colors": "Extend theme with brand colors",
+              "spacing": "Use Tailwind's default spacing scale",
+              "breakpoints": "Follow Tailwind's responsive design system"
+            },
+            "organization": [
+              "Group related utilities with @apply when needed",
+              "Keep utility classes in templates for better visibility",
+              "Extract common patterns into components",
+              "Use Tailwind's plugin system for custom utilities"
+            ]
+          }
+        },
+        "design_system": {
+          "tool": "UX Pilot AI",
+          "workflow": [
+            "AI-driven wireframing and prototyping",
+            "High-fidelity design generation",
+            "Screen flow automation",
+            "Figma integration"
+          ],
+          "implementation": [
+            "Generated code adaptation to SvelteKit",
+            "Component pattern consistency",
+            "Design system adherence",
+            "Accessibility standards"
+          ],
+          "ux_pilot_integration": {
+            "process": [
+              "Extract common elements from <head> section to app.html and app.css",
+              "Extract color theme variables to app.css",
+              "Configure Tailwind to use theme colors",
+              "Create reusable layout components",
+              "Convert screen-specific content to Svelte components"
+            ],
+            "head_section_handling": {
+              "fonts": "Move Google Fonts imports to app.html",
+              "icons": "Move Font Awesome or other icon libraries to app.html",
+              "global_styles": "Move global styles to app.css"
+            },
+            "color_management": {
+              "approach": [
+                "Extract CSS variables for colors to app.css",
+                "Add brand colors to tailwind.config.js",
+                "Use semantic color classes instead of hex values",
+                "Support both light and dark themes"
+              ],
+              "implementation": [
+                "For recurring brand colors, add to tailwind.config.js (e.g., facebook: { DEFAULT: '#3B5998', dark: '#2d4373' })",
+                "For one-off colors, use Tailwind's bracket notation (e.g., text-[#3B5998])",
+                "Maintain consistent color naming across components"
+              ]
+            },
+            "component_conversion": {
+              "steps": [
+                "Remove HTML boilerplate and <head> content",
+                "Keep only the main content section",
+                "Replace hardcoded values with Svelte variables",
+                "Extract repeated elements into reusable components"
+              ],
+              "best_practices": [
+                "Convert inline styles to Tailwind classes",
+                "Move JavaScript to Svelte's <script> section",
+                "Use Svelte's reactive paradigm instead of imperative JavaScript",
+                "Download and store images locally instead of using external URLs"
+              ]
+            },
+            "troubleshooting": [
+              "Verify custom colors are defined in Tailwind config",
+              "Check for missing container elements or structural differences",
+              "Ensure all font and icon libraries are properly imported",
+              "Convert vanilla JavaScript to Svelte's reactive paradigm"
+            ]
+          },
+          "component_workflow": [
+            "Generate atomic components via UX Pilot AI",
+            "Implement using Tailwind utilities",
+            "Structure as reusable Svelte components",
+            "Document component API and usage patterns"
+          ],
+          "component_organization": {
+            "principles": [
+              "Atomic design principles",
+              "Feature-based grouping",
+              "Shared component library",
+              "Clear component interfaces"
+            ],
+            "structure": {
+              "shared": {
+                "purpose": "Reusable components across the application",
+                "location": "frontend/src/lib/components/shared",
+                "categories": [
+                  "Basic UI elements (Button, Text, Link)",
+                  "Common patterns (Card, Form)",
+                  "Layout components (Grid, Stack)",
+                  "Composite components (NavBar, Footer)"
+                ],
+                "naming": "Generic, purpose-describing names (Button.svelte)"
+              },
+              "pages": {
+                "purpose": "Page-specific components and sections",
+                "location": "frontend/src/lib/components/pages/{page-name}",
+                "organization": {
+                  "sections": {
+                    "purpose": "Major page-specific assemblies",
+                    "naming": "{PageName}{Purpose}Section.svelte",
+                    "composition": "Combines shared and page-specific components"
+                  },
+                  "components": {
+                    "purpose": "Components unique to page sections",
+                    "location": "pages/{page-name}/components",
+                    "naming": "Descriptive of specific use",
+                    "scope": "Used only within page sections"
+                  }
+                }
+              }
+            },
+            "styling": {
+              "approach": "Utility-first with Tailwind CSS",
+              "location": "Inline utility classes with component-specific styles in <style>",
+              "patterns": [
+                "Use Tailwind utilities for layout and styling",
+                "Extract common patterns with @apply",
+                "Define variants using dynamic classes",
+                "Maintain responsive design with Tailwind breakpoints"
+              ]
+            }
+          }
+        }
       },
       "ai_system": {
         "framework": "@langchain/langgraph",
@@ -44,7 +182,9 @@
           "JSDoc comments for all public APIs",
           "Component documentation",
           "Agent flow documentation",
-          "Architecture decision records"
+          "Architecture decision records",
+          "Design prompt patterns and outcomes",
+          "UI generation workflows"
         ]
       },
       "testing": {
@@ -52,23 +192,10 @@
           "Unit tests for business logic",
           "Integration tests for AI flows",
           "E2E tests for critical paths",
-          "Performance benchmarks"
+          "Performance benchmarks",
+          "Design system compliance checks"
         ]
       }
-    },
-    "ai_development": {
-      "agent_patterns": [
-        "Modular agent design",
-        "Clear conversation flows",
-        "Error recovery strategies",
-        "Context preservation patterns"
-      ],
-      "integration": [
-        "AI service isolation",
-        "Fallback mechanisms",
-        "Performance optimization",
-        "State management"
-      ]
     }
   }
 }

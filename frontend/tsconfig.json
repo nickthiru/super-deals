@@ -8,13 +8,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
-    "strict": true,
-    "paths": {
-      "$lib": ["./src/lib"],
-      "$lib/*": ["./src/lib/*"],
-      "$types": ["./src/types"],
-      "$types/*": ["./src/types/*"]
-    }
+    "strict": true
   },
   "include": [
     ".svelte-kit/types/**/$types.d.ts",
@@ -23,6 +17,14 @@
     ".svelte-kit/types/src/**/*.svelte",
     "src/**/*.js",
     "src/**/*.ts",
-    "src/**/*.svelte"
+    "src/**/*.svelte",
+    "src/lib/components/Homepage.svelte.bak",
+    "src/routes/public/page2.svelte.bak",
+    "src/routes/public/page.svelte.bak",
+    "src/routes/page.svelte.bak",
+    "src/routes/layout.svelte.bak",
+    "src/lib/components/pages/home/HomePage.svelte.bak",
+    "src/routes/public/layout.svelte.bak",
+    "src/routes/merchants/sign-up/page.svelte.bak"
   ]
 }

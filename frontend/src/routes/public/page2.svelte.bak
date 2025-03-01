@@ -1,0 +1,34 @@
+<script>
+  import { setContext } from "svelte";
+  import Header from '$lib/components/shared/Header/Header.svelte';
+  import FeaturedDealsSection from '$lib/components/pages/home/sections/FeaturedDealsSection.svelte';
+  import CategoriesSection from '$lib/components/pages/home/sections/CategoriesSection.svelte';
+  import LatestDealsSection from '$lib/components/pages/home/sections/LatestDealsSection.svelte';
+  import MerchantCtaSection from '$lib/components/pages/home/sections/MerchantCtaSection.svelte';
+
+  /** @type {import('./$types').PageData} */
+  export let data;
+
+  setContext("categories", data.categories);
+</script>
+
+<div class="page">
+  <Header />
+  <main>
+    <FeaturedDealsSection />
+    <CategoriesSection />
+    <LatestDealsSection />
+    <MerchantCtaSection />
+  </main>
+</div>
+
+<style>
+  .page {
+    min-height: 100vh;
+    background-color: var(--gray-50);
+  }
+
+  main {
+    padding-top: var(--size-20);
+  }
+</style>

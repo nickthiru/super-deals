@@ -1,19 +1,16 @@
-<div class={$$props.class}>
+<script>
+  /** @type {string} */
+  export let className = '';
+</script>
+
+<div class="container mx-auto px-6 {className}">
   <slot />
 </div>
 
-
 <style>
-  .app {
-    min-width: 375px;
-    padding-inline: 20px;
+  .container {
+    width: 100%;
+    max-width: var(--max-width-content);
     margin-inline: auto;
-    margin-block: 20px;
   }
-
-  /* @media (width >= 90rem) {
-    .app {
-      max-width: 960px;
-    }
-  } */
 </style>

@@ -1,7 +1,14 @@
 /**
  * Authentication configuration for AWS Cognito
- * @type {import('@aws-amplify/auth').AuthConfig}
+ * @typedef {Object} AuthConfig
+ * @property {Object} Cognito - Cognito configuration
+ * @property {string} Cognito.userPoolId - User pool ID
+ * @property {string} Cognito.userPoolClientId - User pool client ID
+ * @property {Object} Cognito.loginWith - Login configuration
+ * @property {Object} Cognito.loginWith.oauth - OAuth configuration
  */
+
+/** @type {AuthConfig} */
 export const authConfig = {
   Cognito: {
     userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID,
@@ -11,8 +18,15 @@ export const authConfig = {
         domain: import.meta.env.VITE_COGNITO_DOMAIN,
         scopes: ['openid', 'email', 'profile', 'deals/read', 'deals/write', 'deals/delete'],
         responseType: 'code',
-        redirectSignIn: ['http://localhost:5173'],
-        redirectSignOut: ['http://localhost:5173'],
+        redirectSignIn: [
+          'http://localhost:5173',
+          'http://localhost:5173/merchants/sign-in',
+          'http://localhost:5173/merchants/dashboard'
+        ],
+        redirectSignOut: [
+          'http://localhost:5173',
+          'http://localhost:5173/merchants/sign-in'
+        ],
       }
     }
   }

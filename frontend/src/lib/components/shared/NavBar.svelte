@@ -1,31 +1,11 @@
 <script>
-  import Link from "$lib/components/shared/Link.svelte";
-  import Text from "$lib/components/shared/Text.svelte";
+  /** @type {string} */
+  export let className = '';
 </script>
 
-
-<nav>
-  <Link class="nav">
-    <Text class="sm">Home</Text>
-  </Link>
-  <Link class="nav">
-    <Text class="sm">Brands</Text>
-  </Link>
-  <Link class="nav">
-    <Text class="sm">Editor's Choice</Text>
-  </Link>
+<nav class="hidden md:flex ml-8 space-x-6 {className}">
+  <a href="/" class="text-gray-600 hover:text-primary">Front Page</a>
+  <a href="/brands" class="text-gray-600 hover:text-primary">Brands</a>
+  <a href="/editors-choice" class="text-gray-600 hover:text-primary">Editor's Choice</a>
+  <a href="/settings" class="text-gray-600 hover:text-primary">Settings</a>
 </nav>
-
-
-<style>
-  nav {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    height: 50px;
-    border: 1px solid black;
-  }
-</style>

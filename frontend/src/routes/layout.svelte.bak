@@ -1,0 +1,24 @@
+<script>
+  import { onMount } from 'svelte';
+  import { auth } from '$lib/stores/auth';
+  import '../app.css';
+  // Uncomment the line below to use Font Awesome from npm instead of CDN
+  // import '@fortawesome/fontawesome-free/css/all.min.css';
+  import Header from '$lib/components/shared/Header/Header.svelte';
+  import Container from '$lib/components/shared/layout/Container.svelte';
+
+  /** @type {import('./$types').LayoutData | null} */
+  export const data = null;
+
+  onMount(() => {
+    auth.initialize();
+  });
+</script>
+
+<!-- <Header />
+
+<Container className="app">
+  <slot />
+</Container> -->
+
+<slot />

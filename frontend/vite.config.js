@@ -20,6 +20,11 @@ export default defineConfig({
 			'./vitest/register-matchers.js',
 			'./vitest/clean-up-dom.js'
 		],
+		coverage: {
+			provider: 'v8',
+			reporter: ['text', 'json', 'html'],
+			reportsDirectory: './coverage'
+		}
 	},
 	resolve: {
 		alias: {

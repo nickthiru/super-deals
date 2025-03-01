@@ -1,23 +1,49 @@
-<button class={$$props.class}>
+<script>
+  export let variant = 'primary';
+  export let size = 'md';
+  export let type = 'button';
+</script>
+
+<button
+  {type}
+  class="button"
+  class:primary={variant === 'primary'}
+  class:secondary={variant === 'secondary'}
+  class:sm={size === 'sm'}
+  class:md={size === 'md'}
+  class:lg={size === 'lg'}
+  on:click
+>
   <slot />
 </button>
 
-
 <style>
-  button {
-    border-radius: 3px;
-    display: inline-block;
-    cursor: pointer;
-    font-size: var(--font-size-1);
+  .button {
+    font-family: var(--font-sans);
     font-weight: var(--font-weight-6);
-    padding: 13px 40px;
-    border: 0;
-    transition: background-color 200ms, color 200ms;
+    border-radius: var(--radius-3);
+    transition: background-color var(--transition-ease-out);
+    cursor: pointer;
   }
 
-  .outline {
-    box-shadow: 1px 1px 7px #c4c4c4;
-    padding: 8px 25px;
-    border-radius: 10px;
+  .primary {
+    background-color: var(--brand);
+    color: var(--gray-0);
   }
+
+  .primary:hover {
+    background-color: var(--brand-dark);
+  }
+
+  .secondary {
+    color: var(--brand);
+  }
+
+  .secondary:hover {
+    color: var(--brand-dark);
+  }
+
+  .sm { padding: var(--size-2) var(--size-3); }
+  .md { padding: var(--size-3) var(--size-4); }
+  .lg { padding: var(--size-4) var(--size-6); }
 </style>

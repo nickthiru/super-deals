@@ -1,0 +1,31 @@
+<script>
+  import Header from '$lib/components/shared/layout/header/Header.svelte';
+  import Footer from '$lib/components/shared/layout/footer/Footer.svelte';
+  import CategoriesSection from './sections/CategoriesSection.svelte';
+  import DealsSection from './sections/DealsSection.svelte';
+  import MerchantPromotion from './sections/MerchantPromotion.svelte';
+</script>
+
+<div class="homepage">
+  <Header />
+  <main>
+    <CategoriesSection />
+    <DealsSection />
+    <MerchantPromotion />
+  </main>
+  <Footer />
+</div>
+
+<style>
+  .homepage {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+</style>

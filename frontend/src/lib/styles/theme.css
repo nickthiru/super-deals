@@ -1,0 +1,59 @@
+/* Theme Variables */
+:root {
+  /* Color System */
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
+  
+  /* Surface Colors */
+  --surface-primary: var(--gray-0);
+  --surface-secondary: var(--gray-50);
+  --surface-tertiary: var(--gray-100);
+  
+  /* Text Colors */
+  --text-primary: var(--gray-900);
+  --text-secondary: var(--gray-600);
+  --text-tertiary: var(--gray-400);
+  --text-inverse: var(--gray-0);
+  
+  /* Interactive Colors */
+  --interactive-primary: var(--brand);
+  --interactive-primary-hover: var(--brand-dark);
+  --interactive-secondary: var(--gray-600);
+  --interactive-secondary-hover: var(--gray-700);
+  
+  /* Border Colors */
+  --border-light: var(--gray-200);
+  --border-medium: var(--gray-300);
+  
+  /* Status Colors */
+  --status-success: var(--green-500);
+  --status-warning: var(--yellow-500);
+  --status-error: var(--red-500);
+  --status-info: var(--blue-500);
+  
+  /* Component Specific */
+  --card-background: var(--surface-primary);
+  --header-background: var(--surface-primary);
+  --footer-background: var(--gray-900);
+  --button-primary-background: var(--interactive-primary);
+  --button-primary-hover: var(--interactive-primary-hover);
+}
+
+/* Dark Theme (prepared for future use) */
+[data-theme="dark"] {
+  --surface-primary: var(--gray-900);
+  --surface-secondary: var(--gray-800);
+  --surface-tertiary: var(--gray-700);
+  
+  --text-primary: var(--gray-0);
+  --text-secondary: var(--gray-300);
+  --text-tertiary: var(--gray-500);
+  --text-inverse: var(--gray-900);
+  
+  --border-light: var(--gray-700);
+  --border-medium: var(--gray-600);
+  
+  --card-background: var(--surface-primary);
+  --header-background: var(--surface-primary);
+  --footer-background: var(--gray-950);
+}
