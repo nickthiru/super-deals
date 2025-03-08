@@ -2,11 +2,15 @@
   import { signUp } from 'aws-amplify/auth';
   import { goto } from '$app/navigation';
   import { z } from 'zod';
+  import Header from '$lib/components/shared/Header/Header.svelte';
+  import SimpleFooter from '$lib/components/shared/layout/footer/SimpleFooter.svelte';
+  import MerchantSignUpSection from '$lib/components/pages/merchants/sign-up/MerchantSignUpSection.svelte';
   
   let businessName = '';
   let email = '';
   let password = '';
   let confirmPassword = '';
+  /** @type {string|null} */
   let error = null;
   let isLoading = false;
 
@@ -30,7 +34,7 @@
   /**
    * Validate form data using Zod schema
    * @param {Object} data - Form data to validate
-   * @returns {Object} Validation result with success and optional error
+   * @returns {{ success: boolean, error?: string }} Validation result with success and optional error
    */
   function validateForm(data) {
     try {
@@ -53,10 +57,8 @@
 
   /**
    * Handle merchant sign-up using Amplify
-   * @param {Event} event - Form submission event
    */
-  async function handleSignUp(event) {
-    event.preventDefault();
+  async function handleSignUp() {
     error = null;
     isLoading = true;
 
@@ -69,7 +71,7 @@
     });
 
     if (!validation.success) {
-      error = validation.error;
+      error = validation.error || 'Validation failed';
       isLoading = false;
       return;
     }
@@ -94,119 +96,27 @@
       goto('/merchants/confirm-sign-up');
     } catch (err) {
       console.error('Sign up error:', err);
-      error = err.message || 'Failed to sign up. Please try again.';
+      /** @type {string} */
+      const errorMessage = err instanceof Error ? err.message : 'Failed to sign up. Please try again.';
+      error = errorMessage;
     } finally {
       isLoading = false;
     }
   }
 </script>
 
-<h1 id="sign-up-title">Merchant Sign-Up</h1>
-
-<form on:submit={handleSignUp} aria-labelledby="sign-up-title">
-  <label>
-    Business Name
-    <input 
-      bind:value={businessName}
-      type="text" 
-      required 
-      maxlength="255"
-      disabled={isLoading}
-    >
-  </label>
-
-  <label>
-    Email
-    <input 
-      bind:value={email}
-      type="email" 
-      required
-      disabled={isLoading}
-    >
-  </label>
-
-  <label>
-    Password
-    <input 
-      bind:value={password}
-      type="password" 
-      required 
-      minlength="8"
-      disabled={isLoading}
-    >
-  </label>
-
-  <label>
-    Confirm Password
-    <input 
-      bind:value={confirmPassword}
-      type="password" 
-      required 
-      minlength="8"
-      disabled={isLoading}
-    >
-  </label>
-
-  {#if error}
-    <p class="error">{error}</p>
-  {/if}
-
-  <button type="submit" disabled={isLoading}>
-    {#if isLoading}
-      Signing up...
-    {:else}
-      Sign Up
-    {/if}
-  </button>
-</form>
-
-<style>
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    max-width: 400px;
-    margin: 0 auto;
-  }
-
-  label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  input {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-
-  input:disabled {
-    background-color: #f5f5f5;
-    cursor: not-allowed;
-  }
-
-  .error {
-    color: tomato;
-    margin: 0;
-  }
-
-  button {
-    padding: 0.5rem 1rem;
-    background: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-
-  button:hover:not(:disabled) {
-    background: #45a049;
-  }
-
-  button:disabled {
-    background: #cccccc;
-    cursor: not-allowed;
-  }
-</style>
+<div class="min-h-screen bg-gray-50">
+    <Header />
+    <main class="pt-24">
+        <MerchantSignUpSection 
+            bind:businessName
+            bind:email
+            bind:password
+            bind:confirmPassword
+            {error}
+            {isLoading}
+            on:submit={handleSignUp}
+        />
+    </main>
+    <SimpleFooter />
+</div>

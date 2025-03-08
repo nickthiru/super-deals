@@ -4,8 +4,8 @@
   import { goto } from '$app/navigation';
 
   // Get the reason from the URL query parameter
-  $: reason = $page.url.searchParams.get('reason') || 'default';
-  $: user = $auth.user;
+  let reason = $derived($page.url.searchParams.get('reason') || 'default');
+  let user = $derived($auth.user);
 
   // Map reasons to user-friendly messages
   const messages = {
@@ -15,7 +15,7 @@
     'default': 'You don\'t have permission to access this page'
   };
 
-  $: message = messages[reason] || messages.default;
+  let message = $derived(messages[reason] || messages.default);
 
   function goBack() {
     window.history.back();
@@ -41,11 +41,11 @@
 
     <div class="actions">
       {#if !user}
-        <button on:click={handleSignIn}>Sign In</button>
-        <button on:click={handleSignUp} class="secondary">Sign Up</button>
+        <button onclick={handleSignIn}>Sign In</button>
+        <button onclick={handleSignUp} class="secondary">Sign Up</button>
       {/if}
-      <button on:click={goBack} class="secondary">Go Back</button>
-      <button on:click={goHome} class="secondary">Go Home</button>
+      <button onclick={goBack} class="secondary">Go Back</button>
+      <button onclick={goHome} class="secondary">Go Home</button>
     </div>
   </div>
 </div>

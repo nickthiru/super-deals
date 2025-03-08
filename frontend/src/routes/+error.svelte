@@ -10,10 +10,10 @@
     500: 'Something went wrong on our end'
   };
 
-  $: status = $page.status;
-  $: message = Object.prototype.hasOwnProperty.call(errorMessages, status) 
+  let status = $derived($page.status);
+  let message = $derived(Object.prototype.hasOwnProperty.call(errorMessages, status) 
     ? errorMessages[status] 
-    : $page.error?.message || 'An unexpected error occurred';
+    : $page.error?.message || 'An unexpected error occurred');
 
   /**
    * Go back to the previous page.
@@ -36,8 +36,8 @@
     <p class="message">{message}</p>
 
     <div class="actions">
-      <button on:click={goBack}>Go Back</button>
-      <button on:click={goHome}>Go Home</button>
+      <button onclick={goBack}>Go Back</button>
+      <button onclick={goHome}>Go Home</button>
       {#if status === 401}
         <a href="/merchants/sign-in" class="sign-in-link">Sign In</a>
       {/if}

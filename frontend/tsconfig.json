@@ -25,6 +25,7 @@
     "src/routes/layout.svelte.bak",
     "src/lib/components/pages/home/HomePage.svelte.bak",
     "src/routes/public/layout.svelte.bak",
-    "src/routes/merchants/sign-up/page.svelte.bak"
+    "src/routes/merchants/sign-up/page.svelte.bak",
+    "src/routes/public/merchants/page.svelte.bak"
   ]
 }

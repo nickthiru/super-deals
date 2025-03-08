@@ -15,6 +15,10 @@
 	--color-gray-700: #374151;
 	--color-gray-800: #1f2937;
 	--color-gray-900: #111827;
+	
+	/* Brand colors */
+	--color-facebook: #3B5998;
+	--color-facebook-dark: #324b81;
 }
 
 /* Base Styles */

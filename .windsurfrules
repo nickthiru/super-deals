@@ -2,10 +2,42 @@
   "assistant_rules": {
     "architecture": {
       "frontend": {
-        "framework": "SvelteKit",
+        "framework": "SvelteKit with Svelte 5",
+        "svelte_version": {
+          "version": 5,
+          "key_features": [
+            "Runes-based reactivity ($state, $derived, $effect, $props)",
+            "Fine-grained reactivity model",
+            "Universal component format",
+            "Improved performance"
+          ],
+          "coding_patterns": [
+            "Use $state() instead of let for reactive variables",
+            "Use $derived() instead of $: for derived values",
+            "Use $effect() for side effects instead of $: statements",
+            "Use $props() for component props definition",
+            "Prefer inline event handlers with () => syntax",
+            "Use exported functions for component methods",
+            "Avoid using lifecycle methods (onMount, etc.) when possible in favor of $effect()"
+          ],
+          "migration_considerations": [
+            "Maintain consistent reactivity pattern throughout codebase",
+            "Avoid mixing old reactivity system with runes",
+            "Use new control flow syntax ({#if} becomes {if})",
+            "Move away from REPL-style component format to universal component format",
+            "Leverage snippets for reusable template pieces"
+          ],
+          "component_structure": [
+            "Use universal component format (no separate <script> and <style> sections)",
+            "Declare reactive state at component top level",
+            "Place effects after state declarations",
+            "Group related functionality together",
+            "Export component API functions directly"
+          ]
+        },
         "patterns": [
           "Component-based architecture",
-          "State management best practices",
+          "State management using Svelte 5 runes",
           "Progressive enhancement",
           "Responsive design patterns"
         ],
@@ -40,7 +72,7 @@
             "Figma integration"
           ],
           "implementation": [
-            "Generated code adaptation to SvelteKit",
+            "Generated code adaptation to SvelteKit with Svelte 5 syntax",
             "Component pattern consistency",
             "Design system adherence",
             "Accessibility standards"
@@ -53,6 +85,32 @@
               "Create reusable layout components",
               "Convert screen-specific content to Svelte components"
             ],
+            "code_extraction": {
+              "initial_page": {
+                "approach": "Use the complete HTML from the copy button",
+                "purpose": "Establish foundation for the entire application",
+                "steps": [
+                  "Extract global elements for app.html (fonts, meta tags, etc.)",
+                  "Extract global styles for app.css",
+                  "Configure theme colors in tailwind.config.js",
+                  "Convert page-specific content to SvelteKit component using Svelte 5 syntax"
+                ]
+              },
+              "subsequent_pages": {
+                "approach": "Copy only the visible code from the source code panel",
+                "reasoning": [
+                  "Panel shows only page-specific HTML needed for SvelteKit components",
+                  "Avoids redundant head content and boilerplate already extracted"
+                ],
+                "steps": [
+                  "Copy visible code from UX Pilot panel",
+                  "Convert to SvelteKit component structure using Svelte 5 syntax",
+                  "Apply Tailwind classes directly",
+                  "Integrate with existing components (Header, Footer, etc.)",
+                  "Wrap page content in a root div with appropriate Tailwind classes"
+                ]
+              }
+            },
             "head_section_handling": {
               "fonts": "Move Google Fonts imports to app.html",
               "icons": "Move Font Awesome or other icon libraries to app.html",
@@ -75,13 +133,15 @@
               "steps": [
                 "Remove HTML boilerplate and <head> content",
                 "Keep only the main content section",
-                "Replace hardcoded values with Svelte variables",
+                "Replace hardcoded values with Svelte 5 reactive state ($state, $derived)",
                 "Extract repeated elements into reusable components"
               ],
               "best_practices": [
                 "Convert inline styles to Tailwind classes",
-                "Move JavaScript to Svelte's <script> section",
-                "Use Svelte's reactive paradigm instead of imperative JavaScript",
+                "Use Svelte 5 universal component format",
+                "Declare reactive state with $state() instead of let variables",
+                "Use $effect() for side effects instead of lifecycle methods",
+                "Use $derived() for computed values",
                 "Download and store images locally instead of using external URLs"
               ]
             },
@@ -89,13 +149,14 @@
               "Verify custom colors are defined in Tailwind config",
               "Check for missing container elements or structural differences",
               "Ensure all font and icon libraries are properly imported",
-              "Convert vanilla JavaScript to Svelte's reactive paradigm"
+              "Convert vanilla JavaScript to Svelte 5's reactivity model",
+              "Ensure correct use of Svelte 5 runes syntax"
             ]
           },
           "component_workflow": [
             "Generate atomic components via UX Pilot AI",
             "Implement using Tailwind utilities",
-            "Structure as reusable Svelte components",
+            "Structure as reusable Svelte 5 components",
             "Document component API and usage patterns"
           ],
           "component_organization": {
@@ -137,7 +198,7 @@
             },
             "styling": {
               "approach": "Utility-first with Tailwind CSS",
-              "location": "Inline utility classes with component-specific styles in <style>",
+              "location": "Inline utility classes with component-specific styles using Svelte 5's styling approach",
               "patterns": [
                 "Use Tailwind utilities for layout and styling",
                 "Extract common patterns with @apply",
@@ -149,7 +210,7 @@
         }
       },
       "ai_system": {
-        "framework": "@langchain/langgraph",
+        "framework": "@langchain/langgraph for JavaScript",
         "patterns": [
           "Agent orchestration patterns",
           "Conversation flow management",
