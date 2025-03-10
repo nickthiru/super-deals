@@ -1,9 +1,10 @@
 import { writable } from 'svelte/store';
-import { getCurrentUser } from 'aws-amplify/auth';
+import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
+import { jwtDecode } from 'jwt-decode';
 
-/** @typedef {{ sub: string, email: string, userType: string }} User */
+/** @typedef {{ sub: string, email: string, userType: string, businessName?: string }} User */
 
-/** @typedef {{ user: User | null, initialized: boolean, isAuthenticated: boolean }} AuthState */
+/** @typedef {{ user: User | null, initialized: boolean, isAuthenticated: boolean, error?: string }} AuthState */
 
 /** @type {AuthState} */
 const initialState = {
@@ -12,21 +13,43 @@ const initialState = {
   isAuthenticated: false
 };
 
+/**
+ * Validate and decode JWT token
+ * @param {string} token
+ * @returns {User | null}
+ */
+function decodeToken(token) {
+  try {
+    const decoded = jwtDecode(token);
+    return {
+      sub: decoded.sub,
+      email: decoded.email,
+      userType: decoded['custom:userType'],
+      ...(decoded['custom:businessName'] && { businessName: decoded['custom:businessName'] })
+    };
+  } catch (error) {
+    console.error('Token validation error:', error);
+    return null;
+  }
+}
+
 function createAuthStore() {
   const { subscribe, update } = writable(initialState);
 
   return {
     subscribe,
-    
+    decodeToken,
+
     /**
      * Set the current user
-     * @param {User | null} user 
+     * @param {User | null} user
      */
     setUser: (user) => {
       update(state => ({
         ...state,
         user,
-        isAuthenticated: !!user
+        isAuthenticated: !!user,
+        error: undefined
       }));
     },
 
@@ -37,7 +60,8 @@ function createAuthStore() {
       update(state => ({
         ...state,
         user: null,
-        isAuthenticated: false
+        isAuthenticated: false,
+        error: undefined
       }));
     },
 
@@ -46,25 +70,35 @@ function createAuthStore() {
      */
     initialize: async () => {
       try {
-        const { username, signInDetails } = await getCurrentUser();
-        const user = {
-          sub: username,
-          email: signInDetails?.loginId || username,
-          userType: 'merchant' // For now, hardcode as merchant
-        };
+        // Get the current user session
+        await getCurrentUser(); // Just check if user is authenticated
+        const session = await fetchAuthSession();
+        const token = session.tokens?.idToken?.toString();
+
+        if (!token) {
+          throw new Error('No token found');
+        }
+
+        const user = decodeToken(token);
+
+        if (!user) {
+          throw new Error('Invalid token');
+        }
+
         update(state => ({
           ...state,
           user,
           isAuthenticated: true,
           initialized: true
         }));
-      } catch {
-        // User is not authenticated, which is fine
+      } catch (error) {
+        console.error('Auth initialization error:', error);
         update(state => ({
           ...state,
           user: null,
           isAuthenticated: false,
-          initialized: true
+          initialized: true,
+          error: error.message
         }));
       }
     }
@@ -72,3 +106,4 @@ function createAuthStore() {
 }
 
 export const auth = createAuthStore();
+export { decodeToken };

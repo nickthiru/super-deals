@@ -1,10 +1,32 @@
 import { redirect } from '@sveltejs/kit';
-import { jwtDecode } from 'jwt-decode';
 import { isPublicRoute } from '$lib/config/routes.js';
+import { jwtDecode } from 'jwt-decode';
+
+/** @typedef {{ sub: string, email: string, userType: string, businessName?: string }} User */
+
+/**
+ * Validate and decode JWT token
+ * @param {string} token
+ * @returns {User | null}
+ */
+function decodeToken(token) {
+  try {
+    /** @type {any} */
+    const decoded = jwtDecode(token);
+    return {
+      sub: decoded.sub,
+      email: decoded.email,
+      userType: decoded['custom:userType'],
+      ...(decoded['custom:businessName'] && { businessName: decoded['custom:businessName'] })
+    };
+  } catch (error) {
+    console.error('Token validation error:', error);
+    return null;
+  }
+}
 
 /** @type {import('@sveltejs/kit').HandleFetch} */
 export async function handleFetch({ event, request, fetch }) {
-  // Forward the Authorization header from the client if present
   const authHeader = event.request.headers.get('Authorization');
   if (authHeader) {
     request.headers.set('Authorization', authHeader);
@@ -24,36 +46,30 @@ export function handleError({ error, event }) {
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
   const currentPath = event.url.pathname;
-  
-  // Check if the current path matches any public route
+
   if (isPublicRoute(currentPath)) {
     return resolve(event);
   }
 
-  // Get the Authorization header which should contain the Amplify session token
   const authHeader = event.request.headers.get('Authorization');
-  
+
   if (!authHeader) {
     throw redirect(303, '/merchants/sign-in');
   }
 
   try {
-    // Decode the JWT token
     const token = authHeader.replace('Bearer ', '');
-    const decoded = jwtDecode(token);
+    const user = decodeToken(token);
 
-    // Set user information in locals for use in routes
-    event.locals.user = {
-      sub: decoded.sub,
-      email: decoded.email,
-      groups: decoded['cognito:groups'] || [],
-      userType: decoded['custom:userType'],
-      ...(decoded['custom:businessName'] && { businessName: decoded['custom:businessName'] })
-    };
+    if (!user) {
+      throw new Error('Invalid token');
+    }
 
+    // @ts-ignore - Set user information in locals
+    event.locals.user = user;
     return resolve(event);
   } catch (error) {
-    console.error('Token validation error:', error);
+    console.error('Authentication error:', error);
     throw redirect(303, '/merchants/sign-in');
   }
 }

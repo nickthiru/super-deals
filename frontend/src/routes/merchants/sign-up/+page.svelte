@@ -62,7 +62,6 @@
     error = null;
     isLoading = true;
 
-    // Validate form data
     const validation = validateForm({
       businessName,
       email,
@@ -89,16 +88,13 @@
         }
       });
 
-      // Store email for confirmation
       localStorage.setItem('pendingConfirmation', email);
+      localStorage.setItem('pendingUserType', 'merchant');
       
-      // Redirect to confirmation page
-      goto('/merchants/confirm-sign-up');
+      goto('/auth/confirm-sign-up');
     } catch (err) {
       console.error('Sign up error:', err);
-      /** @type {string} */
-      const errorMessage = err instanceof Error ? err.message : 'Failed to sign up. Please try again.';
-      error = errorMessage;
+      error = err instanceof Error ? err.message : 'Failed to sign up. Please try again.';
     } finally {
       isLoading = false;
     }

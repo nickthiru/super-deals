@@ -1,0 +1,154 @@
+<script>
+  import { signInWithRedirect } from 'aws-amplify/auth';
+  import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
+  
+  let email = $state('');
+  let password = $state('');
+  /** @type {string | null} */
+  let error = $state(null);
+  let isLoading = $state(false);
+
+  onMount(() => {
+    // Ensure we're running in the browser
+    if (typeof window !== 'undefined') {
+      // Check if we have a code parameter in the URL (OAuth redirect)
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      if (code) {
+        // Handle the OAuth redirect
+        handleOAuthRedirect();
+      }
+    }
+  });
+
+  /**
+   * Handle OAuth redirect after successful sign-in
+   */
+  async function handleOAuthRedirect() {
+    try {
+      isLoading = true;
+      await signInWithRedirect();
+      goto('/merchants/dashboard');
+    } catch (err) {
+      console.error('OAuth redirect error:', err);
+      error = 'Failed to complete sign in. Please try again.';
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  /**
+   * Handle merchant sign-in using Amplify
+   * @param {Event} event - Form submission event
+   */
+  async function handleSignIn(event) {
+    event.preventDefault();
+    error = null;
+    isLoading = true;
+
+    try {
+      // Use signInWithRedirect without credentials for OAuth flow
+      await signInWithRedirect();
+    } catch (err) {
+      console.error('Sign in error:', err);
+      error = err instanceof Error ? err.message : 'Failed to sign in. Please try again.';
+      isLoading = false;
+    }
+  }
+</script>
+
+<div class="merchant-sign-in">
+  <h1 id="sign-in-title">Merchant Sign-In</h1>
+
+  <form onsubmit={handleSignIn} aria-labelledby="sign-in-title">
+    <label>
+      Email
+      <input 
+        bind:value={email}
+        type="email" 
+        required
+        disabled={isLoading}
+      >
+    </label>
+
+    <label>
+      Password
+      <input 
+        bind:value={password}
+        type="password" 
+        required 
+        minlength="8"
+        disabled={isLoading}
+      >
+    </label>
+
+    {#if error}
+      <p class="error">{error}</p>
+    {/if}
+
+    <button type="submit" disabled={isLoading}>
+      {#if isLoading}
+        Signing in...
+      {:else}
+        Sign In
+      {/if}
+    </button>
+  </form>
+</div>
+
+<style>
+  .merchant-sign-in {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: var(--container-padding);
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-4);
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-2);
+  }
+
+  input {
+    padding: var(--size-2);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-2);
+  }
+
+  input:disabled {
+    background-color: var(--surface-secondary);
+    cursor: not-allowed;
+  }
+
+  .error {
+    color: var(--status-error);
+    margin: 0;
+  }
+
+  button {
+    padding: var(--size-2) var(--size-4);
+    background: var(--interactive-primary);
+    color: var(--text-inverse);
+    border: none;
+    border-radius: var(--radius-2);
+    cursor: pointer;
+    font-size: var(--font-size-1);
+    transition: background var(--transition-base);
+  }
+
+  button:hover:not(:disabled) {
+    background: var(--interactive-primary-hover);
+  }
+
+  button:disabled {
+    background: var(--surface-tertiary);
+    cursor: not-allowed;
+  }
+</style>

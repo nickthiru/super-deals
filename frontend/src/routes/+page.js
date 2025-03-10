@@ -1,23 +1,39 @@
-// frontend/src/routes/+page.js
 import { redirect } from '@sveltejs/kit';
-import { getCurrentUser } from 'aws-amplify/auth';
+import { auth } from '$lib/stores/auth';
+import { get } from 'svelte/store';
 
 /** @type {import('./$types').PageLoad} */
 export async function load() {
   try {
-    // Check if user is authenticated
-    const { signInDetails } = await getCurrentUser();
-    const userType = signInDetails?.loginId?.userType;
-
-    // Redirect based on user type
-    if (userType === 'merchant') {
-      return redirect(302, `/merchants/${signInDetails.userId}`);
+    // Get auth state from the store instead of calling Amplify directly
+    const authState = get(auth);
+    
+    if (!authState.initialized) {
+      // Wait for auth to initialize if it hasn't already
+      await auth.initialize();
     }
     
-    // For customers and unauthenticated users, go to public page
-    return redirect(302, '/public');
-  } catch {
-    // Not authenticated, go to public page
-    return redirect(302, '/public');
+    if (!authState.isAuthenticated || !authState.user) {
+      // User is not authenticated, redirect to public page
+      return {
+        userType: 'public'
+      };
+    }
+    
+    const userType = authState.user.userType || 'public';
+    
+    // Redirect based on user type
+    if (userType === 'merchant') {
+      return redirect(302, `/merchants/${authState.user.sub}`);
+    }
+    
+    return {
+      userType
+    };
+  } catch (error) {
+    console.error('Error in page load:', error);
+    return {
+      userType: 'public'
+    };
   }
 }

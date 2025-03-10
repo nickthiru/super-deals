@@ -14,9 +14,27 @@
   /** @type {import('./$types').LayoutData | null} */
   export const data = null;
 
+  // Track authentication state
+  const authState = $state({
+    initialized: false,
+    error: /** @type {string|null} */ (null)
+  });
+
+  // Initialize auth store
   $effect(() => {
-    auth.initialize();
-  })
+    const initAuth = async () => {
+      try {
+        await auth.initialize();
+        authState.initialized = true;
+      } catch (/** @type {unknown} */ error) {
+        console.error('Failed to initialize auth:', error);
+        authState.error = error instanceof Error ? error.message : 'Unknown authentication error';
+        authState.initialized = true;
+      }
+    };
+    
+    initAuth();
+  });
 </script>
 
 {@render children?.()}

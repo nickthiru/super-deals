@@ -1,4 +1,16 @@
-const logRouteMatch = (routeType, path, pattern, matched) => {
+/**
+ * Log route match details
+ * @param {string} routeType - Type of route (Public or Protected)
+ * @param {string} path - Path to check
+ * @param {RegExp} pattern - Route pattern
+ * @param {boolean} matched - Whether the path matches the pattern
+ */
+const logRouteMatch = (
+  routeType,
+  path,
+  pattern,
+  matched
+) => {
   console.log(`${routeType} route check:`, {
     path,
     pattern: pattern.toString(),
@@ -8,6 +20,7 @@ const logRouteMatch = (routeType, path, pattern, matched) => {
 
 const publicRoutes = [
   /^\/$/,
+  /^\/auth\/confirm-sign-up\/?$/,
   /^\/public\/?$/,
   /^\/merchants\/sign-up\/?$/,
   /^\/merchants\/sign-in\/?$/,
@@ -39,9 +52,14 @@ const protectedRoutes = [
     requiredGroup: 'Admins',
     redirectPath: '/admins/sign-in',
     idType: 'userId'
-  },
+  }
 ];
 
+/**
+ * Check if the path is a public route
+ * @param {string} path - Path to check
+ * @returns {boolean} True if the path is a public route, false otherwise
+ */
 export const isPublicRoute = (path) => {
   for (const route of publicRoutes) {
     const matched = route.test(path);
@@ -51,10 +69,20 @@ export const isPublicRoute = (path) => {
   return false;
 };
 
+/**
+ * Find the protected route that matches the path
+ * @param {string} path - Path to check
+ * @returns {Object|null} Protected route configuration if found, null otherwise
+ */
 export const findProtectedRoute = (path) => {
   for (const route of protectedRoutes) {
     const matched = route.pattern.test(path);
-    logRouteMatch('Protected', path, route.pattern, matched);
+    logRouteMatch(
+      'Protected',
+      path,
+      route.pattern,
+      matched
+    );
     if (matched) return route;
   }
   return null;
