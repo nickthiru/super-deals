@@ -1,5 +1,7 @@
 <script>
   import { auth } from '$lib/stores/auth';
+  import { dev } from '$app/environment';
+  import DevAuthPanel from '$lib/components/DevAuthPanel.svelte';
   import '../app.css';
   /**
    * @typedef {Object} Props
@@ -38,3 +40,8 @@
 </script>
 
 {@render children?.()}
+
+<!-- Add DevAuthPanel for development testing -->
+{#if dev}
+  <DevAuthPanel />
+{/if}
