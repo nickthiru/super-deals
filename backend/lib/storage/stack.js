@@ -5,18 +5,15 @@ class StorageStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const {
-      stage,
-    } = props;
+    // We can use envName for resource naming or other environment-specific configurations
+    const { envName } = props;
 
-    // Define allowed origins based on the stage
-    const allowedOrigins = stage === "prod"
-      ? ['https://your-production-domain.com']
-      : ['http://localhost:5173', 'http://localhost:3000']; // Add any other local development URLs
+    // Define allowed origins for CORS
+    const allowedOrigins = ['https://your-production-domain.com', 'http://localhost:5173', 'http://localhost:3000'];
 
     this.s3Bucket = new Bucket(this, "S3Bucket", {
-      removalPolicy: stage === "prod" ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
-      autoDeleteObjects: stage !== "prod", // Only enable for non-production stages
+      removalPolicy: RemovalPolicy.RETAIN, // Default to RETAIN for safety
+      autoDeleteObjects: false, // Default to false for safety
       cors: [
         {
           allowedMethods: [

@@ -14,7 +14,7 @@ class UserPoolStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const { stage } = props;
+    const { envName } = props;
 
     this.pool = new UserPool(this, `UserPool`, {
       selfSignUpEnabled: true,
@@ -52,15 +52,14 @@ class UserPoolStack extends Stack {
         businessName: new StringAttribute({ mutable: true }),
         userGroup: new StringAttribute({ mutable: false }),
       },
-      removalPolicy:
-        stage === "prod" ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
+      removalPolicy: RemovalPolicy.RETAIN, // Default to RETAIN for safety
     });
 
     // Create Cognito domain
     this.domain = new UserPoolDomain(this, "UserPoolDomain", {
       userPool: this.pool,
       cognitoDomain: {
-        domainPrefix: `super-deals-${stage}`,
+        domainPrefix: `super-deals-${envName}`,
       },
     });
 
@@ -88,7 +87,7 @@ class UserPoolStack extends Stack {
       "ResourceServersStack",
       {
         userPool: this.pool,
-        stage,
+        envName,
       }
     );
 

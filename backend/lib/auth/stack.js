@@ -8,12 +8,10 @@ class AuthStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const {
-      stage,
-    } = props;
+    const { envName } = props;
 
     this.userPool = new UserPoolStack(this, `UserPoolStack`, {
-      stage,
+      envName,
     });
 
     this.identityPool = new IdentityPoolStack(this, `IdentityPoolStack`, {

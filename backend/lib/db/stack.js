@@ -5,9 +5,8 @@ class DbStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const {
-      stage,
-    } = props;
+    // We can use envName for resource naming or other environment-specific configurations
+    const { envName } = props;
 
     this.table = new TableV2(this, "TableV2", {
       partitionKey: {
@@ -31,7 +30,7 @@ class DbStack extends Stack {
           },
         },
       ],
-      removalPolicy: stage === "prod" ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
+      removalPolicy: RemovalPolicy.RETAIN, // Default to RETAIN for safety
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
   };

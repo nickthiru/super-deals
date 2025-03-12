@@ -5,7 +5,7 @@ const HttpStack = require("./http/stack");
 
 /**
  * @typedef {Object} ApiStackProps
- * @property {string} stage - Stage name (e.g., 'dev', 'prod')
+ * @property {string} envName - Environment name for URL paths (e.g., 'dev', 'prod')
  * @property {import('../auth/stack').AuthStack} auth - Auth stack
  * @property {import('../lambda/stack').LambdaStack} lambda - Lambda stack
  * @property {import('../permissions/stack').PermissionsStack} permissions - Permissions stack
@@ -16,14 +16,14 @@ class ApiStack extends Stack {
     super(scope, id, props);
 
     const {
-      stage,
+      envName,
       auth,
       lambda,
       permissions,
     } = props;
 
     this.http = new HttpStack(this, "HttpStack", {
-      stage,
+      envName,
       auth,
       lambda,
       permissions,

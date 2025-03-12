@@ -4,6 +4,7 @@ const { UserPoolResourceServer, ResourceServerScope } = require("aws-cdk-lib/aws
 /**
  * @typedef {Object} DealsResourceServerProps
  * @property {import('aws-cdk-lib/aws-cognito').UserPool} userPool - Cognito User Pool
+ * @property {string} envName - Environment name for resource identification
  */
 
 /**
@@ -14,7 +15,7 @@ class DealsResourceServerConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id);
 
-    const { userPool } = props;
+    const { userPool, envName } = props;
 
     // Define scopes for Deals API
     this.scopes = [
@@ -35,7 +36,7 @@ class DealsResourceServerConstruct extends Construct {
     // Create Resource Server
     this.resourceServer = new UserPoolResourceServer(this, 'ResourceServer', {
       userPool,
-      identifier: 'deals',
+      identifier: `deals-${envName}`, // Include environment name in identifier
       scopes: this.scopes,
     });
   }

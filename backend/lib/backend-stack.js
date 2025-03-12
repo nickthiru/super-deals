@@ -17,18 +17,18 @@ class BackendStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const { stage } = props;
+    const { envName } = props;
 
     const db = new DbStack(this, "DbStack", {
-      stage,
+      envName,
     });
 
     const storage = new StorageStack(this, "StorageStack", {
-      stage,
+      envName,
     });
 
     const auth = new AuthStack(this, "AuthStack", {
-      stage,
+      envName,
     });
 
     const iam = new IamStack(this, "IamStack", {
@@ -48,7 +48,7 @@ class BackendStack extends Stack {
 
     new ApiStack(this, "ApiStack", {
       auth,
-      stage,
+      envName,
       lambda, // For HTTP API Lambda proxy integration
       permissions,
     });
