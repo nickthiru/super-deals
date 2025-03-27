@@ -1,8 +1,4 @@
-# Story Template
-
-## Feature: [Feature Name]
-
-Story: [Story Name]
+# Story: [Story Name]
 
 As a [role]  
 I want to [action/goal]  
@@ -10,30 +6,19 @@ So that [benefit/value]
 
 ## Background
 
-Given I am a [role]  
- And [any prerequisite conditions]
+[Any information that is common to all scenarios]
 
-## Rules and Scenarios
+## Scenarios
 
-Rule: [Business rule description]
+**Scenario: [Happy path scenario name]**
 
-**Scenario: [Happy path scenario name]**  
- Given [initial context]  
- When [action is performed]  
- And [additional actions if needed]  
- Then [expected outcome]  
- And [additional outcomes if needed]
+[Mention the steps of the scenario and acceptance criteria]
 
-**Scenario: [Alternative/error path scenario name]**  
- Given [initial context]  
- When [action is performed]  
- Then [expected outcome]
+[Include user flow diagram, if applicable]
 
-## Acceptance Criteria
+**Scenario: [Alternative/error path scenario name]**
 
-- [ ] [Specific testable requirement 1]
-- [ ] [Specific testable requirement 2]
-- [ ] [Specific testable requirement 3]
+[Mention the steps of the scenario that lead to the alternative/error path and acceptance criteria]
 
 ## Technical Constraints
 
@@ -64,37 +49,45 @@ Rule: [Business rule description]
 
 ### API Gateway
 
-HTTP: [base URL]
-[METHOD] [path]
-Headers:
+**Method**: [METHOD]  
+**Path**: [path]  
+**Headers**:  
 [header name]: [description]
 
-      Query Parameters:
-        [param name]: [type]; [required/optional]; [description]
+    **Query Parameters**:
+      [param name]: [type]; [required/optional]; [description]
 
-      Body:
+    Body:
+      {
+        [field]: [type]; [required/optional]; [description]
+      }
+
+    Responses:
+      [status code]:
         {
           [field]: [type]; [required/optional]; [description]
         }
 
-      Responses:
-        [status code]:
-          {
-            [field]: [type]; [required/optional]; [description]
-          }
-
-### Storage (S3/DynamoDB)
+### Storage
 
 [Storage type]:
 [Resource name]:
-[Schema/Structure details]
+[Schema/Structure details]:
 
-### Lambda Functions
+### DB
 
-[function-name]:
-Purpose: [brief description]
-Triggers: [what invokes this function]
-Permissions: [required IAM permissions]
+#### DB: [DB type]
+
+&ensp; Entity: [Entity name]
+
+    [Schema]
+
+### Lambda
+
+Name: [function-name]  
+Purpose: [brief description]  
+Triggers: [what invokes this function]  
+Permissions: [required permissions]
 
 ## Frontend
 
@@ -118,6 +111,10 @@ Permissions: [required IAM permissions]
 ### State Management
 
 [Describe any state management requirements]
+
+## Non-Functional Requirements
+
+[Any non-functional requirements]
 
 ## Notes
 

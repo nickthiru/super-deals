@@ -1,18 +1,19 @@
 <script>
-  import { signUp } from 'aws-amplify/auth';
   import { goto } from '$app/navigation';
   import { z } from 'zod';
   import Header from '$lib/components/shared/Header/Header.svelte';
   import SimpleFooter from '$lib/components/shared/layout/footer/SimpleFooter.svelte';
   import MerchantSignUpSection from '$lib/components/pages/merchants/sign-up/MerchantSignUpSection.svelte';
+  import { registerMerchant } from '$lib/stores/merchantStore';
   
-  let businessName = '';
-  let email = '';
-  let password = '';
-  let confirmPassword = '';
+  // Using $state() instead of let for Svelte 5 reactivity
+  let businessName = $state('');
+  let email = $state('');
+  let password = $state('');
+  let confirmPassword = $state('');
   /** @type {string|null} */
-  let error = null;
-  let isLoading = false;
+  let error = $state(null);
+  let isLoading = $state(false);
 
   // Validation schema
   const passwordSchema = z.string()
@@ -56,7 +57,7 @@
   }
 
   /**
-   * Handle merchant sign-up using Amplify
+   * Handle merchant sign-up using our merchant service
    */
   async function handleSignUp() {
     error = null;
@@ -76,22 +77,34 @@
     }
 
     try {
-      const { userId, nextStep } = await signUp({
-        username: email,
+      // Create merchant data object
+      const merchantData = {
+        businessName,
+        email,
         password,
-        options: {
-          userAttributes: {
-            email,
-            'custom:businessName': businessName,
-            'custom:userType': 'merchant'
-          }
-        }
-      });
+        registrationNumber: '', // Will be collected later
+        yearOfRegistration: new Date().getFullYear(),
+        businessType: 'General', // Default value
+        phone: '', // Will be collected later
+        address: '', // Will be collected later
+        city: '', // Will be collected later
+        state: '', // Will be collected later
+        country: '', // Will be collected later
+        postalCode: '' // Will be collected later
+      };
 
-      localStorage.setItem('pendingConfirmation', email);
-      localStorage.setItem('pendingUserType', 'merchant');
-      
-      goto('/auth/confirm-sign-up');
+      const result = await registerMerchant(merchantData);
+
+      if (result.success) {
+        // Store email for verification page
+        localStorage.setItem('pendingConfirmation', email);
+        localStorage.setItem('pendingUserType', 'merchant');
+        
+        // Navigate to confirmation page
+        goto('/auth/confirm-sign-up');
+      } else {
+        error = result.error;
+      }
     } catch (err) {
       console.error('Sign up error:', err);
       error = err instanceof Error ? err.message : 'Failed to sign up. Please try again.';

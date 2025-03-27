@@ -1,9 +1,16 @@
 <script>
     import { page } from '$app/stores';
+    /**
+     * @typedef {Object} Props
+     * @property {import('svelte').Snippet} [children]
+     */
+
+    /** @type {Props} */
+    let { children } = $props();
 </script>
 
 <div class="merchant-auth-layout">
-    <slot />
+    {@render children?.()}
 </div>
 
 <style>
