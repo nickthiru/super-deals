@@ -1,6 +1,8 @@
 import { writable } from 'svelte/store';
 import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
 import { jwtDecode } from 'jwt-decode';
+import { dev } from '$app/environment';
+import { devConfig } from '$lib/config/dev.js';
 
 /** @typedef {{ sub: string, email: string, userType: string, businessName?: string }} User */
 
@@ -20,6 +22,7 @@ const initialState = {
  */
 function decodeToken(token) {
   try {
+    /** @type {any} */
     const decoded = jwtDecode(token);
     return {
       sub: decoded.sub,
@@ -70,6 +73,17 @@ function createAuthStore() {
      */
     initialize: async () => {
       try {
+        // In development mode with auth bypass enabled, use mock user
+        if (dev && devConfig.bypassAuth) {
+          update(state => ({
+            ...state,
+            user: devConfig.mockUser,
+            isAuthenticated: true,
+            initialized: true
+          }));
+          return;
+        }
+
         // Get the current user session
         await getCurrentUser(); // Just check if user is authenticated
         const session = await fetchAuthSession();
@@ -91,14 +105,14 @@ function createAuthStore() {
           isAuthenticated: true,
           initialized: true
         }));
-      } catch (error) {
+      } catch (/** @type {unknown} */ error) {
         console.error('Auth initialization error:', error);
         update(state => ({
           ...state,
           user: null,
           isAuthenticated: false,
           initialized: true,
-          error: error.message
+          error: error instanceof Error ? error.message : 'Unknown error'
         }));
       }
     }

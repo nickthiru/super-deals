@@ -1,6 +1,70 @@
-Components in the UI Kit ($lib/components) may have different variations e.g. default button, outline button, etc. To choose a particular variation, pass in the variation's class names via the "class" prop. Class names should be passed in a string, with each class name separated by a space character. Note: Do not include the customary "." (dot) class selector at the start of the class name.
+# Authentication Bypass for Development
 
-Components may have different variations, or types. These types are created using CSS classes within the style block of the component. To be able to select a type of a component, the component exports a "type" prop. Pass the name of CSS class, for the type of component desired, through this prop.
+## Overview
+
+The Super Deals frontend includes a development mode that allows you to temporarily bypass all authentication and protected routes while you continue to develop the application. This feature is useful when you're working on parts of the application that would normally require authentication, but you want to focus on frontend development without dealing with authentication flows.
+
+## How It Works
+
+The authentication bypass is implemented through a simple configuration file (`src/lib/config/dev.js`) that controls whether authentication is enforced. When bypass is enabled:
+
+1. All protected routes become accessible without authentication
+2. A mock user is provided to the application, simulating an authenticated session
+3. No redirects to sign-in pages occur
+4. You can freely navigate to any page in the application
+
+## Using Authentication Bypass
+
+### Enabling/Disabling Bypass
+
+To enable or disable authentication bypass, edit the `bypassAuth` flag in `src/lib/config/dev.js`:
+
+```javascript
+export const devConfig = {
+  // Set to true to bypass all authentication and protected routes
+  bypassAuth: true,
+  
+  // Mock user configuration
+  mockUser: {
+    sub: 'dev-user-id',
+    email: 'dev@example.com',
+    userType: 'merchant', // Change to 'customer' or 'admin' as needed
+    businessName: 'Dev Business'
+  }
+};
+```
+
+### Customizing the Mock User
+
+You can customize the mock user by editing the `mockUser` object in the same file. This allows you to test different user types and scenarios:
+
+- Change `userType` to test different user roles ('merchant', 'customer', 'admin')
+- Modify other properties to test specific user attributes
+
+### Implementation Details
+
+The authentication bypass works by modifying three key files:
+
+1. **hooks.server.js**: Bypasses server-side authentication checks and provides the mock user
+2. **auth.js store**: Returns the mock user during authentication initialization
+3. **+page.js**: Skips authentication-based redirects
+
+### When to Use
+
+Use authentication bypass when:
+- Developing UI components that require an authenticated user
+- Working on protected pages without having to sign in repeatedly
+- Building features that depend on user data being available
+- Testing different user types without creating multiple accounts
+
+### When to Disable
+
+Disable authentication bypass when:
+- Testing actual authentication flows
+- Verifying authorization logic works correctly
+- Preparing for production deployment
+
+---
 
 # Enhanced Mock Authentication Solution for Local Development
 
@@ -160,3 +224,7 @@ localStorage.removeItem('mock_auth_current_user');
 ## Security Considerations
 
 The mock authentication system is designed for development purposes only and should never be used in production environments. It does not provide any real security and stores sensitive information (like passwords) in plaintext in localStorage.
+
+Components in the UI Kit ($lib/components) may have different variations e.g. default button, outline button, etc. To choose a particular variation, pass in the variation's class names via the "class" prop. Class names should be passed in a string, with each class name separated by a space character. Note: Do not include the customary "." (dot) class selector at the start of the class name.
+
+Components may have different variations, or types. These types are created using CSS classes within the style block of the component. To be able to select a type of a component, the component exports a "type" prop. Pass the name of CSS class, for the type of component desired, through this prop.

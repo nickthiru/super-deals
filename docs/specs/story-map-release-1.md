@@ -28,18 +28,24 @@
 
 ## Merchant
 
-- Account sign-up
-  - Submit account application ^
-  - Sign up with username and password
 - Manage account
-  - Sign in with username and MFA
+  - Complete verification for a pre-verified merchant account
+  - Self-sign up for a pre-verified merchant account
+    - Successful sign up
+  - Sign in
   - Sign out
   - Update account
     - Change password
   - Delete account
 - Manage deals
-  - Add a deal ^
-  - List all deals ^
+  - Add a deal
+  - List all deals
+  - Suspend a deal
+  - Update a deal
+  - Delete a deal
+  - View a deal
+- Receive training
+- Receive support
 
 ## Platform Admin
 
@@ -51,7 +57,9 @@
     - Change password
   - Delete account
 - Manage merchants
-  - Approve/reject merchant application ^
+  - Process merchant account application ^
+  - View merchants
+  - Suspend merchants
 - Manage deal listings
   - Approve deals
   - View deals

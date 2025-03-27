@@ -60,7 +60,15 @@
               "Keep utility classes in templates for better visibility",
               "Extract common patterns into components",
               "Use Tailwind's plugin system for custom utilities"
-            ]
+            ],
+            "svelte_config": "Enable runes project-wide in svelte.config.js with: compilerOptions: { runes: true }",
+            "common_issues": [
+              "Projects started with earlier Svelte versions need configuration updates to use runes",
+              "Imported values created with $state cannot be directly modified; use objects or proxies",
+              "Explicit typing with $props() can be verbose but necessary for complex props",
+              "Mixing old and new syntax can cause 'Unexpected token' errors"
+            ],
+            "shared_state": "For shared state, use objects: export const count = $state({ value: 0 }); and update with count.value++ rather than reassigning count"
           }
         },
         "design_system": {

@@ -1,3 +1,107 @@
-@import 'tailwindcss';
+/* @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
-@plugin '@tailwindcss/typography';
+@plugin '@tailwindcss/typography'; */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base theme */
+:root {
+	/* Base theme colors */
+	--color-gray-50: #f9fafb;
+	--color-gray-100: #f3f4f6;
+	--color-gray-200: #e5e7eb;
+	--color-gray-300: #d1d5db;
+	--color-gray-400: #9ca3af;
+	--color-gray-500: #6b7280;
+	--color-gray-600: #4b5563;
+	--color-gray-700: #374151;
+	--color-gray-800: #1f2937;
+	--color-gray-900: #111827;
+
+	/* Brand colors */
+	--color-facebook: #3b5998;
+	--color-facebook-dark: #324b81;
+}
+
+/* Base Styles */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+* {
+	margin: 0;
+}
+
+html,
+body {
+	height: 100%;
+	background-color: var(--color-gray-100);
+}
+
+body {
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+	display: block;
+	max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+	font: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	overflow-wrap: break-word;
+}
+
+#root,
+#__next {
+	isolation: isolate;
+}
+
+iconify-icon {
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+}
+
+@media (pointer: coarse) {
+	html {
+		--min-tap-height: 44px;
+	}
+}
+
+/* Remove all animations, transitions and smooth scroll for people that prefer not to see them */
+@media (prefers-reduced-motion: reduce) {
+	html:focus-within {
+		scroll-behavior: auto;
+	}
+
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
