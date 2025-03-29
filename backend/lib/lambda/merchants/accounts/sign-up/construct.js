@@ -9,9 +9,7 @@ class SignUpConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id);
 
-    const {
-      auth,
-    } = props;
+    const { auth } = props;
 
     this.function = new NodejsFunction(this, "NodejsFunction", {
       bundling: {
@@ -22,7 +20,10 @@ class SignUpConstruct extends Construct {
       // memorySize: 1024,
       // memorySize: 512,
       // timeout: Duration.minutes(1),
-      entry: (path.join(__dirname, "./handler.js")),
+      entry: path.join(
+        __dirname,
+        "../../../../src/lambda/merchants/accounts/sign-up/handler.js"
+      ),
       handler: "handler",
       depsLockFilePath: require.resolve("#package-lock"),
       environment: {
