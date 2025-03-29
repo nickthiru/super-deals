@@ -26,14 +26,14 @@
     <div class="flex justify-center gap-4">
       <button 
         class="btn-primary px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        on:click={redirectToSignIn}
+        onclick={redirectToSignIn}
       >
         Sign In
       </button>
       
       <button 
         class="btn-secondary px-6 py-3 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50"
-        on:click={redirectToSignUp}
+        onclick={redirectToSignUp}
       >
         Create Account
       </button>

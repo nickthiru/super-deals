@@ -13,150 +13,118 @@
   const { data, form } = $props();
   
   // Reactive state using Svelte 5 runes
-  let codeInputs = $state(['', '', '', '', '', '']);
-  let error = $state('');
-  let message = $state('');
-  let isLoading = $state(false);
-  let isResending = $state(false);
-  /** @type {HTMLInputElement[]} */
-  let inputRefs = $state([]);
-  let showDevInfo = $state(false);
-  let verificationAttempts = $state(0);
-  let redirecting = $state(false);
-  let emailAddress = $state('');
-  let userTypeValue = $state('merchant');
+  const formState = $state({
+    codeInputs: ['', '', '', '', '', ''],
+    error: '',
+    message: '',
+    isLoading: false,
+    isResending: false,
+    inputRefs: /** @type {HTMLInputElement[]} */ ([]),
+    showDevInfo: false,
+    verificationAttempts: 0,
+    redirecting: false,
+    emailAddress: '',
+    userTypeValue: 'merchant'
+  });
   
   // Initialize on component mount
   $effect(() => {
     // Get email from data (server)
-    emailAddress = data?.email || '';
-    userTypeValue = data?.userType || 'merchant';
+    formState.emailAddress = data?.email || '';
+    formState.userTypeValue = data?.userType || 'merchant';
     
     // Only access browser APIs when in browser environment
     if (browser) {
       // If we don't have an email from the server, try localStorage
-      if (!emailAddress) {
-        emailAddress = localStorage.getItem('pendingConfirmation') || '';
-        userTypeValue = localStorage.getItem('pendingUserType') || 'merchant';
+      if (!formState.emailAddress) {
+        formState.emailAddress = localStorage.getItem('pendingConfirmation') || '';
+        formState.userTypeValue = localStorage.getItem('pendingUserType') || 'merchant';
         
         if (dev) {
-          console.log('Email from localStorage:', emailAddress);
+          console.log('Email from localStorage:', formState.emailAddress);
         }
-      } else if (emailAddress) {
+      } else if (formState.emailAddress) {
         // If we have an email from the server, store it in localStorage
-        localStorage.setItem('pendingConfirmation', emailAddress);
-        localStorage.setItem('pendingUserType', userTypeValue);
+        localStorage.setItem('pendingConfirmation', formState.emailAddress);
+        localStorage.setItem('pendingUserType', formState.userTypeValue);
         
         if (dev) {
-          console.log('Email from server stored in localStorage:', emailAddress);
+          console.log('Email from server stored in localStorage:', formState.emailAddress);
         }
       }
       
-      // Check for development verification code
-      const devVerificationCode = localStorage.getItem('devVerificationCode') || '';
-      showDevInfo = !!devVerificationCode;
-      
-      if (devVerificationCode) {
-        console.log('Development verification code:', devVerificationCode);
-        
-        // Auto-fill the verification code inputs
-        if (devVerificationCode.length === 6) {
-          for (let i = 0; i < 6; i++) {
-            codeInputs[i] = devVerificationCode.charAt(i);
-          }
-        }
+      // In dev mode, show verification code from localStorage
+      if (dev) {
+        formState.showDevInfo = true;
       }
-    }
-    
-    if (dev) {
-      console.log('Development mode active');
-      console.log('Email address:', emailAddress);
-      console.log('User type:', userTypeValue);
-    }
-    
-    // Focus first input
-    if (browser && inputRefs[0]) {
-      inputRefs[0].focus();
     }
   });
   
-  // Handle form submission results
+  // Handle form results from server
   $effect(() => {
     if (form) {
       if (form.success === false && form.error) {
-        error = form.error;
-        
-        // Increment verification attempts on error
-        if (form.error.includes('Invalid verification code')) {
-          verificationAttempts++;
-          
-          // Clear the code after 3 failed attempts
-          if (verificationAttempts >= 3) {
-            clearVerificationCode();
-          }
-        }
+        formState.error = form.error;
+        formState.isLoading = false;
+        formState.verificationAttempts += 1;
       } else if (form.success === true && form.message) {
-        message = form.message;
-        error = '';
+        formState.message = form.message;
         
-        // If verification was successful, check for custom properties
-        if (form.success && form.message && form.message.includes('verified')) {
-          redirecting = true;
-          
-          if (browser) {
-            // Clear verification data
-            localStorage.removeItem('pendingConfirmation');
-            localStorage.removeItem('pendingUserType');
-            localStorage.removeItem('devVerificationCode');
-            
-            // Redirect after a short delay
-            setTimeout(() => {
-              goto('/merchants/dashboard');
-            }, 1500);
-          }
+        // If resend was successful, reset the form
+        if (form.type === 'resend') {
+          formState.isResending = false;
         }
       }
     }
   });
   
   /**
-   * Handle input change and auto-focus next input
    * @param {Event} event - Input event
    * @param {number} index - Input index
    */
   function handleInputChange(event, index) {
-    if (!event || !event.target) return;
+    const value = /** @type {HTMLInputElement} */ (event.target).value;
     
-    // Type check and ensure target is an input element
-    if (event.target instanceof HTMLInputElement) {
-      const value = event.target.value;
-      
+    // Only allow digits
+    if (/^\d*$/.test(value)) {
       // Update the value in our state array
-      codeInputs[index] = value;
+      const newCodeInputs = [...formState.codeInputs];
+      newCodeInputs[index] = value;
+      formState.codeInputs = newCodeInputs;
       
-      // If value is entered and not the last input, focus next input
+      // Auto-advance to next field if this one is filled
       if (value && index < 5) {
-        inputRefs[index + 1]?.focus();
+        formState.inputRefs[index + 1]?.focus();
       }
+    } else {
+      // Reset to previous value if non-digit was entered
+      /** @type {HTMLInputElement} */ (event.target).value = formState.codeInputs[index];
     }
   }
   
   /**
-   * Handle key down events for navigation between inputs
    * @param {KeyboardEvent} event - Keyboard event
    * @param {number} index - Input index
    */
   function handleKeyDown(event, index) {
-    if (!event) return;
-    
-    // Handle backspace to go to previous input
-    if (event.key === 'Backspace' && !codeInputs[index] && index > 0) {
-      inputRefs[index - 1]?.focus();
+    // Handle backspace
+    if (event.key === 'Backspace') {
+      if (!formState.codeInputs[index] && index > 0) {
+        // If current field is empty and backspace is pressed, go to previous field
+        formState.inputRefs[index - 1]?.focus();
+      }
+    } 
+    // Handle arrow keys
+    else if (event.key === 'ArrowLeft' && index > 0) {
+      formState.inputRefs[index - 1]?.focus();
+      event.preventDefault();
+    } else if (event.key === 'ArrowRight' && index < 5) {
+      formState.inputRefs[index + 1]?.focus();
+      event.preventDefault();
     }
   }
   
   /**
-   * Handle paste event to fill all inputs
    * @param {ClipboardEvent} event - Clipboard event
    */
   function handlePaste(event) {
@@ -165,42 +133,35 @@
     // Prevent default paste behavior
     event.preventDefault();
     
-    // Get pasted text and clean it
-    const pastedText = event.clipboardData.getData('text').replace(/\D/g, '');
+    // Get pasted data
+    const pastedData = event.clipboardData.getData('text');
     
-    // Fill inputs with pasted text
-    for (let i = 0; i < Math.min(pastedText.length, 6); i++) {
-      codeInputs[i] = pastedText[i];
-    }
+    // Filter out non-digits
+    const digits = pastedData.replace(/\D/g, '').slice(0, 6);
     
-    // Focus the next empty input or the last one
-    const nextEmptyIndex = codeInputs.findIndex(val => !val);
-    if (nextEmptyIndex !== -1 && nextEmptyIndex < 6) {
-      inputRefs[nextEmptyIndex]?.focus();
-    } else {
-      inputRefs[5]?.focus();
+    if (digits.length > 0) {
+      // Distribute digits across input fields
+      const newCodeInputs = [...formState.codeInputs];
+      
+      for (let i = 0; i < Math.min(digits.length, 6); i++) {
+        newCodeInputs[i] = digits[i];
+      }
+      
+      formState.codeInputs = newCodeInputs;
+      
+      // Focus on the next empty field or the last field
+      const nextEmptyIndex = newCodeInputs.findIndex(val => !val);
+      if (nextEmptyIndex !== -1 && nextEmptyIndex < 6) {
+        formState.inputRefs[nextEmptyIndex]?.focus();
+      } else {
+        formState.inputRefs[5]?.focus();
+      }
     }
   }
   
-  /**
-   * Clear verification code inputs
-   */
-  function clearVerificationCode() {
-    for (let i = 0; i < 6; i++) {
-      codeInputs[i] = '';
-    }
-    
-    // Focus the first input
-    inputRefs[0]?.focus();
-  }
-  
-  /**
-   * Handle resend code button click
-   */
-  function handleResend() {
-    isResending = true;
-    error = '';
-    message = '';
+  // Toggle resend form
+  function toggleResendForm() {
+    formState.isResending = !formState.isResending;
   }
 </script>
 
@@ -209,7 +170,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16 items-center">
         <div class="flex-shrink-0">
-          <h1 class="text-xl font-bold text-gray-900">Super Deals</h1>
+          <a href="/" class="text-blue-600 font-bold text-xl">SuperDeals</a>
         </div>
       </div>
     </div>
@@ -222,28 +183,28 @@
           Verify Your Email
         </h2>
         <p class="mt-2 text-center text-sm text-gray-600">
-          {#if emailAddress}
+          {#if formState.emailAddress}
             We've sent a 6-digit verification code to<br />
-            <span class="font-medium text-blue-600">{emailAddress}</span>
+            <span class="font-medium text-blue-600">{formState.emailAddress}</span>
           {:else}
             Please enter your verification code
           {/if}
         </p>
       </div>
       
-      {#if error}
+      {#if formState.error}
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-          <span class="block sm:inline">{error}</span>
+          <span class="block sm:inline">{formState.error}</span>
         </div>
       {/if}
       
-      {#if message}
+      {#if formState.message}
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-          <span class="block sm:inline">{message}</span>
+          <span class="block sm:inline">{formState.message}</span>
         </div>
       {/if}
       
-      {#if showDevInfo}
+      {#if formState.showDevInfo}
         <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative" role="alert">
           <p class="font-bold">Development Mode</p>
           <p>Verification code: {browser ? localStorage.getItem('devVerificationCode') : ''}</p>
@@ -255,22 +216,22 @@
         method="POST" 
         class="mt-8 space-y-6"
         use:enhance={() => {
-          isLoading = true;
-          error = '';
-          message = '';
+          formState.isLoading = true;
+          formState.error = '';
+          formState.message = '';
           
           return async ({ result }) => {
-            isLoading = false;
+            formState.isLoading = false;
             
             if (result.type === 'redirect') {
-              redirecting = true;
+              formState.redirecting = true;
             }
           };
         }}
       >
         <!-- Hidden email field -->
-        <input type="hidden" name="email" value={emailAddress} />
-        <input type="hidden" name="userType" value={userTypeValue} />
+        <input type="hidden" name="email" value={formState.emailAddress} />
+        <input type="hidden" name="userType" value={formState.userTypeValue} />
         
         <fieldset>
           <legend class="block text-sm font-medium text-gray-700 mb-2">
@@ -288,13 +249,13 @@
                   pattern="[0-9]"
                   maxlength="1"
                   required
-                  bind:value={codeInputs[i]}
-                  bind:this={inputRefs[i]}
+                  bind:value={formState.codeInputs[i]}
+                  bind:this={formState.inputRefs[i]}
                   oninput={(e) => handleInputChange(e, i)}
                   onkeydown={(e) => handleKeyDown(e, i)}
                   onpaste={i === 0 ? handlePaste : undefined}
                   class="w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  disabled={isLoading || redirecting}
+                  disabled={formState.isLoading || formState.redirecting}
                 />
               </div>
             {/each}
@@ -305,11 +266,11 @@
           <button 
             type="submit" 
             class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            disabled={isLoading || redirecting || !codeInputs.every(code => code)}
+            disabled={formState.isLoading || formState.redirecting || !formState.codeInputs.every(code => code)}
           >
-            {#if isLoading}
+            {#if formState.isLoading}
               Verifying...
-            {:else if redirecting}
+            {:else if formState.redirecting}
               Redirecting...
             {:else}
               Verify Email
@@ -323,39 +284,39 @@
           Didn't receive a code?
         </p>
         
-        {#if isResending}
+        {#if formState.isResending}
           <form 
             method="POST" 
             action="?/resend"
             class="mt-2"
             use:enhance={() => {
-              isLoading = true;
-              error = '';
-              message = '';
+              formState.isLoading = true;
+              formState.error = '';
+              formState.message = '';
               
               return async ({ result }) => {
-                isLoading = false;
-                isResending = false;
+                formState.isLoading = false;
+                formState.isResending = false;
               };
             }}
           >
-            <input type="hidden" name="email" value={emailAddress} />
-            <input type="hidden" name="userType" value={userTypeValue} />
+            <input type="hidden" name="email" value={formState.emailAddress} />
+            <input type="hidden" name="userType" value={formState.userTypeValue} />
             
             <button 
               type="submit" 
               class="text-blue-600 hover:text-blue-500 font-medium"
-              disabled={isLoading}
+              disabled={formState.isLoading}
             >
-              {isLoading ? 'Sending...' : 'Send Code'}
+              {formState.isLoading ? 'Sending...' : 'Send Code'}
             </button>
           </form>
         {:else}
           <button 
             type="button" 
             class="mt-2 text-blue-600 hover:text-blue-500 font-medium"
-            onclick={handleResend}
-            disabled={isLoading}
+            onclick={toggleResendForm}
+            disabled={formState.isLoading}
           >
             Resend Code
           </button>
@@ -367,7 +328,7 @@
   <footer class="bg-white">
     <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
       <p class="text-center text-sm text-gray-500">
-        &copy; 2025 Super Deals. All rights reserved.
+        &copy; {new Date().getFullYear()} SuperDeals. All rights reserved.
       </p>
     </div>
   </footer>

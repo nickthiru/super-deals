@@ -8,116 +8,81 @@
   import { goto } from '$app/navigation';
   
   // Reactive state using Svelte 5 runes
-  const merchantId = $state($page.params.user_id);
-  const title = $state('');
-  const description = $state('');
-  const discountType = $state('percentage');
-  const discountValue = $state('');
-  const minPurchase = $state('');
-  const startDate = $state('');
-  const endDate = $state('');
-  const termsAndConditions = $state('');
-  const isLimitedQuantity = $state(false);
-  const maxRedemptions = $state('');
-  const isLoading = $state(false);
-  const error = $state('');
-  const currentStep = $state(1);
+  const formState = $state({
+    merchantId: $page.params.user_id,
+    title: '',
+    description: '',
+    discountType: 'percentage',
+    discountValue: '',
+    minPurchase: '',
+    startDate: '',
+    endDate: '',
+    termsAndConditions: '',
+    isLimitedQuantity: false,
+    maxRedemptions: '',
+    currentStep: 1,
+    isSubmitting: false,
+    error: null
+  });
   
-  // Form validation
+  // Derived values
   const isStep1Valid = $derived(
-    title.trim() !== '' && 
-    description.trim() !== '' && 
-    discountType !== '' &&
-    discountValue.trim() !== '' && 
-    !isNaN(Number(discountValue)) &&
-    (minPurchase.trim() === '' || !isNaN(Number(minPurchase)))
+    formState.title.trim() !== '' && 
+    formState.description.trim() !== '' && 
+    formState.discountValue.trim() !== ''
   );
   
   const isStep2Valid = $derived(
-    startDate !== '' && 
-    endDate !== '' && 
-    new Date(startDate) <= new Date(endDate) &&
-    (!isLimitedQuantity || (maxRedemptions.trim() !== '' && !isNaN(Number(maxRedemptions))))
+    formState.startDate !== '' && 
+    formState.endDate !== '' && 
+    formState.termsAndConditions.trim() !== ''
   );
-  
-  // Discount type options
-  const discountTypes = [
-    { value: 'percentage', label: 'Percentage Discount' },
-    { value: 'fixed', label: 'Fixed Amount Discount' },
-    { value: 'bogo', label: 'Buy One Get One Free' },
-    { value: 'free', label: 'Free Item or Service' }
-  ];
   
   // Handle form navigation
   function nextStep() {
-    if (currentStep === 1 && isStep1Valid) {
-      currentStep = 2;
+    if (formState.currentStep === 1 && isStep1Valid) {
+      formState.currentStep = 2;
     }
   }
   
   function prevStep() {
-    if (currentStep === 2) {
-      currentStep = 1;
+    if (formState.currentStep === 2) {
+      formState.currentStep = 1;
     }
   }
   
-  // Format dates for input fields
-  function getTodayDate() {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  }
-  
-  function getNextMonthDate() {
-    const nextMonth = new Date();
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-    return nextMonth.toISOString().split('T')[0];
-  }
-  
-  // Initialize dates if empty
-  $effect(() => {
-    if (!startDate) {
-      startDate = getTodayDate();
-    }
+  // Form submission
+  /**
+   * @param {Event} event - Form submission event
+   */
+  async function handleCreateDeal(event) {
+    if (!isStep2Valid) return;
     
-    if (!endDate) {
-      endDate = getNextMonthDate();
-    }
-  });
-  
-  // Handle deal creation
-  async function handleCreateDeal() {
-    if (!isStep1Valid || !isStep2Valid) return;
-    
-    isLoading = true;
-    error = '';
+    formState.isSubmitting = true;
+    formState.error = null;
     
     try {
-      // Prepare deal data
-      const dealData = {
-        merchantId,
-        title,
-        description,
-        discountType,
-        discountValue: Number(discountValue),
-        minPurchase: minPurchase ? Number(minPurchase) : null,
-        startDate,
-        endDate,
-        termsAndConditions,
-        isLimitedQuantity,
-        maxRedemptions: isLimitedQuantity ? Number(maxRedemptions) : null
-      };
-      
-      // TODO: Implement actual deal creation using API
-      // For now, we'll simulate a successful creation
+      // Mock API call for now
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Redirect to deals list
-      goto(`/merchants/${merchantId}/deals/list`);
+      goto(`/merchants/${formState.merchantId}/deals`);
     } catch (err) {
-      error = err.message || 'Failed to create deal. Please try again.';
+      formState.error = /** @type {Error} */ (err).message || 'An error occurred while creating the deal';
     } finally {
-      isLoading = false;
+      formState.isSubmitting = false;
     }
+  }
+  
+  // Format currency input
+  /**
+   * @param {string} value - Input value to format
+   * @return {string} Formatted value
+   */
+  function formatCurrency(value) {
+    if (!value) return '';
+    return value.replace(/[^\d.]/g, '')
+      .replace(/^(\d*\.?)(\d*)$/, (_, p1, p2) => p1 + p2.slice(0, 2));
   }
 </script>
 
@@ -127,137 +92,123 @@
     <p class="text-gray-600">Create a new deal to attract customers</p>
   </div>
   
-  {#if error}
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
-      <span class="block sm:inline">{error}</span>
-    </div>
-  {/if}
-  
+  <!-- Form Steps -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
     <div class="steps-header flex border-b border-gray-200">
       <button 
-        class="flex-1 py-4 px-6 text-center font-medium {currentStep === 1 ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}"
-        on:click={() => currentStep = 1}
-        disabled={currentStep === 1}
+        class="flex-1 py-4 px-6 text-center font-medium {formState.currentStep === 1 ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}"
+        onclick={() => formState.currentStep = 1}
+        type="button"
       >
         1. Deal Details
       </button>
-      
       <button 
-        class="flex-1 py-4 px-6 text-center font-medium {currentStep === 2 ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}"
-        on:click={() => isStep1Valid && (currentStep = 2)}
-        disabled={!isStep1Valid || currentStep === 2}
+        class="flex-1 py-4 px-6 text-center font-medium {formState.currentStep === 2 ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}"
+        onclick={() => isStep1Valid && (formState.currentStep = 2)}
+        disabled={!isStep1Valid}
+        type="button"
       >
         2. Schedule & Terms
       </button>
     </div>
     
     <div class="p-6">
-      <form on:submit|preventDefault={currentStep === 1 ? nextStep : handleCreateDeal} class="space-y-6">
-        {#if currentStep === 1}
+      <form 
+        onsubmit={(e) => {
+          e.preventDefault();
+          if (formState.currentStep === 1) {
+            nextStep();
+          } else {
+            handleCreateDeal(e);
+          }
+        }}
+        class="space-y-6"
+      >
+        {#if formState.currentStep === 1}
           <!-- Step 1: Deal Details -->
           <div class="form-group">
             <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Deal Title *</label>
             <input
               type="text"
               id="title"
-              bind:value={title}
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="e.g., Summer Special Discount"
+              bind:value={formState.title}
+              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="e.g. 20% Off All Electronics"
               required
             />
-            <p class="text-xs text-gray-500 mt-1">A catchy, descriptive title for your deal</p>
           </div>
           
           <div class="form-group">
             <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description *</label>
             <textarea
               id="description"
-              bind:value={description}
+              bind:value={formState.description}
               rows="3"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Describe your deal and what customers will get"
+              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="Describe your deal"
               required
             ></textarea>
           </div>
           
-          <div class="form-group">
-            <label for="discountType" class="block text-sm font-medium text-gray-700 mb-1">Discount Type *</label>
-            <select
-              id="discountType"
-              bind:value={discountType}
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              required
-            >
-              {#each discountTypes as type}
-                <option value={type.value}>{type.label}</option>
-              {/each}
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label for="discountValue" class="block text-sm font-medium text-gray-700 mb-1">
-              {#if discountType === 'percentage'}
-                Discount Percentage *
-              {:else if discountType === 'fixed'}
-                Discount Amount *
-              {:else if discountType === 'bogo'}
-                Discount Percentage for Second Item *
-              {:else if discountType === 'free'}
-                Value of Free Item/Service *
-              {/if}
-            </label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-group">
+              <label for="discountType" class="block text-sm font-medium text-gray-700 mb-1">Discount Type *</label>
+              <select
+                id="discountType"
+                bind:value={formState.discountType}
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              >
+                <option value="percentage">Percentage (%)</option>
+                <option value="fixed">Fixed Amount ($)</option>
+                <option value="buyOneGetOne">Buy One Get One</option>
+              </select>
+            </div>
             
-            <div class="mt-1 relative rounded-md shadow-sm">
-              {#if discountType === 'fixed' || discountType === 'free'}
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span class="text-gray-500 sm:text-sm">$</span>
-                </div>
+            <div class="form-group">
+              <label for="discountValue" class="block text-sm font-medium text-gray-700 mb-1">
+                {formState.discountType === 'percentage' ? 'Discount Percentage *' : 
+                 formState.discountType === 'fixed' ? 'Discount Amount *' : 
+                 'Number of Free Items *'}
+              </label>
+              <div class="mt-1 relative rounded-md shadow-sm">
+                {#if formState.discountType === 'fixed'}
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="text-gray-500 sm:text-sm">$</span>
+                  </div>
+                {/if}
                 <input
-                  type="number"
+                  type="text"
                   id="discountValue"
-                  bind:value={discountValue}
-                  min="0"
-                  step="0.01"
-                  class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="0.00"
+                  bind:value={formState.discountValue}
+                  class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 {formState.discountType === 'fixed' ? 'pl-7' : ''} {formState.discountType === 'percentage' ? 'pr-7' : ''} focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder={formState.discountType === 'percentage' ? '20' : 
+                              formState.discountType === 'fixed' ? '10.00' : '1'}
                   required
                 />
-              {:else if discountType === 'percentage' || discountType === 'bogo'}
-                <input
-                  type="number"
-                  id="discountValue"
-                  bind:value={discountValue}
-                  min="0"
-                  max="100"
-                  class="w-full pr-12 pl-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="0"
-                  required
-                />
-                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <span class="text-gray-500 sm:text-sm">%</span>
-                </div>
-              {/if}
+                {#if formState.discountType === 'percentage'}
+                  <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <span class="text-gray-500 sm:text-sm">%</span>
+                  </div>
+                {/if}
+              </div>
             </div>
           </div>
           
           <div class="form-group">
-            <label for="minPurchase" class="block text-sm font-medium text-gray-700 mb-1">Minimum Purchase Amount (Optional)</label>
+            <label for="minPurchase" class="block text-sm font-medium text-gray-700 mb-1">Minimum Purchase (Optional)</label>
             <div class="mt-1 relative rounded-md shadow-sm">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <span class="text-gray-500 sm:text-sm">$</span>
               </div>
               <input
-                type="number"
+                type="text"
                 id="minPurchase"
-                bind:value={minPurchase}
-                min="0"
-                step="0.01"
-                class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                bind:value={formState.minPurchase}
+                class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pl-7 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="0.00"
               />
             </div>
-            <p class="text-xs text-gray-500 mt-1">Leave empty if there's no minimum purchase requirement</p>
+            <p class="mt-1 text-xs text-gray-500">Leave empty if there's no minimum purchase required</p>
           </div>
           
           <div class="form-actions">
@@ -277,9 +228,8 @@
               <input
                 type="date"
                 id="startDate"
-                bind:value={startDate}
-                min={getTodayDate()}
-                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                bind:value={formState.startDate}
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 required
               />
             </div>
@@ -289,17 +239,13 @@
               <input
                 type="date"
                 id="endDate"
-                bind:value={endDate}
-                min={startDate || getTodayDate()}
-                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                bind:value={formState.endDate}
+                min={formState.startDate}
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 required
               />
             </div>
           </div>
-          
-          {#if startDate && endDate && new Date(startDate) > new Date(endDate)}
-            <div class="text-sm text-red-600">End date must be after start date</div>
-          {/if}
           
           <div class="form-group">
             <div class="flex items-start">
@@ -307,62 +253,68 @@
                 <input
                   id="isLimitedQuantity"
                   type="checkbox"
-                  bind:checked={isLimitedQuantity}
+                  bind:checked={formState.isLimitedQuantity}
                   class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
                 />
               </div>
               <div class="ml-3 text-sm">
-                <label for="isLimitedQuantity" class="font-medium text-gray-700">
-                  Limit number of redemptions
-                </label>
+                <label for="isLimitedQuantity" class="font-medium text-gray-700">Limit number of redemptions</label>
                 <p class="text-gray-500">Set a maximum number of times this deal can be redeemed</p>
               </div>
             </div>
           </div>
           
-          {#if isLimitedQuantity}
+          {#if formState.isLimitedQuantity}
             <div class="form-group">
               <label for="maxRedemptions" class="block text-sm font-medium text-gray-700 mb-1">Maximum Redemptions *</label>
               <input
                 type="number"
                 id="maxRedemptions"
-                bind:value={maxRedemptions}
+                bind:value={formState.maxRedemptions}
                 min="1"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., 100"
-                required={isLimitedQuantity}
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                required={formState.isLimitedQuantity}
               />
             </div>
           {/if}
           
           <div class="form-group">
-            <label for="termsAndConditions" class="block text-sm font-medium text-gray-700 mb-1">Terms and Conditions (Optional)</label>
+            <label for="termsAndConditions" class="block text-sm font-medium text-gray-700 mb-1">Terms and Conditions *</label>
             <textarea
               id="termsAndConditions"
-              bind:value={termsAndConditions}
+              bind:value={formState.termsAndConditions}
               rows="4"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Any additional terms, conditions, or restrictions for this deal"
+              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="Enter terms and conditions for this deal"
+              required
             ></textarea>
           </div>
           
-          <div class="form-actions flex space-x-4">
+          {#if formState.error}
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+              <span class="block sm:inline">{formState.error}</span>
+            </div>
+          {/if}
+          
+          <div class="flex justify-between">
             <button
               type="button"
-              on:click={prevStep}
-              class="flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              onclick={prevStep}
+              class="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              Back
+              Back to Deal Details
             </button>
             
             <button
               type="submit"
-              disabled={!isStep2Valid || isLoading}
-              class="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!isStep2Valid || formState.isSubmitting}
+              class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {#if isLoading}
-                <span class="loading-spinner mr-2"></span>
-                Creating...
+              {#if formState.isSubmitting}
+                <span class="flex items-center">
+                  <span class="loading-spinner mr-2"></span>
+                  Creating...
+                </span>
               {:else}
                 Create Deal
               {/if}
