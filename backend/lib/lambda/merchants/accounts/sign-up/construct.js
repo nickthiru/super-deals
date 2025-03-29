@@ -22,7 +22,7 @@ class SignUpConstruct extends Construct {
       // timeout: Duration.minutes(1),
       entry: path.join(
         __dirname,
-        "../../../../src/lambda/merchants/accounts/sign-up/handler.js"
+        "../../../../../src/lambda/merchants/accounts/sign-up/handler.js"
       ),
       handler: "handler",
       depsLockFilePath: require.resolve("#package-lock"),

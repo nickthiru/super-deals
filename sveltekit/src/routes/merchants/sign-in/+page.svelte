@@ -11,32 +11,34 @@
   const { data, form } = $props();
   
   // Reactive state using Svelte 5 runes
-  let email = $state('');
-  let password = $state('');
-  let isLoading = $state(false);
-  let error = $state('');
-  let rememberMe = $state(false);
-  let showSuccessMessage = $state(false);
+  const formState = $state({
+    email: '',
+    password: '',
+    isLoading: false,
+    error: '',
+    rememberMe: false,
+    showSuccessMessage: false
+  });
   
   // Form validation
   const isFormValid = $derived(
-    email.trim() !== '' && 
-    password.trim() !== '' &&
-    email.includes('@')
+    formState.email.trim() !== '' && 
+    formState.password.trim() !== '' &&
+    formState.email.includes('@')
   );
   
   // Handle form results from server
   $effect(() => {
     if (form) {
       if (form.success === false && form.error) {
-        error = form.error;
-        isLoading = false;
+        formState.error = form.error;
+        formState.isLoading = false;
       }
     }
     
     // Show success message if redirected from verification
     if (data?.verified) {
-      showSuccessMessage = true;
+      formState.showSuccessMessage = true;
     }
   });
 </script>
@@ -45,13 +47,13 @@
   <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
     <h1 class="text-2xl font-bold mb-6 text-center">Merchant Sign In</h1>
     
-    {#if error}
+    {#if formState.error}
       <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
-        <p>{error}</p>
+        <p>{formState.error}</p>
       </div>
     {/if}
     
-    {#if showSuccessMessage}
+    {#if formState.showSuccessMessage}
       <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" role="alert">
         <p>Email verified successfully! Please sign in to continue.</p>
       </div>
@@ -61,12 +63,12 @@
       method="POST" 
       class="space-y-4"
       use:enhance={() => {
-        isLoading = true;
-        error = '';
+        formState.isLoading = true;
+        formState.error = '';
         
         return async ({ result, update }) => {
           await update();
-          isLoading = false;
+          formState.isLoading = false;
         };
       }}
     >
@@ -76,7 +78,7 @@
           type="email"
           id="email"
           name="email"
-          bind:value={email}
+          bind:value={formState.email}
           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           placeholder="your@email.com"
           required
@@ -89,7 +91,7 @@
           type="password"
           id="password"
           name="password"
-          bind:value={password}
+          bind:value={formState.password}
           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           placeholder="••••••••"
           required
@@ -102,7 +104,7 @@
             id="rememberMe" 
             name="rememberMe"
             type="checkbox" 
-            bind:checked={rememberMe}
+            bind:checked={formState.rememberMe}
             class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
           />
           <label for="rememberMe" class="ml-2 block text-sm text-gray-900">Remember me</label>
@@ -116,10 +118,10 @@
       <div>
         <button
           type="submit"
-          disabled={!isFormValid || isLoading}
+          disabled={!isFormValid || formState.isLoading}
           class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {#if isLoading}
+          {#if formState.isLoading}
             <span class="flex items-center">
               <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
