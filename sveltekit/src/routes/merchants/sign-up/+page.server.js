@@ -207,7 +207,7 @@ export const actions = {
           completed: true,
           email: email,
           userType: 'merchant',
-          redirect: '/auth/confirm-sign-up'
+          redirect: '/auth/verification-sent'
         };
       } catch (error) {
         if (error && typeof error === 'object' && 'status' in error && error.status === 303) {

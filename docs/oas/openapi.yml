@@ -6,6 +6,8 @@ info:
 tags:
   - name: deals
     description: Deals service
+  - name: merchants
+    description: Merchants service
 
 components:
   schemas:
@@ -33,19 +35,19 @@ security:
   - jwt: []
 
 paths:
-  # Accounts service
-  /accounts/sign-up:
-    $ref: "./resources/accounts/sign-up.yml"
+  # Merchant account service
+  /merchants/account/signup:
+    $ref: "./resources/merchants/account/sign-up.yml"
 
-  /accounts/sign-in:
-    $ref: "./resources/accounts/sign-in.yml"
+  /merchants/account/sign-in:
+    $ref: "./resources/merchants/account/sign-in.yml"
 
-  /accounts/confirm-sign-up:
-    $ref: "./resources/accounts/confirm-sign-up.yml"
+  /merchants/account/confirm-sign-up:
+    $ref: "./resources/merchants/account/confirm-sign-up.yml"
 
-  # Deals service
-  /deals?merchantId={merchantId}:
-    $ref: "./resources/deals/create-deal.yml"
+  # Merchant deals service
+  /merchants/deals:
+    $ref: "./resources/merchants/deals/create-deal.yml"
 
 x-amazon-apigateway-request-validators:
   all:

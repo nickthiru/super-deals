@@ -45,7 +45,16 @@ User Pool:
 - Custom attributes:
   - businessName (mutable)
   - userGroup (immutable)
+  - registrationNumber (mutable)
+  - yearOfRegistration (mutable)
+  - website (mutable)
+  - address (mutable)
+  - phone (mutable)
+  - primaryContact (mutable)
+  - productCategories (mutable)
 - Removal policy: RETAIN
+- Lambda Triggers:
+  - Custom Message: Customizes email templates based on user type
 
 User Pool Client:
 
@@ -71,15 +80,45 @@ Sign-up Flow:
   - email
   - custom:businessName
   - custom:userGroup
+  - custom:registrationNumber
+  - custom:yearOfRegistration
+  - custom:website
+  - custom:address (JSON string)
+  - custom:phone
+  - custom:primaryContact (JSON string)
+  - custom:productCategories (JSON string)
 - User is added to "Merchants" group
 - Email verification is required before account activation
+- Custom email is sent based on user type
+
+### Custom Email Templates
+
+**Implementation**: Custom Message Lambda Trigger
+
+**Files**:
+- Handler: `backend/src/lambda/auth/custom-message/handler.js`
+- Construct: `backend/lib/lambda/auth/custom-message/construct.js`
+- Configuration: `backend/lib/auth/user-pool/stack.js`
+
+**Features**:
+- Different email templates for merchants and customers
+- HTML-formatted emails with styling
+- Custom subject lines based on user type
+- Merchant-specific messaging and branding
+- Support for verification emails and password reset emails
+- Responsive design for mobile devices
 
 ### API Gateway
 
 **Method**: POST  
-**Path**: /merchant/accounts  
+**Path**: /merchants/account/signup  
 **Headers**:  
 Content-Type: application/json
+
+**Files**:
+- Construct: `backend/lib/api/http/endpoints/merchants/account/sign-up/construct.js`
+- Schema: `backend/lib/api/http/endpoints/merchants/account/sign-up/schema.js`
+- OpenAPI: `docs/oas/resources/merchants/account/sign-up.yml`
 
 **Request Body**:
 
@@ -129,240 +168,163 @@ Content-Type: application/json
 
 **Integration**: AWS Lambda Proxy  
 **Lambda Function**: Merchant Sign-Up Lambda  
-**Request Validation**: Body  
+**Request Validation**: Body (using API Gateway Model and RequestValidator)  
 **Authorization**: None (Public endpoint)
 
 ### Lambda
 
-Name: MerchantSignUpLambda  
-Runtime: Node.js 20.x  
-Handler: handler  
-Entry: src/lambda/merchant/accounts/sign-up/handler.js
+**Name**: MerchantSignUpLambda  
+**Runtime**: Node.js 20.x  
+**Handler**: handler  
+**Files**:
+- Handler: `backend/src/lambda/merchants/account/sign-up/handler.js`
+- Construct: `backend/lib/lambda/merchants/account/sign-up/construct.js`
 
-Environment Variables:
+**Environment Variables**:
 
 - USER_POOL_ID: Cognito User Pool ID
 - USER_POOL_CLIENT_ID: Cognito User Pool Client ID
 
-IAM Permissions:
+**IAM Permissions**:
 
 - cognito-idp:SignUp (Allow)
 - cognito-idp:AdminAddUserToGroup (Allow on User Pool ARN)
 
-Function Logic:
+**Function Logic**:
 
 1. Receives merchant sign-up data from API Gateway
-2. Creates Cognito user with SignUpCommand
-3. Sets required attributes:
+2. Performs dynamic business validations:
+   - Validates year of registration is not in the future
+   - Validates year of registration is not too old (before 1900)
+   - Validates website URL format if provided
+   - Validates primary contact email is different from business email
+3. Creates Cognito user with SignUpCommand
+4. Sets all required attributes:
    - email
    - custom:businessName
    - custom:userGroup
-4. Adds user to "Merchants" group with AdminAddUserToGroupCommand
-5. Returns success response with username and message
+   - custom:registrationNumber
+   - custom:yearOfRegistration
+   - custom:website
+   - custom:address (JSON string)
+   - custom:phone
+   - custom:primaryContact (JSON string)
+   - custom:productCategories (JSON string)
+5. Adds user to "Merchants" group with AdminAddUserToGroupCommand
+6. Returns success response with username and message
 
 ## Frontend
 
-### Route:
+### Routes:
 
-    merchants/accounts/sign-up
+- `/merchants/sign-up`: Multi-step merchant registration form
+- `/auth/verification-sent`: Verification email confirmation page
+- `/auth/confirm-sign-up`: Code verification page
 
-### Page:
+### Sign-up Page
 
-    Need a sign up form with the following merchant details to be obtained:
+**Files**:
+- Component: `sveltekit/src/routes/merchants/sign-up/+page.svelte`
+- Server Actions: `sveltekit/src/routes/merchants/sign-up/+page.server.js`
+- Validation Schema: `sveltekit/src/routes/merchants/sign-up/schema.js`
 
-      {
-        MerchantId: {
-          description: "Merchant ID using KSUID",
-          type: string,
-          required: true
-        },
-        BusinessName: {
-          description: "Name of business",
-          type: string,
-          required: true
-        },
-        RegistrationNumber: {
-          description: "Business registration number",
-          type: string,
-          required: true
-        },
-        YearOfRegistration: {
-          description: "Year of business registration",
-          type: number,
-          required: true
-        },
-        Email: {
-          description: "Email",
-          type: string,
-          required: true
-        },
-        Website: {
-          description: "Website URL",
-          type: string,
-          required: false
-        },
-        Address: {
-          BuildingNumber: {
-            description: "Building number",
-            type: string,
-            required: true
-          },
-          Street: {
-            description: "Street",
-            type: string,
-            required: true
-          },
-          City: {
-            description: "City",
-            type: string,
-            required: true
-          },
-          State: {
-            description: "State",
-            type: string,
-            required: true
-          },
-          Zip: {
-            description: "Zip",
-            type: string,
-            required: true
-          },
-          Country: {
-            description: "Country",
-            type: string,
-            required: true
-          }
-        },
-        Phone: {
-          description: "Phone",
-          type: string,
-          required: true
-        },
-        PrimaryContact: {
-          Name: {
-            description: "Name",
-            type: string,
-            required: true
-          },
-          Email: {
-            description: "Email",
-            type: string,
-            required: true
-          },
-          Phone: {
-            description: "Phone",
-            type: string,
-            required: true
-          }
-        },
-        ProductCategories: {
-          description: "Product categories",
-          type: string[
-            'Electronics', 'Clothing', 'Home & Kitchen', 'Beauty & Personal Care', 'Books', 'Toys & Games', 'Sports & Outdoors', 'Automotive', 'Health & Wellness', 'Food & Grocery', 'Jewelry', 'Office Supplies'
-          ],
-          required: true
-        },
-        Status: {
-          description: "Status",
-          type: string,
-          required: true
-        }
-      }
+**Features**:
+- Multi-step form with 3 steps:
+  - Step 1: Account Information (business name, email, password)
+  - Step 2: Business Information (registration number, year, business type, website)
+  - Step 3: Contact Information (address, phone, primary contact, product categories)
+- Client-side validation using Svelte 5 runes
+- Server-side validation using Zod schemas
+- Progress indicator showing current step
+- Form state persistence between steps using cookies
+- Responsive design using Tailwind CSS
+- Error handling and feedback
 
-    Browser validation
+**Implementation**:
+- Uses Svelte 5 runes for reactivity:
+  - `$state()` for reactive variables
+  - `$derived()` for computed values
+  - `$effect()` for side effects
+- Follows universal component format (no separate script/style sections)
+- Implements progressive enhancement with server-side form handling
+- Uses Tailwind CSS for styling
+- Communicates with backend API through merchant service
 
-### Page Server:
+### Verification Sent Page
 
-    Path: sveltekit/src/routes/merchants/sign-up/+page.server.js
+**Files**:
+- Component: `sveltekit/src/routes/auth/verification-sent/+page.svelte`
+- Server Load: `sveltekit/src/routes/auth/verification-sent/+page.server.js`
 
-    Actions:
-      default: Sign up form submission
-        - Multi-step form with server-side validation
-        - Step 1: Account Information validation
-        - Step 2: Business Information validation
-        - Step 3: Contact Information validation and API submission
+**Features**:
+- Confirmation that account was created successfully
+- Instructions to check email for verification code
+- Countdown timer for code expiration (5 minutes)
+- Buttons to:
+  - Enter verification code
+  - Resend verification code
+  - Go to sign-in
+- Adapts messaging based on user type (merchant or customer)
+- Secure access (redirects if no pending confirmation)
 
-    Validation Schema:
-      Path: sveltekit/src/routes/merchants/sign-up/schema.js
-      - step1Schema: Validates business name, email, password with Zod
-      - step2Schema: Validates registration number, year, business type
-      - step3Schema: Validates contact details, address, product categories
-      - Custom refinements for password matching and terms acceptance
+**Implementation**:
+- Uses Svelte 5 runes for reactivity
+- Loads email and user type data from cookies
+- Implements countdown timer with cleanup on component unmount
+- Uses Tailwind CSS for responsive design
+- Provides clear user guidance on next steps
 
-    API Integration:
-      - Calls merchantService.signUp() with combined form data
-      - Handles success/error responses
-      - Redirects to confirmation page on success
-      - Returns validation errors to client on failure
+### API Integration
 
-### State Management
+**Files**:
+- Service: `sveltekit/src/lib/services/api/merchantService.js`
 
-- Cookies (secure) to store form data between steps:
-  - signup_businessName
-  - signup_email
-  - signup_password
-  - signup_registrationNumber
-  - signup_yearOfRegistration
-  - signup_businessType
-  - signup_website
-- Cookie maxAge: 30 minutes
-- Cookie path: '/'
-- httpOnly: false (to allow client-side access)
+**Features**:
+- Handles API communication between frontend and backend
+- Supports both real API and mock API for development
+- Standardized error handling
+- Type definitions using JSDoc
 
-### Route:
+**Implementation**:
+- `signUp()` function sends merchant data to backend API
+- Handles success and error responses
+- Returns standardized response format
+- Supports development with mock data
 
-    auth/confirm-sign-up
+### Validation Schema
 
-### Page:
+**Files**:
+- Frontend: `sveltekit/src/routes/merchants/sign-up/schema.js`
+- Backend: `backend/lib/api/http/endpoints/merchants/account/sign-up/schema.js`
 
-    Need a "confirm sign up" form with the following info:
+**Features**:
+- Step-specific validation schemas
+- Comprehensive field validation
+- Custom error messages
+- Type safety
 
-      {
-        verificationCode: {
-          description: "Verification code sent to email",
-          type: string,
-          required: true
-        },
-      }
+**Implementation**:
+- Frontend: Uses Zod for form validation with three schemas:
+  - `step1Schema`: Validates account information
+  - `step2Schema`: Validates business information
+  - `step3Schema`: Validates contact information
+- Backend: Uses Zod to generate JSON Schema for API Gateway validation
 
-    Browser validation
+## Integration Points
 
-### Page Server:
+1. **Frontend to Backend**:
+   - SvelteKit form submits to page server action
+   - Server action calls merchant service API
+   - API Gateway validates request using schema
+   - Lambda processes request and creates Cognito user
 
-    Actions:
-      default: Sign up form submission
-        - Multi-step form with server-side validation
-        - Step 1: Account Information validation
-        - Step 2: Business Information validation
-        - Step 3: Contact Information validation and API submission
+2. **Email Verification Flow**:
+   - Cognito triggers custom message Lambda
+   - Custom email sent based on user type
+   - User redirected to verification sent page
+   - User enters code on confirm sign-up page
 
-    Validation Schema:
-      Path: sveltekit/src/routes/merchants/sign-up/schema.js
-      - step1Schema: Validates business name, email, password with Zod
-      - step2Schema: Validates registration number, year, business type
-      - step3Schema: Validates contact details, address, product categories
-      - Custom refinements for password matching and terms acceptance
-
-    API Integration:
-      - Calls merchantService.signUp() with combined form data
-      - Handles success/error responses
-      - Redirects to confirmation page on success
-      - Returns validation errors to client on failure
-
-### State Management
-
-- Cookies (secure) to store form data between steps:
-  - signup_businessName
-  - signup_email
-  - signup_password
-  - signup_registrationNumber
-  - signup_yearOfRegistration
-  - signup_businessType
-  - signup_website
-- Cookie maxAge: 30 minutes
-- Cookie path: '/'
-- httpOnly: false (to allow client-side access)
-
-## Notes
-
-- This is a pre-verified account opening workflow. The user still hast to complete document verification to be able to sell products.
+3. **Post-Verification**:
+   - User status changes from UNCONFIRMED to CONFIRMED
+   - User can sign in with verified credentials
+   - User receives follow-up instructions for document verification

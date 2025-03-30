@@ -9,12 +9,22 @@ const {
 } = require("aws-cdk-lib/aws-cognito");
 
 const ResourceServersStack = require("./resource-servers/stack");
+const CustomMessageConstruct = require("../../lambda/auth/custom-message/construct");
 
 class UserPoolStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
     const { envName } = props;
+
+    // Create the custom message Lambda function
+    const customMessageLambda = new CustomMessageConstruct(
+      this,
+      "CustomMessageLambda",
+      {
+        appUrl: process.env.SITE_URL || "https://dbcxhkl1jwg4u.cloudfront.net",
+      }
+    );
 
     this.pool = new UserPool(this, `UserPool`, {
       selfSignUpEnabled: true,
@@ -41,6 +51,9 @@ class UserPoolStack extends Stack {
           "Thanks for signing up to our awesome app! Your verification code is {####}. This code is valid for 24 hours.",
         emailStyle: VerificationEmailStyle.CODE,
       },
+      lambdaTriggers: {
+        customMessage: customMessageLambda.function,
+      },
       accountRecovery: AccountRecovery.EMAIL_ONLY,
       standardAttributes: {
         email: {
@@ -54,6 +67,12 @@ class UserPoolStack extends Stack {
       },
       removalPolicy: RemovalPolicy.RETAIN, // Default to RETAIN for safety
     });
+
+    // Grant the custom message Lambda permission to be invoked by Cognito
+    this.pool.addTrigger(
+      "CustomMessage",
+      customMessageLambda.function
+    );
 
     // Create Cognito domain
     this.domain = new UserPoolDomain(this, "UserPoolDomain", {
@@ -109,6 +128,12 @@ class UserPoolStack extends Stack {
       value: this.domain.domainName,
       description: "Cognito domain for OAuth flows",
       exportName: `UserPoolDomainName`,
+    });
+
+    new CfnOutput(this, `IdentityPoolId`, {
+      value: this.resourceServers.identityPool.identityPoolId,
+      description: "Cognito identity pool ID",
+      exportName: `IdentityPoolId`,
     });
   }
 }

@@ -1,6 +1,6 @@
 const { Construct } = require("constructs");
 
-// const AccountsConstruct = require("./accounts/construct");
+const AccountsConstruct = require("./accounts/construct");
 // const DealsConstruct = require("./deals/construct");
 
 class MerchantsConstruct extends Construct {
@@ -20,11 +20,11 @@ class MerchantsConstruct extends Construct {
       merchantsResource,
     });
 
-    new DealsConstruct(this, "DealsConstruct", {
-      http,
-      lambda,
-      merchantsResource,
-    });
+    // new DealsConstruct(this, "DealsConstruct", {
+    //   http,
+    //   lambda,
+    //   merchantsResource,
+    // });
   }
 }
 

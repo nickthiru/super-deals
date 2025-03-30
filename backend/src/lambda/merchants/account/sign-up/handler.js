@@ -6,10 +6,22 @@ const Api = require("#src/api/_index.js");
 
 const cognitoClient = new CognitoIdentityProviderClient();
 
+/**
+ * Validates a URL string
+ * @param {string} url - URL to validate
+ * @returns {boolean} - Whether the URL is valid
+ */
+function isValidUrl(url) {
+  try {
+    new URL(url);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 exports.handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
-
-  // const stage = event.headers['X-Stage'] || 'dev';
 
   const data = JSON.parse(event.body);
 
@@ -17,6 +29,60 @@ exports.handler = async (event) => {
   const userPoolClientId = process.env.USER_POOL_CLIENT_ID;
 
   try {
+    // Perform dynamic business validations
+    const currentYear = new Date().getFullYear();
+    
+    // Validate year of registration is not in the future
+    if (data.yearOfRegistration > currentYear) {
+      throw new Error("Year of registration cannot be in the future");
+    }
+    
+    // Validate year of registration is not too far in the past (arbitrary business rule)
+    if (data.yearOfRegistration < 1900) {
+      throw new Error("Year of registration is invalid");
+    }
+    
+    // Validate website if provided
+    if (data.website) {
+      if (!isValidUrl(data.website)) {
+        throw new Error("Website URL is invalid");
+      }
+      
+      // Optional: Check for allowed domains if needed
+      // const url = new URL(data.website);
+      // const allowedDomains = ['example.com', 'business.com'];
+      // if (!allowedDomains.some(domain => url.hostname.endsWith(domain))) {
+      //   throw new Error("Website domain is not allowed");
+      // }
+    }
+    
+    // Validate primary contact email matches pattern or domain requirements
+    if (data.primaryContact && data.primaryContact.email) {
+      // Example: Ensure primary contact email is not the same as the business email
+      if (data.primaryContact.email === data.email) {
+        throw new Error("Primary contact email should be different from business email");
+      }
+    }
+
+    // Prepare address and contact information for attributes
+    const addressString = JSON.stringify({
+      buildingNumber: data.address.buildingNumber,
+      street: data.address.street,
+      city: data.address.city,
+      state: data.address.state,
+      zip: data.address.zip,
+      country: data.address.country
+    });
+
+    const primaryContactString = JSON.stringify({
+      name: data.primaryContact.name,
+      email: data.primaryContact.email,
+      phone: data.primaryContact.phone
+    });
+
+    const productCategoriesString = JSON.stringify(data.productCategories);
+
+    // Sign up the user with Cognito
     const signUpResponse = await cognitoClient.send(new SignUpCommand({
       ClientId: userPoolClientId,
       Username: data.email,
@@ -24,22 +90,30 @@ exports.handler = async (event) => {
       UserAttributes: [
         { Name: "email", Value: data.email },
         { Name: "custom:businessName", Value: data.businessName },
-        { Name: "custom:userGroup", Value: data.userGroup }
+        { Name: "custom:userGroup", Value: "Merchant" },
+        { Name: "custom:registrationNumber", Value: data.registrationNumber },
+        { Name: "custom:yearOfRegistration", Value: data.yearOfRegistration.toString() },
+        { Name: "custom:website", Value: data.website || "" },
+        { Name: "custom:address", Value: addressString },
+        { Name: "custom:phone", Value: data.phone },
+        { Name: "custom:primaryContact", Value: primaryContactString },
+        { Name: "custom:productCategories", Value: productCategoriesString }
       ]
     }));
     console.log("(+) signUpResponse: " + JSON.stringify(signUpResponse, null, 2));
 
+    // Add user to the Merchants group
     await cognitoClient.send(new AdminAddUserToGroupCommand({
       UserPoolId: userPoolId,
       Username: data.email,
       GroupName: 'Merchants'
     }));
 
-
     // Return success response
     const successResponse = Api.success({
-      username: data.email,
-      message: "User account registered. Needs confirmation via OTP.",
+      success: true,
+      message: "Account registered. Complete sign-up with OTP",
+      username: data.email
     });
     console.log(`Success Response: ${JSON.stringify(successResponse, null, 2)}`);
 
@@ -48,7 +122,10 @@ exports.handler = async (event) => {
   } catch (error) {
     console.log(error);
 
-    const errorResponse = Api.error(400, error.message || "Failed to register user account");
+    const errorResponse = Api.error(400, {
+      success: false,
+      error: error.message || "Failed to register user account"
+    });
 
     return errorResponse;
   }
