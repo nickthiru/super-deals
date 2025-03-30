@@ -77,7 +77,7 @@ Sign-up Flow:
 ### API Gateway
 
 **Method**: POST  
-**Path**: /merchants/sign-up  
+**Path**: /merchant/accounts  
 **Headers**:  
 Content-Type: application/json
 
@@ -137,7 +137,7 @@ Content-Type: application/json
 Name: MerchantSignUpLambda  
 Runtime: Node.js 20.x  
 Handler: handler  
-Entry: src/lambda/merchants/accounts/sign-up/handler.js
+Entry: src/lambda/merchant/accounts/sign-up/handler.js
 
 Environment Variables:
 
@@ -164,7 +164,7 @@ Function Logic:
 
 ### Route:
 
-    merchants/sign-up
+    merchants/accounts/sign-up
 
 ### Page:
 
@@ -274,6 +274,60 @@ Function Logic:
 ### Page Server:
 
     Path: sveltekit/src/routes/merchants/sign-up/+page.server.js
+
+    Actions:
+      default: Sign up form submission
+        - Multi-step form with server-side validation
+        - Step 1: Account Information validation
+        - Step 2: Business Information validation
+        - Step 3: Contact Information validation and API submission
+
+    Validation Schema:
+      Path: sveltekit/src/routes/merchants/sign-up/schema.js
+      - step1Schema: Validates business name, email, password with Zod
+      - step2Schema: Validates registration number, year, business type
+      - step3Schema: Validates contact details, address, product categories
+      - Custom refinements for password matching and terms acceptance
+
+    API Integration:
+      - Calls merchantService.signUp() with combined form data
+      - Handles success/error responses
+      - Redirects to confirmation page on success
+      - Returns validation errors to client on failure
+
+### State Management
+
+- Cookies (secure) to store form data between steps:
+  - signup_businessName
+  - signup_email
+  - signup_password
+  - signup_registrationNumber
+  - signup_yearOfRegistration
+  - signup_businessType
+  - signup_website
+- Cookie maxAge: 30 minutes
+- Cookie path: '/'
+- httpOnly: false (to allow client-side access)
+
+### Route:
+
+    auth/confirm-sign-up
+
+### Page:
+
+    Need a "confirm sign up" form with the following info:
+
+      {
+        verificationCode: {
+          description: "Verification code sent to email",
+          type: string,
+          required: true
+        },
+      }
+
+    Browser validation
+
+### Page Server:
 
     Actions:
       default: Sign up form submission

@@ -1,23 +1,14 @@
 const { Construct } = require("constructs");
 
-// const AccountsConstruct = require("./accounts/construct");
-const DealsConstruct = require("./deals/construct");
+const MerchantsConstruct = require("./merchants/construct");
 
 class EndpointsConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const {
-      http,
-      lambda,
-    } = props;
+    const { http, lambda } = props;
 
-    // new AccountsConstruct(this, "AccountsConstruct", {
-    //   http,
-    //   lambda,
-    // });
-
-    new DealsConstruct(this, "DealsConstruct", {
+    new MerchantsConstruct(this, "MerchantsConstruct", {
       http,
       lambda,
     });
