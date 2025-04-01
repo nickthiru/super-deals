@@ -68,12 +68,6 @@ class UserPoolStack extends Stack {
       removalPolicy: RemovalPolicy.RETAIN, // Default to RETAIN for safety
     });
 
-    // Grant the custom message Lambda permission to be invoked by Cognito
-    this.pool.addTrigger(
-      "CustomMessage",
-      customMessageLambda.function
-    );
-
     // Create Cognito domain
     this.domain = new UserPoolDomain(this, "UserPoolDomain", {
       userPool: this.pool,
@@ -130,11 +124,15 @@ class UserPoolStack extends Stack {
       exportName: `UserPoolDomainName`,
     });
 
+    // Remove or comment out the IdentityPoolId output since it doesn't exist yet
+    // We'll need to implement the identity pool before using this
+    /*
     new CfnOutput(this, `IdentityPoolId`, {
       value: this.resourceServers.identityPool.identityPoolId,
       description: "Cognito identity pool ID",
       exportName: `IdentityPoolId`,
     });
+    */
   }
 }
 
