@@ -1,7 +1,7 @@
 const { Stack } = require("aws-cdk-lib");
 
-const DealsStack = require("./merchants/deals/stack");
-const AccountStack = require("./merchants/account/stack");
+const DealsStack = require("./deals/stack");
+const AccountStack = require("./account/stack");
 
 class MerchantsStack extends Stack {
   constructor(scope, id, props) {
