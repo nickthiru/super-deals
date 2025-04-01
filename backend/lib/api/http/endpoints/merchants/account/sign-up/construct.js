@@ -8,10 +8,10 @@ class SignUpConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const { http, lambda, merchantsResource } = props;
+    const { http, lambda, accountResource } = props;
 
     // Create the sign-up resource with CORS options
-    const signupResource = merchantsResource.addResource(
+    const signupResource = accountResource.addResource(
       "signup",
       http.optionsWithCors
     );
