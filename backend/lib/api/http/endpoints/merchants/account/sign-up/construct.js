@@ -20,7 +20,7 @@ class SignUpConstruct extends Construct {
     const model = new Model(this, `Model`, {
       restApi: http.restApi,
       contentType: "application/json",
-      description: "Validation model for merchant sign-up form",
+      description: "/merchants/account/signup",
       schema,
     });
 
@@ -36,7 +36,7 @@ class SignUpConstruct extends Construct {
       "POST",
       new LambdaIntegration(lambda.merchants.account.signUp.function),
       {
-        operationName: "SignUpMerchant",
+        operationName: "MerchantAccountSignUp",
         requestValidator,
         requestModels: {
           "application/json": model,
