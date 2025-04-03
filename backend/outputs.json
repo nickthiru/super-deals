@@ -25,6 +25,6 @@
     "ExportsOutputFnGetAttSignUpConstructNodejsFunction75CDDCFBArnDCC898BC": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackDevLambdaStac-SignUpConstructNodejsFun-DgA6oP3tDtaG"
   },
   "BackendStackDevApiStackHttpStackB0C9C4D3": {
-    "RestApiUrldev": "https://p2rn35zwhg.execute-api.us-east-1.amazonaws.com/dev/"
+    "RestApiUrldev": "https://soa1om0fz0.execute-api.us-east-1.amazonaws.com/dev/"
   }
 }

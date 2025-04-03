@@ -1,6 +1,6 @@
 const request = require("supertest");
 const { apiUrl } = require("#tests/api/config");
-const { validMerchantData } = require("./fixtures");
+const { validMerchantData, invalidMerchantData } = require("./fixtures");
 
 describe("POST /merchants/account/signup", () => {
   beforeEach(async () => {
@@ -8,6 +8,8 @@ describe("POST /merchants/account/signup", () => {
     // For example, remove test users from Cognito
 
     console.log("API URL:", apiUrl);
+    // console.log("Valid Merchant Data:", validMerchantData);
+    // console.log("Invalid Merchant Data:", invalidMerchantData);
   });
 
   afterEach(async () => {
@@ -17,7 +19,8 @@ describe("POST /merchants/account/signup", () => {
   test("successfully creates a merchant account", async () => {
     const response = await request(apiUrl)
       .post("/merchants/account/signup")
-      .send(validMerchantData)
+      // .send(JSON.stringify(validMerchantData)) // Valid merchant data
+      .send(JSON.stringify(invalidMerchantData)) // Invalid merchant data
       .expect(201)
       .expect("Content-Type", /json/);
 

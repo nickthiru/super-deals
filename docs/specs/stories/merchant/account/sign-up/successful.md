@@ -325,7 +325,7 @@ Content-Type: application/json
   - `step1Schema`: Validates account information
   - `step2Schema`: Validates business information
   - `step3Schema`: Validates contact information
-- Backend: Uses Zod to generate JSON Schema for API Gateway validation
+- Backend: Uses "JSON schema draft 4" to generate Schema for API Gateway validation
 
 ## Integration Points
 
