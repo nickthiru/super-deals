@@ -9,9 +9,7 @@ class CreateConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id);
 
-    const {
-      db,
-    } = props;
+    const { db } = props;
 
     this.function = new NodejsFunction(this, "NodejsFunction", {
       bundling: {
@@ -22,7 +20,10 @@ class CreateConstruct extends Construct {
       // memorySize: 1024,
       // memorySize: 512,
       // timeout: Duration.minutes(1),
-      entry: (path.join(__dirname, "./handler.js")),
+      entry: path.join(
+        __dirname,
+        "../../../../../src/lambda/merchants/deals/create/handler.js"
+      ),
       handler: "handler",
       depsLockFilePath: require.resolve("#package-lock"),
       environment: {
@@ -34,7 +35,7 @@ class CreateConstruct extends Construct {
           resources: [db.table.tableArn],
           actions: ["dynamodb:PutItem"],
         }),
-      ]
+      ],
     });
   }
 }

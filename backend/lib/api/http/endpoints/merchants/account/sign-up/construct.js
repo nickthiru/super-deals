@@ -1,6 +1,11 @@
 const { Construct } = require("constructs");
 const { LambdaIntegration } = require("aws-cdk-lib/aws-apigateway");
-const { Model, RequestValidator } = require("aws-cdk-lib/aws-apigateway");
+const {
+  Model,
+  RequestValidator,
+  GatewayResponse,
+  ResponseType,
+} = require("aws-cdk-lib/aws-apigateway");
 
 const schema = require("./schema.js");
 
@@ -8,10 +13,10 @@ class SignUpConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const { http, lambda, merchantsResource } = props;
+    const { http, lambda, accountResource } = props;
 
     // Create the sign-up resource with CORS options
-    const signupResource = merchantsResource.addResource(
+    const signupResource = accountResource.addResource(
       "signup",
       http.optionsWithCors
     );
@@ -20,7 +25,7 @@ class SignUpConstruct extends Construct {
     const model = new Model(this, `Model`, {
       restApi: http.restApi,
       contentType: "application/json",
-      description: "Validation model for merchant sign-up form",
+      description: "/merchants/account/signup",
       schema,
     });
 
@@ -31,12 +36,32 @@ class SignUpConstruct extends Construct {
       validateRequestParameters: false,
     });
 
+    // Add custom gateway response for validation errors
+    new GatewayResponse(this, "ValidationErrorResponse", {
+      restApi: http.restApi,
+      type: ResponseType.BAD_REQUEST_BODY,
+      statusCode: "400",
+      responseHeaders: {
+        "Access-Control-Allow-Origin": "'*'",
+        "Access-Control-Allow-Headers": "'*'",
+      },
+      templates: {
+        "application/json": `{
+          "error": "Validation error",
+          "message": $context.error.messageString,
+          "details": $context.error.validationErrorString,
+          "stage": "$context.stage",
+          "resourcePath": "$context.resourcePath"
+        }`,
+      },
+    });
+
     // Add POST method with Lambda integration and request validation
     signupResource.addMethod(
       "POST",
       new LambdaIntegration(lambda.merchants.account.signUp.function),
       {
-        operationName: "SignUpMerchant",
+        operationName: "MerchantAccountSignUp",
         requestValidator,
         requestModels: {
           "application/json": model,

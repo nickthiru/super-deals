@@ -88,17 +88,49 @@ exports.handler = async (event) => {
 
     const productCategoriesString = JSON.stringify(data.productCategories);
 
+    // Sign up the user with Cognito
+    const signUpResponse = await cognitoClient.send(
+      new SignUpCommand({
+        ClientId: userPoolClientId,
+        Username: data.email,
+        Password: data.password,
+        UserAttributes: [
+          { Name: "email", Value: data.email },
+          { Name: "custom:businessName", Value: data.businessName },
+          { Name: "custom:userGroup", Value: "Merchant" },
+          { Name: "custom:registrationNumber", Value: data.registrationNumber },
+          {
+            Name: "custom:yearOfRegistration",
+            Value: data.yearOfRegistration.toString(),
+          },
+          { Name: "custom:website", Value: data.website || "" },
+          { Name: "custom:address", Value: addressString },
+          { Name: "custom:phone", Value: data.phone },
+          { Name: "custom:primaryContact", Value: primaryContactString },
+          { Name: "custom:productCategories", Value: productCategoriesString },
+        ],
+      })
+    );
+    console.log(
+      "(+) signUpResponse: " + JSON.stringify(signUpResponse, null, 2)
+    );
+
+    // Add user to the Merchants group
+    await cognitoClient.send(
+      new AdminAddUserToGroupCommand({
+        UserPoolId: userPoolId,
+        Username: data.email,
+        GroupName: "Merchants",
+      })
+    );
+
     // Return success response
     const successResponse = Api.success(
       {
         message: "Merchant registered. Needs to submit OTP to complete sign-up",
-        userConfirmed: false,
-        merchantId: 123456,
-        codeDeliveryDetails: {
-          AttributeName: "email",
-          DeliveryMedium: "EMAIL",
-          Destination: "n***@g***",
-        },
+        userConfirmed: signUpResponse.UserConfirmed,
+        merchantId: signUpResponse.UserSub,
+        codeDeliveryDetails: signUpResponse.CodeDeliveryDetails,
       },
       201
     );

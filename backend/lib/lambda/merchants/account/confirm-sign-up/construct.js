@@ -5,14 +5,11 @@ const { Runtime } = require("aws-cdk-lib/aws-lambda");
 // const { Duration } = require("aws-cdk-lib");
 const path = require("path");
 
-
 class ConfirmSignUpConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id);
 
-    const {
-      auth,
-    } = props;
+    const { auth } = props;
 
     this.function = new NodejsFunction(this, "NodejsFunction", {
       bundling: {
@@ -23,7 +20,10 @@ class ConfirmSignUpConstruct extends Construct {
       // memorySize: 1024,
       // memorySize: 512,
       // timeout: Duration.minutes(1),
-      entry: (path.join(__dirname, "./handler.js")),
+      entry: path.join(
+        __dirname,
+        "../../../../../src/lambda/merchants/account/confirm-sign-up/handler.js"
+      ),
       handler: "handler",
       depsLockFilePath: require.resolve("#package-lock"),
       environment: {

@@ -46,7 +46,7 @@ class UserPoolStack extends Stack {
       },
       signInCaseSensitive: false,
       userVerification: {
-        emailSubject: "Verify you email",
+        emailSubject: "Super Deals: Email Verification",
         emailBody:
           "Thanks for signing up to our awesome app! Your verification code is {####}. This code is valid for 24 hours.",
         emailStyle: VerificationEmailStyle.CODE,
@@ -64,15 +64,16 @@ class UserPoolStack extends Stack {
       customAttributes: {
         businessName: new StringAttribute({ mutable: true }),
         userGroup: new StringAttribute({ mutable: false }),
+        registrationNumber: new StringAttribute({ mutable: false }),
+        yearOfRegistration: new StringAttribute({ mutable: false }),
+        website: new StringAttribute({ mutable: true }),
+        address: new StringAttribute({ mutable: true }),
+        phone: new StringAttribute({ mutable: true }),
+        primaryContact: new StringAttribute({ mutable: true }),
+        productCategories: new StringAttribute({ mutable: true }),
       },
       removalPolicy: RemovalPolicy.RETAIN, // Default to RETAIN for safety
     });
-
-    // Grant the custom message Lambda permission to be invoked by Cognito
-    this.pool.addTrigger(
-      "CustomMessage",
-      customMessageLambda.function
-    );
 
     // Create Cognito domain
     this.domain = new UserPoolDomain(this, "UserPoolDomain", {
@@ -84,7 +85,7 @@ class UserPoolStack extends Stack {
 
     // Create app client with OAuth scopes
     this.poolClient = this.pool.addClient(`UserPoolClient`, {
-      generateSecret: true,
+      // generateSecret: true,
       authFlows: {
         userPassword: true,
         adminUserPassword: true,
@@ -130,11 +131,15 @@ class UserPoolStack extends Stack {
       exportName: `UserPoolDomainName`,
     });
 
+    // Remove or comment out the IdentityPoolId output since it doesn't exist yet
+    // We'll need to implement the identity pool before using this
+    /*
     new CfnOutput(this, `IdentityPoolId`, {
       value: this.resourceServers.identityPool.identityPoolId,
       description: "Cognito identity pool ID",
       exportName: `IdentityPoolId`,
     });
+    */
   }
 }
 

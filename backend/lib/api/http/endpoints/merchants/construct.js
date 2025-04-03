@@ -1,6 +1,6 @@
 const { Construct } = require("constructs");
 
-const AccountsConstruct = require("./accounts/construct");
+const AccountsConstruct = require("./account/construct");
 // const DealsConstruct = require("./deals/construct");
 
 class MerchantsConstruct extends Construct {
