@@ -16,7 +16,7 @@ const defaultConfig = {
 // Get configuration from environment if available
 const envConfig = {
   useMockApi: import.meta.env?.VITE_USE_MOCK_API === 'true',
-  apiBaseUrl: import.meta.env?.VITE_API_BASE_URL,
+  apiBaseUrl: import.meta.env?.VITE_API_URL,
   mockDelay: parseInt(import.meta.env?.VITE_MOCK_DELAY) || defaultConfig.mockDelay,
   mockBehavior: {
     simulateRandomFailures: import.meta.env?.VITE_SIMULATE_FAILURES === 'true',

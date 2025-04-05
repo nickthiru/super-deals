@@ -71,12 +71,22 @@
   });
   
   // Form validation
+  // Password validation helpers
+  const hasLowercase = $derived(password.match(/[a-z]/) !== null);
+  const hasUppercase = $derived(password.match(/[A-Z]/) !== null);
+  const hasDigit = $derived(password.match(/[0-9]/) !== null);
+  const hasSymbol = $derived(password.match(/[^a-zA-Z0-9]/) !== null);
+  const isLongEnough = $derived(password.length >= 8);
+  
+  const isPasswordValid = $derived(
+    isLongEnough && hasLowercase && hasUppercase && hasDigit && hasSymbol
+  );
+  
   const isStep1Valid = $derived(
     businessName.trim() !== '' && 
     email.trim() !== '' && 
     email.includes('@') &&
-    password.trim() !== '' &&
-    password.length >= 8 &&
+    isPasswordValid &&
     password === confirmPassword
   );
   
@@ -315,9 +325,22 @@
             bind:value={password}
             required
             minlength="8"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 border-gray-300"
           />
-          <p class="text-xs text-gray-500 mt-1">Password must be at least 8 characters long</p>
+          <!-- Password validation indicator is now handled through the text color -->
+          {#if !isPasswordValid && password}
+            <p class="text-xs text-red-500 mt-1">Password does not meet all requirements</p>
+          {/if}
+          <div class="text-xs mt-1">
+            <p class="font-medium {isPasswordValid ? 'text-green-600' : 'text-gray-700'}">Password requirements:</p>
+            <ul class="list-disc pl-5 mt-1">
+              <li class="{isLongEnough ? 'text-green-600' : 'text-gray-600'}">At least 8 characters</li>
+              <li class="{hasLowercase ? 'text-green-600' : 'text-gray-600'}">At least one lowercase letter</li>
+              <li class="{hasUppercase ? 'text-green-600' : 'text-gray-600'}">At least one uppercase letter</li>
+              <li class="{hasDigit ? 'text-green-600' : 'text-gray-600'}">At least one number</li>
+              <li class="{hasSymbol ? 'text-green-600' : 'text-gray-600'}">At least one special character</li>
+            </ul>
+          </div>
         </div>
         
         <div class="form-group mt-4">
@@ -329,7 +352,7 @@
             bind:value={confirmPassword}
             required
             minlength="8"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 {password !== confirmPassword && confirmPassword ? 'border-red-500' : ''}"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" class:border-red-500={password !== confirmPassword && confirmPassword}
           />
           {#if password !== confirmPassword && confirmPassword}
             <p class="text-xs text-red-500 mt-1">Passwords do not match</p>
@@ -363,8 +386,8 @@
             <p class="text-xs text-red-500 mt-2 text-center">
               {#if password !== confirmPassword}
                 Passwords do not match
-              {:else if password.length < 8}
-                Password must be at least 8 characters
+              {:else if !isPasswordValid}
+                Password does not meet the requirements
               {:else if !email.includes('@')}
                 Please enter a valid email address
               {:else}

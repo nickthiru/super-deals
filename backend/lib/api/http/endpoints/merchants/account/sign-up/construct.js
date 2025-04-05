@@ -17,7 +17,7 @@ class SignUpConstruct extends Construct {
 
     // Create the sign-up resource with CORS options
     const signupResource = accountResource.addResource(
-      "signup",
+      "sign-up",
       http.optionsWithCors
     );
 

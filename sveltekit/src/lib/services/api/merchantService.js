@@ -7,6 +7,9 @@ import { apiConfig, useMockApi } from '$lib/config/api';
 import * as mockMerchantService from '$lib/services/mock/merchantService';
 import { handleApiError } from '$lib/utils/errorHandling';
 
+// Default to global fetch if no fetch function is provided
+const defaultFetch = globalThis.fetch;
+
 /**
  * @typedef {Object} MerchantData
  * @property {string} email - Merchant email
@@ -25,34 +28,39 @@ import { handleApiError } from '$lib/utils/errorHandling';
 /**
  * Sign up a new merchant
  * @param {MerchantData} merchantData - Merchant sign-up data
+ * @param {Function} [customFetch=defaultFetch] - Optional fetch function to use
  * @returns {Promise<MerchantSignUpResponse>} Sign-up response
  */
-export async function signUp(merchantData) {
-  try {
-    // Use mock service if configured to do so
-    if (useMockApi()) {
-      return await mockMerchantService.signUp(merchantData);
-    }
+export async function signUp(merchantData, customFetch = defaultFetch) {
+	try {
+		// Use mock service if configured to do so
+		if (useMockApi()) {
+			return await mockMerchantService.signUp(merchantData);
+		}
 
-    // Real API implementation
-    const response = await fetch(`${apiConfig.apiBaseUrl}/merchants/sign-up`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(merchantData)
-    });
+		console.log('apiBaseUrl', apiConfig.apiBaseUrl);
+		console.log('full url', `${apiConfig.apiBaseUrl}merchants/account/sign-up`);
 
-    if (!response.ok) {
-      throw response;
-    }
+		// Real API implementation
+		const fetchToUse = customFetch || defaultFetch;
+		const response = await fetchToUse(`${apiConfig.apiBaseUrl}merchants/account/sign-up`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(merchantData)
+		});
 
-    /** @type {MerchantSignUpResponse} */
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    throw await handleApiError(error);
-  }
+		if (!response.ok) {
+			throw response;
+		}
+
+		/** @type {MerchantSignUpResponse} */
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		throw await handleApiError(error);
+	}
 }
 
 /**
@@ -65,34 +73,36 @@ export async function signUp(merchantData) {
  * Verify merchant email with verification code
  * @param {string} email - Merchant email
  * @param {string} code - Verification code
+ * @param {Function} [customFetch=defaultFetch] - Optional fetch function to use
  * @returns {Promise<VerificationResponse>} Verification response
  */
-export async function verifyEmail(email, code) {
-  try {
-    // Use mock service if configured to do so
-    if (useMockApi()) {
-      return await mockMerchantService.verifyEmail(email, code);
-    }
+export async function verifyEmail(email, code, customFetch = defaultFetch) {
+	try {
+		// Use mock service if configured to do so
+		if (useMockApi()) {
+			return await mockMerchantService.verifyEmail(email, code);
+		}
 
-    // Real API implementation
-    const response = await fetch(`${apiConfig.apiBaseUrl}/merchants/verify-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email, code })
-    });
+		// Real API implementation
+		const fetchToUse = customFetch || defaultFetch;
+		const response = await fetchToUse(`${apiConfig.apiBaseUrl}merchants/verify-email`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ email, code })
+		});
 
-    if (!response.ok) {
-      throw response;
-    }
+		if (!response.ok) {
+			throw response;
+		}
 
-    /** @type {VerificationResponse} */
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    throw await handleApiError(error);
-  }
+		/** @type {VerificationResponse} */
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		throw await handleApiError(error);
+	}
 }
 
 /**
@@ -115,33 +125,35 @@ export async function verifyEmail(email, code) {
 /**
  * Get merchant details by ID
  * @param {string} merchantId - Merchant ID
+ * @param {Function} [customFetch=defaultFetch] - Optional fetch function to use
  * @returns {Promise<Merchant>} Merchant details
  */
-export async function getMerchantById(merchantId) {
-  try {
-    // Use mock service if configured to do so
-    if (useMockApi()) {
-      return await mockMerchantService.getMerchantById(merchantId);
-    }
+export async function getMerchantById(merchantId, customFetch = defaultFetch) {
+	try {
+		// Use mock service if configured to do so
+		if (useMockApi()) {
+			return await mockMerchantService.getMerchantById(merchantId);
+		}
 
-    // Real API implementation
-    const response = await fetch(`${apiConfig.apiBaseUrl}/merchants/${merchantId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+		// Real API implementation
+		const fetchToUse = customFetch || defaultFetch;
+		const response = await fetchToUse(`${apiConfig.apiBaseUrl}merchants/${merchantId}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
 
-    if (!response.ok) {
-      throw response;
-    }
+		if (!response.ok) {
+			throw response;
+		}
 
-    /** @type {Merchant} */
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    throw await handleApiError(error);
-  }
+		/** @type {Merchant} */
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		throw await handleApiError(error);
+	}
 }
 
 /**
@@ -153,41 +165,43 @@ export async function getMerchantById(merchantId) {
 /**
  * Resend verification code to merchant email
  * @param {string} email - Merchant email
+ * @param {Function} [customFetch=defaultFetch] - Optional fetch function to use
  * @returns {Promise<ResendVerificationResponse>} Resend response
  */
-export async function resendVerificationCode(email) {
-  try {
-    // Use mock service if configured to do so
-    if (useMockApi()) {
-      return await mockMerchantService.resendVerificationCode(email);
-    }
+export async function resendVerificationCode(email, customFetch = defaultFetch) {
+	try {
+		// Use mock service if configured to do so
+		if (useMockApi()) {
+			return await mockMerchantService.resendVerificationCode(email);
+		}
 
-    // Real API implementation
-    const response = await fetch(`${apiConfig.apiBaseUrl}/merchants/resend-verification`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email })
-    });
+		// Real API implementation
+		const fetchToUse = customFetch || defaultFetch;
+		const response = await fetchToUse(`${apiConfig.apiBaseUrl}merchants/resend-verification`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ email })
+		});
 
-    if (!response.ok) {
-      throw response;
-    }
+		if (!response.ok) {
+			throw response;
+		}
 
-    /** @type {ResendVerificationResponse} */
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    throw await handleApiError(error);
-  }
+		/** @type {ResendVerificationResponse} */
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		throw await handleApiError(error);
+	}
 }
 
 /**
  * @typedef {Object} SignInResponse
  * @property {boolean} success - Whether sign-in was successful
  * @property {string} merchantId - Merchant ID
- * @property {string} token - Auth token 
+ * @property {string} token - Auth token
  * @property {string} message - Response message
  */
 
@@ -195,32 +209,34 @@ export async function resendVerificationCode(email) {
  * Sign in merchant
  * @param {string} email - Merchant email
  * @param {string} password - Merchant password
+ * @param {Function} [customFetch=defaultFetch] - Optional fetch function to use
  * @returns {Promise<SignInResponse>} Sign-in response
  */
-export async function signIn(email, password) {
-  try {
-    // Use mock service if configured to do so
-    if (useMockApi()) {
-      return await mockMerchantService.signIn(email, password);
-    }
+export async function signIn(email, password, customFetch = defaultFetch) {
+	try {
+		// Use mock service if configured to do so
+		if (useMockApi()) {
+			return await mockMerchantService.signIn(email, password);
+		}
 
-    // Real API implementation
-    const response = await fetch(`${apiConfig.apiBaseUrl}/merchants/sign-in`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email, password })
-    });
+		// Real API implementation
+		const fetchToUse = customFetch || defaultFetch;
+		const response = await fetchToUse(`${apiConfig.apiBaseUrl}merchants/sign-in`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ email, password })
+		});
 
-    if (!response.ok) {
-      throw response;
-    }
+		if (!response.ok) {
+			throw response;
+		}
 
-    /** @type {SignInResponse} */
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    throw await handleApiError(error);
-  }
+		/** @type {SignInResponse} */
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		throw await handleApiError(error);
+	}
 }

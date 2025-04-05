@@ -21,6 +21,8 @@ const schema = {
     password: {
       type: "string",
       minLength: 8,
+      pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,}$",
+      description: "Password must be at least 8 characters and contain at least one lowercase letter, one uppercase letter, one number, and one special character",
     },
     businessName: {
       type: "string",

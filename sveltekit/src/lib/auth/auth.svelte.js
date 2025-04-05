@@ -19,7 +19,11 @@ export const auth = $state({
 });
 
 // Computed properties
-export const isAuthenticated = $derived(!!auth.user);
+// Create a derived value and then export a function that returns it
+const isAuthenticatedValue = $derived(!!auth.user);
+export function isAuthenticated() {
+  return isAuthenticatedValue;
+}
 
 // Load the current authenticated user
 $effect(() => {
@@ -52,37 +56,7 @@ export async function checkAuthState() {
   }
 }
 
-/**
- * Sign up a new user
- * @param {string} email - User's email
- * @param {string} password - User's password
- * @param {Object} attributes - Additional user attributes
- * @returns {Promise<Object>} - Sign up result
- */
-export async function registerUser(email, password, attributes = {}) {
-  auth.isLoading = true;
-  auth.error = null;
-  
-  try {
-    /** @type {Object} */
-    const result = await signUp({
-      username: email,
-      password,
-      options: {
-        userAttributes: {
-          email,
-          ...(/** @type {Record<string, string>} */(attributes))
-        }
-      }
-    });
-    return result;
-  } catch (/** @type {any} */ err) {
-    auth.error = err;
-    throw err;
-  } finally {
-    auth.isLoading = false;
-  }
-}
+
 
 /**
  * Confirm sign up with verification code
@@ -152,3 +126,5 @@ export async function logoutUser() {
     auth.isLoading = false;
   }
 }
+
+

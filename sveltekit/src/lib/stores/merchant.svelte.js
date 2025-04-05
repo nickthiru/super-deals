@@ -56,12 +56,33 @@ export function setError(errorMessage) {
   errorState = errorMessage;
 }
 
-// Export reactive values
-export const merchant = $derived(merchantState);
-export const isLoading = $derived(loadingState);
-export const error = $derived(errorState);
-export const isAuthenticated = $derived(isAuthenticatedState);
-export const isEmailVerificationPending = $derived(isEmailVerificationPendingState);
+// Create derived values and then export functions that return them
+const merchantValue = $derived(merchantState);
+const isLoadingValue = $derived(loadingState);
+const errorValue = $derived(errorState);
+const isAuthenticatedValue = $derived(isAuthenticatedState);
+const isEmailVerificationPendingValue = $derived(isEmailVerificationPendingState);
+
+// Export functions that return the derived values
+export function merchant() {
+  return merchantValue;
+}
+
+export function isLoading() {
+  return isLoadingValue;
+}
+
+export function error() {
+  return errorValue;
+}
+
+export function isAuthenticated() {
+  return isAuthenticatedValue;
+}
+
+export function isEmailVerificationPending() {
+  return isEmailVerificationPendingValue;
+}
 
 // Effect to persist merchant data to localStorage
 $effect(() => {

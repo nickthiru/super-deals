@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+// Load environment variables from .env file
+require('dotenv').config();
+
 const cdk = require("aws-cdk-lib");
 
 const BackendStack = require("../lib/backend-stack");

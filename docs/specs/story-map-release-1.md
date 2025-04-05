@@ -32,7 +32,10 @@
   - Complete verification for a pre-verified merchant account
   - Self-sign up for a pre-verified merchant account
     - Successful sign up
+    - Resend verification code
   - Sign in
+    - Stay signed in for 24 hours
+      - Need to make the session expiry 24 hours in cognito/amplify. default is 1 hour.
   - Sign out
   - Update account
     - Change password
@@ -64,3 +67,7 @@
   - Approve deals
   - View deals
   - Suspend deals
+
+## General
+
+- Protected routes is implemented for all users
