@@ -10,6 +10,8 @@ Merchants can sign up for a pre-verified merchant account
 
     Submits merchant details
 
+    Is shown a message asking them to check their email for a verification code
+
     Receives welcome email with verification code and unique URL to the "confirm email" page
 
     Verifies email

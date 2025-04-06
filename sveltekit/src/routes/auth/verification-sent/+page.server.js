@@ -18,17 +18,17 @@ import { redirect } from '@sveltejs/kit';
  * @returns {LoadOutput} The data for the page
  */
 export function load({ cookies }) {
-  // Get the pending confirmation email from cookies
-  const email = cookies.get('pendingConfirmation');
-  const userType = cookies.get('pendingUserType') || 'customer';
-  
-  // If no email in cookies, redirect to sign-up
-  if (!email) {
-    throw redirect(303, '/');
-  }
-  
-  return {
-    email,
-    userType
-  };
+	// Get the pending confirmation email from cookies
+	const email = cookies.get('pendingConfirmation');
+	const userType = cookies.get('pendingUserType') || 'customer';
+
+	// If no email in cookies, redirect to sign-up
+	if (!email) {
+		throw redirect(303, '/');
+	}
+
+	return {
+		email,
+		userType
+	};
 }

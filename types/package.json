@@ -1,0 +1,21 @@
+{
+  "name": "@super-deals/types",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "types",
+    "jsdoc"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "Shared JSDoc type definitions for Super Deals project",
+  "private": true,
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
