@@ -13,55 +13,55 @@
   // State using Svelte 5 runes
   let email = $state('');
   let userType = $state('');
-  let remainingSeconds = $state(300); // 5 minutes countdown
-  let countdownInterval = $state(null);
+  // let remainingSeconds = $state(300); // 5 minutes countdown
+  // let countdownInterval = $state(null);
   
   // Effects using Svelte 5 runes
-  $effect(() => {
-    if (data && data.email) {
-      email = data.email;
-    }
+  // $effect(() => {
+  //   if (data && data.email) {
+  //     email = data.email;
+  //   }
     
-    if (data && data.userType) {
-      userType = data.userType;
-    }
+  //   if (data && data.userType) {
+  //     userType = data.userType;
+  //   }
     
-    // Start countdown
-    startCountdown();
+  //   // Start countdown
+  //   startCountdown();
     
-    // Cleanup on component unmount
-    return () => {
-      if (countdownInterval) {
-        clearInterval(countdownInterval);
-      }
-    };
-  });
+  //   // Cleanup on component unmount
+  //   return () => {
+  //     if (countdownInterval) {
+  //       clearInterval(countdownInterval);
+  //     }
+  //   };
+  // });
   
   // Computed values using Svelte 5 runes
-  let minutes = $derived(Math.floor(remainingSeconds / 60));
-  let seconds = $derived(remainingSeconds % 60);
-  let formattedTime = $derived(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+  // let minutes = $derived(Math.floor(remainingSeconds / 60));
+  // let seconds = $derived(remainingSeconds % 60);
+  // let formattedTime = $derived(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
   let userTypeLabel = $derived(userType === 'merchant' ? 'Merchant' : 'Customer');
   
   // Methods
-  function startCountdown() {
-    if (countdownInterval) {
-      clearInterval(countdownInterval);
-    }
+  // function startCountdown() {
+  //   if (countdownInterval) {
+  //     clearInterval(countdownInterval);
+  //   }
     
-    countdownInterval = setInterval(() => {
-      if (remainingSeconds > 0) {
-        remainingSeconds--;
-      } else {
-        clearInterval(countdownInterval);
-      }
-    }, 1000);
-  }
+  //   countdownInterval = setInterval(() => {
+  //     if (remainingSeconds > 0) {
+  //       remainingSeconds--;
+  //     } else {
+  //       clearInterval(countdownInterval);
+  //     }
+  //   }, 1000);
+  // }
   
-  function goToSignIn() {
-    const route = userType === 'merchant' ? '/merchants/sign-in' : '/sign-in';
-    goto(route);
-  }
+  // function goToSignIn() {
+  //   const route = userType === 'merchant' ? '/merchants/sign-in' : '/sign-in';
+  //   goto(route);
+  // }
   
   function goToResendVerification() {
     const route = userType === 'merchant' ? '/merchants/resend-verification' : '/resend-verification';
@@ -91,10 +91,10 @@
         </h3>
         
         <p class="text-gray-600 mb-6">
-          We've sent a verification code to <strong>{email}</strong>. Please check your email and enter the code to verify your account.
+          We've sent a verification code to <strong>{email}</strong>. Please check your email to visit the verification page and enter the code to verify your account.
         </p>
         
-        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+        <!-- <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
           <div class="flex">
             <div class="flex-shrink-0">
               <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -107,9 +107,9 @@
               </p>
             </div>
           </div>
-        </div>
+        </div> -->
         
-        <div class="flex flex-col space-y-4">
+        <!-- <div class="flex flex-col space-y-4">
           <button
             type="button"
             onclick={() => goto('/auth/confirm-sign-up')}
@@ -133,7 +133,7 @@
           >
             Go to Sign In
           </button>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
