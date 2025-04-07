@@ -8,6 +8,15 @@ import { generateMerchantId, generateVerificationCode } from '../../utils/idGene
 import { ERROR_CODES } from '$lib/utils/errorHandling';
 import { browser } from '$app/environment';
 
+/**
+ * @typedef {import('@super-deals/types').MerchantSignUpData} MerchantSignUpData
+ * @typedef {import('@super-deals/types').MerchantSignUpResponse} MerchantSignUpResponse
+ * @typedef {import('@super-deals/types').VerificationResponse} VerificationResponse
+ * @typedef {import('@super-deals/types').ResendVerificationResponse} ResendVerificationResponse
+ * @typedef {import('@super-deals/types').Merchant} Merchant
+ * @typedef {import('@super-deals/types').SignInResponse} SignInResponse
+ */
+
 // Storage key for mock data
 const MOCK_MERCHANTS_STORAGE_KEY = 'mock_merchants_data';
 const MOCK_VERIFICATIONS_STORAGE_KEY = 'mock_verifications_data';
@@ -18,6 +27,7 @@ const pendingVerifications = new Map();
 
 /**
  * @typedef {Object} MockMerchant
+ * Extends the Merchant type with additional fields needed for mock implementation
  * @property {string} id - Merchant ID
  * @property {string} email - Merchant email
  * @property {string} businessName - Business name
@@ -164,8 +174,8 @@ function simulateRandomFailure() {
 
 /**
  * Sign up a new merchant
- * @param {import('../api/merchantService').MerchantData} merchantData - Merchant sign-up data
- * @returns {Promise<import('../api/merchantService').MerchantSignUpResponse>} Sign-up response
+ * @param {MerchantSignUpData} merchantData - Merchant sign-up data
+ * @returns {Promise<MerchantSignUpResponse>} Sign-up response
  */
 export async function signUp(merchantData) {
   // Load latest data from localStorage
@@ -239,7 +249,7 @@ export async function signUp(merchantData) {
  * Verify merchant email with verification code
  * @param {string} email - Merchant email
  * @param {string} code - Verification code
- * @returns {Promise<import('../api/merchantService').VerificationResponse>} Verification response
+ * @returns {Promise<VerificationResponse>} Verification response
  */
 export async function verifyEmail(email, code) {
   await mockDelay();
@@ -286,7 +296,7 @@ export async function verifyEmail(email, code) {
 /**
  * Get merchant by ID
  * @param {string} merchantId - Merchant ID
- * @returns {Promise<import('../api/merchantService').Merchant>} Merchant data
+ * @returns {Promise<Merchant>} Merchant data
  */
 export async function getMerchantById(merchantId) {
   await mockDelay();
@@ -309,7 +319,7 @@ export async function getMerchantById(merchantId) {
 /**
  * Resend verification code to merchant email
  * @param {string} email - Merchant email
- * @returns {Promise<import('../api/merchantService').ResendVerificationResponse>} Resend verification response
+ * @returns {Promise<ResendVerificationResponse>} Resend verification response
  */
 export async function resendVerificationCode(email) {
   await mockDelay();
@@ -355,7 +365,7 @@ export async function resendVerificationCode(email) {
  * Sign in merchant
  * @param {string} email - Merchant email
  * @param {string} password - Merchant password
- * @returns {Promise<import('../api/merchantService').SignInResponse>} Sign-in response
+ * @returns {Promise<SignInResponse>} Sign-in response
  */
 export async function signIn(email, password) {
   await mockDelay();
