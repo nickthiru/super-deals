@@ -30,6 +30,11 @@
 
 ## Merchant
 
+- Get information about becoming a merchant
+  - View a landing page with
+    - Benefits
+    - How to apply
+    - FAQ
 - Manage account
   - Complete verification for a pre-verified merchant account
   - Self-sign up for a pre-verified merchant account
