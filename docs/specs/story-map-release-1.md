@@ -68,6 +68,12 @@
   - View deals
   - Suspend deals
 
+## Auth
+
+- A user who needs to verify their email can request a resend of the verification code
+  - Successful resend
+  - Failed resend
+
 ## General
 
 - Protected routes is implemented for all users

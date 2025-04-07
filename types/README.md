@@ -146,3 +146,110 @@ As the project evolves, we'll gradually migrate existing type definitions into t
 4. Build and test to ensure everything works as expected
 
 This approach allows for incremental migration without disrupting ongoing development.
+
+## JSDoc to Zod
+
+Inferring Zod schemas directly from JSDoc types is not natively supported by Zod, as Zod schemas are designed to define validation rules and infer TypeScript types, whereas JSDoc types are primarily static annotations for documentation and tooling. However, there are workarounds to achieve compatibility between JSDoc types and Zod schemas.
+
+### Workaround: Using `ts-to-zod` to Generate Zod Schemas from TypeScript Types
+
+If you have JSDoc annotations that correspond to TypeScript types, you can convert those TypeScript types into Zod schemas using tools like `ts-to-zod`. Here’s how:
+
+1. **Define JSDoc Types in a TypeScript File**:
+
+   ```typescript
+   /**
+    * @typedef {Object} Person
+    * @property {string} name
+    * @property {number} age
+    */
+   export type Person = {
+     name: string;
+     age: number;
+   };
+   ```
+
+2. **Generate Zod Schemas**:
+   Use `ts-to-zod` to convert the `Person` type into a Zod schema:
+
+   ```bash
+   npx ts-to-zod src/types.ts src/schemas.ts
+   ```
+
+   This will produce:
+
+   ```typescript
+   import { z } from "zod";
+
+   export const PersonSchema = z.object({
+     name: z.string(),
+     age: z.number(),
+   });
+   ```
+
+3. **Use the Schema for Validation**:
+
+   ```javascript
+   import { PersonSchema } from "./schemas";
+
+   const personData = { name: "Alice", age: 30 };
+   const result = PersonSchema.safeParse(personData);
+
+   if (!result.success) {
+     console.error("Validation failed:", result.error);
+   } else {
+     console.log("Validated data:", result.data);
+   }
+   ```
+
+---
+
+### Alternative Approach: Manual Mapping Between JSDoc Types and Zod Schemas
+
+If you don’t want to rely on external tools, you can manually create Zod schemas that match your JSDoc types:
+
+1. **Define JSDoc Types**:
+
+   ```javascript
+   /**
+    * @typedef {Object} Product
+    * @property {string} name
+    * @property {number} price
+    */
+   ```
+
+2. **Manually Create Matching Zod Schema**:
+
+   ```javascript
+   import { z } from "zod";
+
+   const ProductSchema = z.object({
+     name: z.string(),
+     price: z.number(),
+   });
+   ```
+
+3. **Validate Data**:
+   Use the schema for runtime validation while relying on JSDoc for static type hints.
+
+---
+
+### Key Considerations
+
+- **JSDoc Limitations**: JSDoc types are static and cannot enforce runtime validation. Zod provides runtime validation but does not directly parse or infer schemas from JSDoc annotations.
+- **Tooling Requirement**: Tools like `ts-to-zod` bridge the gap between TypeScript (or JSDoc-based TypeScript types) and Zod schemas, ensuring compatibility.
+- **Manual Synchronization**: If you manually create Zod schemas based on JSDoc types, ensure they stay in sync to avoid mismatches.
+
+In summary, while Zod cannot directly infer schemas from JSDoc types, tools like `ts-to-zod` can generate schemas from TypeScript definitions that align with your JSDoc annotations[4][5]. Alternatively, manual mapping is a straightforward solution for smaller projects.
+
+Citations:  
+[1] https://stackoverflow.com/questions/76354177/how-to-infer-zod-type-in-jsdoc-without-typescript  
+[2] https://egghead.io/lessons/typescript-parse-and-infer-data-being-fetched-in-sveltekit-with-zod-and-jsdoc  
+[3] https://dev.to/_domenicocolandrea/master-schema-validation-in-typescript-with-zod-28dc  
+[4] https://www.npmjs.com/package/ts-to-zod  
+[5] https://github.com/fabien0102/ts-to-zod  
+[6] https://www.totaltypescript.com/workshops/advanced-typescript-patterns/external-libraries/create-a-runtime-and-type-safe-function-with-generics-and-zod/solution  
+[7] https://blog.jim-nielsen.com/2023/types-in-jsdoc-with-zod/  
+[8] https://github.com/colinhacks/zod/issues/200
+
+---

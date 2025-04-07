@@ -30,6 +30,7 @@
     "@aws-sdk/client-verifiedpermissions": "^3.699.0",
     "@aws-sdk/util-dynamodb": "^3.658.1",
     "@cdklabs/cdk-verified-permissions": "^0.1.4",
+    "@super-deals/types": "file:../types",
     "aws-cdk-lib": "^2.177.0",
     "constructs": "^10.4.2",
     "dotenv": "^16.4.7",

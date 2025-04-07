@@ -50,6 +50,7 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
+		"@super-deals/types": "file:../types",
 		"aws-amplify": "^6.14.1",
 		"zod": "^3.24.2",
 		"zod-form-data": "^2.0.7",
