@@ -2,7 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import * as merchantService from '$lib/services/api/merchantService';
 import { ERROR_CODES } from '$lib/utils/errorHandling';
-import { verificationSchema, resendSchema } from './schema.js';
+import { verificationCodeSchema, resendCodeSchema } from './schema.js';
 
 /**
  * @typedef {Object} ApiError
@@ -27,11 +27,11 @@ export const actions = {
 	/**
 	 * Default form action for verifying email
 	 */
-	default: async ({ request, cookies }) => {
+	verify: async ({ request, cookies }) => {
 		const formData = await request.formData();
 
 		// Validate form data using Zod schema
-		const result = verificationSchema.safeParse(formData);
+		const result = verificationCodeSchema.safeParse(formData);
 
 		if (!result.success) {
 			const errors = result.error.flatten().fieldErrors;
@@ -41,7 +41,7 @@ export const actions = {
 			};
 		}
 
-		const { email, userType, code1, code2, code3, code4, code5, code6 } = result.data;
+		const { email, code1, code2, code3, code4, code5, code6 } = result.data;
 		const verificationCode = code1 + code2 + code3 + code4 + code5 + code6;
 
 		if (dev) {
@@ -103,11 +103,11 @@ export const actions = {
 	/**
 	 * Form action for resending verification code
 	 */
-	resend: async ({ request, cookies }) => {
+	resendCode: async ({ request, cookies }) => {
 		const formData = await request.formData();
 
 		// Validate form data using Zod schema
-		const result = resendSchema.safeParse(formData);
+		const result = resendCodeSchema.safeParse(formData);
 
 		if (!result.success) {
 			const errors = result.error.flatten().fieldErrors;

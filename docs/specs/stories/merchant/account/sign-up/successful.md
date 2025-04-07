@@ -12,11 +12,21 @@ Merchants can sign up for a pre-verified merchant account
 
     Is shown a message asking them to check their email for a verification code
 
+      Code is only valid for 24 hours?
+
     Receives welcome email with verification code and unique URL to the "confirm email" page
+
+      Apart from email message, there just needs to be a verify email button without the code displayed
+
+      When the user clicks on the verify email button, they are taken to the /auth/confirm-sign-up page, with the url containing two path parameters: /auth/confirm-sign-up/username={email}&code={code}
 
     Verifies email
 
-    Is successfully signed up
+      The page should display "verifying. please hold on"-type of message or something similar
+
+      The page server needs to read the two values from the path parameter and pass it to amplify's confirmSignUp api
+
+      Based on the result, the page should then update the display something similar to "your email has been verified. please click on the 'sign in' button below to sign in", or an error message if the verification failed
 
     Receives email with follow-up instructions to complete document verification
 

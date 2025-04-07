@@ -12,6 +12,8 @@ A user who needs to verify their email can request a resend of the verification 
 
     Is shown a message asking them to check their email for a verification code
 
+    They can also request a new verification code after a timeout of 5 minutes?
+
     Clicks on the "Resend verification code" button
 
     Receives a new verification code
