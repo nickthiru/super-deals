@@ -4,6 +4,10 @@ export type VerificationResponse = {
      */
     success: boolean;
     /**
+     * - Whether sign-up process is complete
+     */
+    isSignUpComplete: boolean;
+    /**
      * - Response message
      */
     message: string;

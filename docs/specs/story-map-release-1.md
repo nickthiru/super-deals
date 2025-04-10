@@ -15,8 +15,10 @@
   - View saved deals
   - View purchase history
 - Manage account
-  - Sign up
+  - Self-sign up
     - With username and password
+      - Successful sign up
+      - Account already exists
     - With SSO
   - Sign in
     - With username and password
@@ -28,11 +30,16 @@
 
 ## Merchant
 
+- Get information about becoming a merchant
+  - View a landing page with
+    - Benefits
+    - How to apply
+    - FAQ
 - Manage account
   - Complete verification for a pre-verified merchant account
   - Self-sign up for a pre-verified merchant account
     - Successful sign up
-    - Resend verification code
+    - Account already exists
   - Sign in
     - Stay signed in for 24 hours
       - Need to make the session expiry 24 hours in cognito/amplify. default is 1 hour.

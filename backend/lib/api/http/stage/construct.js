@@ -1,26 +1,29 @@
 const { Construct } = require("constructs");
-const { Deployment, Stage, LogGroupLogDestination, AccessLogFormat, MethodLoggingLevel } = require("aws-cdk-lib/aws-apigateway");
+const {
+  Deployment,
+  Stage,
+  LogGroupLogDestination,
+  AccessLogFormat,
+  MethodLoggingLevel,
+} = require("aws-cdk-lib/aws-apigateway");
 const { LogGroup, RetentionDays } = require("aws-cdk-lib/aws-logs");
-const { CfnOutput, } = require("aws-cdk-lib");
+const { CfnOutput } = require("aws-cdk-lib");
 
 class StageConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id);
 
-    const {
-      api,
-      stageName
-    } = props;
+    const { api, stageName } = props;
 
     const accessLogGroup = new LogGroup(this, `LogGroup-${stageName}`, {
       logGroupName: `/aws/apigateway/${api.restApiId}/${stageName}`,
-      retention: RetentionDays.ONE_WEEK
+      retention: RetentionDays.ONE_WEEK,
     });
 
-    const executionLogGroup = new LogGroup(this, `ExecutionLogGroup-${stageName}`, {
-      logGroupName: `/aws/apigateway/${api.restApiId}/${stageName}/execution`,
-      retention: RetentionDays.ONE_WEEK
-    });
+    // const executionLogGroup = new LogGroup(this, `ExecutionLogGroup-${stageName}`, {
+    //   logGroupName: `/aws/apigateway/${api.restApiId}/${stageName}/execution`,
+    //   retention: RetentionDays.ONE_WEEK
+    // });
 
     const deployment = new Deployment(this, `Deployment-${stageName}`, {
       api,
@@ -55,7 +58,7 @@ class StageConstruct extends Construct {
     });
 
     // Set the default deployment stage
-    if (stageName === 'dev') {
+    if (stageName === "dev") {
       api.deploymentStage = stage;
     }
 
@@ -63,8 +66,7 @@ class StageConstruct extends Construct {
     new CfnOutput(this, `RestApiUrl-${stageName}`, {
       value: stage.urlForPath(),
       exportName: `RestApiUrl${stageName}`,
-    })
-      .overrideLogicalId(`RestApiUrl${stageName}`);
+    }).overrideLogicalId(`RestApiUrl${stageName}`);
   }
 }
 

@@ -214,6 +214,7 @@
       <form 
         id="verification-form"
         method="POST" 
+        action="?/verify"
         class="mt-8 space-y-6"
         use:enhance={() => {
           formState.isLoading = true;
@@ -287,7 +288,7 @@
         {#if formState.isResending}
           <form 
             method="POST" 
-            action="?/resend"
+            action="?/resendCode"
             class="mt-2"
             use:enhance={() => {
               formState.isLoading = true;

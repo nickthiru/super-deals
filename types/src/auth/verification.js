@@ -9,6 +9,7 @@
 /**
  * @typedef {Object} VerificationResponse
  * @property {boolean} success - Whether verification was successful
+ * @property {boolean} isSignUpComplete - Whether sign-up process is complete
  * @property {string} message - Response message
  */
 

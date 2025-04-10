@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import { dev } from '$app/environment';
-import * as merchantService from '$lib/services/api/merchantService';
+import * as accountsService from '$lib/services/accounts';
 import { step1Schema, step2Schema, step3Schema } from './schema.js';
 
 /** @type {import('./$types').Actions} */
@@ -174,9 +174,16 @@ export const actions = {
 			}
 
 			try {
-				// Use the API Gateway implementation for sign-up
+				// Extract user type from the route path (merchants)
+				const userType = 'merchant';
+				
+				// Create a copy of merchant data to avoid modifying the original object
+				// This prevents adding properties that aren't part of the expected type
+				const merchantDataWithType = { ...merchantData };
+				
+				// Use the accounts service with user type for sign-up
 				// Pass the SvelteKit fetch function to the service
-				const result = await merchantService.signUp(merchantData, fetch);
+				const result = await accountsService.signUp(userType, merchantDataWithType, fetch);
 
 				if (dev) {
 					console.log('Registration result:', result);
