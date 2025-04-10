@@ -16,7 +16,7 @@ const AuthorizationConstruct = require("./authorization/construct");
  * @typedef {Object} HttpStackProps
  * @property {string} envName - Stage name (e.g., 'dev', 'prod')
  * @property {import('../../auth/stack').AuthStack} auth - Auth stack
- * @property {import('../../lambda/stack').LambdaStack} lambda - Lambda stack
+ * @property {import('../../services/stack').LambdaStack} lambda - Lambda stack
  * @property {import('../../permissions/stack').PermissionsStack} permissions - Permissions stack
  */
 

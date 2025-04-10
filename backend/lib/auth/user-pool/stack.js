@@ -9,7 +9,7 @@ const {
 } = require("aws-cdk-lib/aws-cognito");
 
 const ResourceServersStack = require("./resource-servers/stack");
-const CustomMessageConstruct = require("../../lambda/auth/custom-message/construct");
+const CustomMessageConstruct = require("../../services/auth/custom-message/construct");
 
 class UserPoolStack extends Stack {
   constructor(scope, id, props) {

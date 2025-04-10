@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import { dev } from '$app/environment';
-import * as merchantService from '$lib/services/api/merchantService';
+import * as accountsService from '$lib/services/accounts';
 import { ERROR_CODES } from '$lib/utils/errorHandling';
 import { verificationCodeSchema, resendCodeSchema } from './schema.js';
 
@@ -50,8 +50,11 @@ export const actions = {
 		}
 
 		try {
+			// Get user type from cookies or default to merchant
+			const userType = cookies.get('pendingUserType') || 'merchant';
+
 			// Call verification service
-			const result = await merchantService.verifyEmail(email, verificationCode);
+			const result = await accountsService.verifyEmail(userType, email, verificationCode);
 
 			if (dev) {
 				console.log('Verification successful:', result);
@@ -62,8 +65,17 @@ export const actions = {
 			cookies.delete('pendingUserType', { path: '/' });
 			cookies.delete('devVerificationCode', { path: '/' });
 
-			// Redirect to sign-in page
-			// throw redirect(303, `/${userType}s/sign-in?verified=true`);
+			// Check if sign-up is complete
+			if (result.isSignUpComplete) {
+				// Redirect to sign-up-success page
+				throw redirect(303, `/auth/sign-up-success?userType=${userType}`);
+			} else {
+				// Something went wrong, but verification was processed
+				return {
+					email,
+					error: 'Verification was processed, but sign-up could not be completed. Please contact support.'
+				};
+			}
 		} catch (error) {
 			if (error && typeof error === 'object' && 'status' in error && error.status === 303) {
 				// This is our redirect, pass it through
@@ -76,6 +88,28 @@ export const actions = {
 			}
 
 			let errorMessage = 'Failed to verify email. Please try again.';
+			
+			// Extract error message if available
+			if (error && typeof error === 'object') {
+				if ('message' in error && typeof error.message === 'string') {
+					errorMessage = error.message;
+				} else if ('code' in error && typeof error.code === 'string') {
+					// Handle specific error codes
+					switch (error.code) {
+						case 'CodeMismatchException':
+							errorMessage = 'The verification code is incorrect. Please check and try again.';
+							break;
+						case 'ExpiredCodeException':
+							errorMessage = 'The verification code has expired. Please request a new code.';
+							break;
+						case 'LimitExceededException':
+							errorMessage = 'Too many attempts. Please try again later.';
+							break;
+						default:
+							errorMessage = `Verification failed: ${error.code}`;
+					}
+				}
+			}
 
 			if (error && typeof error === 'object') {
 				const apiError = /** @type {ApiError} */ (error);
@@ -120,7 +154,10 @@ export const actions = {
 		const { email } = result.data;
 
 		try {
-			const result = await merchantService.resendVerificationCode(email);
+			// Get user type from cookies or default to merchant
+			const userType = cookies.get('pendingUserType') || 'merchant';
+
+			const result = await accountsService.resendVerificationCode(userType, email);
 
 			if (dev) {
 				console.log('Resend successful:', result);

@@ -3,10 +3,12 @@ const { Stack } = require("aws-cdk-lib");
 const DbStack = require("./db/stack");
 const StorageStack = require("./storage/stack");
 const AuthStack = require("./auth/stack");
-const LambdaStack = require("./lambda/stack");
 const ApiStack = require("./api/stack");
 const PermissionsStack = require("./permissions/stack");
 const IamStack = require("./iam/stack");
+const SnsStack = require("./sns/stack");
+const EmailTemplatesStack = require("./email/stack");
+const ServicesStack = require("./services/stack");
 
 class BackendStack extends Stack {
   /**
@@ -17,13 +19,17 @@ class BackendStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const { envName } = props;
+    const { envName } = props; // this is mainly for config purposes, i think e.g. used by DbStack to determine retention policy for DDB
 
     const db = new DbStack(this, "DbStack", {
       envName,
     });
 
     const storage = new StorageStack(this, "StorageStack", {
+      envName,
+    });
+
+    const sns = new SnsStack(this, "SnsStack", {
       envName,
     });
 
@@ -35,22 +41,27 @@ class BackendStack extends Stack {
       auth,
     });
 
-    const lambda = new LambdaStack(this, "LambdaStack", {
-      auth,
-      db,
-    });
-
     const permissions = new PermissionsStack(this, "PermissionsStack", {
       iam,
       storage,
       auth,
     });
 
-    new ApiStack(this, "ApiStack", {
-      auth,
+    const email = new EmailTemplatesStack(this, "EmailTemplatesStack", {});
+
+    const services = new ServicesStack(this, "ServicesStack", {
       envName,
-      lambda, // For HTTP API Lambda proxy integration
+      auth,
+      db,
+      sns,
+      email,
+    });
+
+    new ApiStack(this, "ApiStack", {
+      envName,
+      auth,
       permissions,
+      services,
     });
   }
 }
