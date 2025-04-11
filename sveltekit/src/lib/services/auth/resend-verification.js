@@ -16,7 +16,7 @@ const defaultFetch = globalThis.fetch;
  * @param {Function} [customFetch=defaultFetch] - Optional fetch function to use
  * @returns {Promise<ResendVerificationResponse>} Resend response
  */
-export async function resendVerificationCode(userType, email, customFetch = defaultFetch) {
+export default async function resendVerificationCode(userType, email, customFetch = defaultFetch) {
 	try {
 		// Use mock service if configured to do so
 		if (useMockApi()) {

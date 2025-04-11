@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { load } from '../../../../src/routes/merchants/sign-up/+page.server.js';
+import { load } from '../../../../src/routes/auth/sign-up/+page.server.js';
 
 describe('/birthdays - load', () => {
 	it('returns a fixture of two items', () => {

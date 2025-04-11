@@ -18,7 +18,7 @@ const defaultFetch = globalThis.fetch;
  * @param {Function} [_customFetch=defaultFetch] - Optional fetch function (reserved for future use)
  * @returns {Promise<SignInResponse>} Sign-in response
  */
-export async function signIn(
+export default async function signIn(
 	userType,
 	email,
 	password,

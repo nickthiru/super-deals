@@ -1,11 +1,17 @@
 import { fail } from '@sveltejs/kit';
 import { dev } from '$app/environment';
-import AccountsService from '$lib/services/accounts/_index.js';
+import AuthService from '$lib/services/auth/_index.js';
 import { step1Schema, step2Schema, step3Schema } from './schema.js';
 
-/** @type {import('./$types').Actions} */
+/**
+ * @typedef {Object} Actions
+ * @property {Function} default - Default action function
+ */
+/** @type {Actions} */
 export const actions = {
-	default: async ({ request, fetch, cookies }) => {
+	default: async (
+		/** @type {{ request: Request, fetch: Function, cookies: any }} */ { request, fetch, cookies }
+	) => {
 		const formData = await request.formData();
 		const currentStep = parseInt(formData.get('currentStep')?.toString() || '1', 10);
 
@@ -176,14 +182,14 @@ export const actions = {
 			try {
 				// Extract user type from the route path (merchants)
 				const userType = 'merchant';
-				
+
 				// Create a copy of merchant data to avoid modifying the original object
 				// This prevents adding properties that aren't part of the expected type
 				const merchantDataWithType = { ...merchantData };
-				
+
 				// Use the accounts service with user type for sign-up
 				// Pass the SvelteKit fetch function to the service
-				const result = await AccountsService.signUp(userType, merchantDataWithType, fetch);
+				const result = await AuthService.signUp(userType, merchantDataWithType, fetch);
 
 				if (dev) {
 					console.log('Registration result:', result);

@@ -16,7 +16,7 @@ const defaultFetch = globalThis.fetch;
  * @param {Function} [customFetch=defaultFetch] - Optional fetch function to use
  * @returns {Promise<UserProfile>} User details
  */
-export async function getUser(userType, userId, customFetch = defaultFetch) {
+export default async function getUser(userType, userId, customFetch = defaultFetch) {
 	try {
 		// Use mock service if configured to do so
 		if (useMockApi()) {
