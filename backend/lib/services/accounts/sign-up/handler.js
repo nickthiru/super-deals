@@ -4,8 +4,11 @@ const {
   AdminAddUserToGroupCommand,
 } = require("@aws-sdk/client-cognito-identity-provider");
 
-const Api = require("#src/services/api/_index.js");
-const PubSub = require("#src/services/pub-sub/_index.js");
+/** @typedef {import('#types/deal-entity').DealEntity} DealItem */
+
+const AccountsService = require("#src/services/accounts/_index.js");
+const ApiService = require("#src/services/api/_index.js");
+const PubSubService = require("#src/services/pub-sub/_index.js");
 
 const cognitoClient = new CognitoIdentityProviderClient();
 
@@ -150,11 +153,11 @@ async function addUserToMerchantsGroup(username, userPoolId, userType) {
 }
 
 async function publishSignUpCompletedEvent() {
-  await PubSub.publishToSns(snsClient, topicArn, topicName);
+  await PubSubService.publishToSns(snsClient, topicArn, topicName);
 }
 
 function prepareSuccessResponse() {
-  const successResponse = Api.success(
+  const successResponse = ApiService.success(
     {
       message: "Merchant registered. Needs to submit OTP to complete sign-up",
       userConfirmed: signUpResponse.UserConfirmed,
@@ -171,7 +174,7 @@ function prepareSuccessResponse() {
 function prepareErrorResponse(error) {
   console.log(error);
 
-  const errorResponse = Api.error(400, {
+  const errorResponse = ApiService.error(400, {
     error: error.message || "Failed to register user account",
   });
 

@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import { dev } from '$app/environment';
-import * as accountsService from '$lib/services/accounts';
+import AccountsService from '$lib/services/accounts/_index.js';
 import { step1Schema, step2Schema, step3Schema } from './schema.js';
 
 /** @type {import('./$types').Actions} */
@@ -183,7 +183,7 @@ export const actions = {
 				
 				// Use the accounts service with user type for sign-up
 				// Pass the SvelteKit fetch function to the service
-				const result = await accountsService.signUp(userType, merchantDataWithType, fetch);
+				const result = await AccountsService.signUp(userType, merchantDataWithType, fetch);
 
 				if (dev) {
 					console.log('Registration result:', result);
