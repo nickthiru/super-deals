@@ -1,7 +1,24 @@
 import { fail } from '@sveltejs/kit';
 import { dev } from '$app/environment';
-import { registerUser } from '$lib/services/auth.svelte.js';
+import { registerUser } from '$lib/services/accounts.svelte.js';
 import { step1Schema, step2Schema, step3Schema } from './schema.js';
+
+/**
+ * @typedef {Object} LoadParams
+ * @property {Object} params - URL parameters
+ * @property {string} params.user_type - Type of user (merchant, customer, etc.)
+ */
+
+/**
+ * Load function to get the user_type parameter from the URL
+ * @param {LoadParams} param0 - Load parameters
+ * @returns {Object} - Data for the page
+ */
+export function load({ params }) {
+	return {
+		userType: params.user_type
+	};
+}
 
 /**
  * @typedef {Object} Actions
