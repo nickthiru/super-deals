@@ -1,6 +1,5 @@
 // Authentication utilities using Svelte 5 runes
 import {
-	signUp as amplifySignUp,
 	signIn as amplifySignIn,
 	signOut,
 	getCurrentUser,

@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import { dev } from '$app/environment';
-import * as accountsService from '$lib/services/accounts';
+import * as accountsService from '$lib/services/accounts.svelte.js';
 import { ERROR_CODES } from '$lib/utils/errorHandling';
 import { verificationCodeSchema, resendCodeSchema } from './schema.js';
 
@@ -10,7 +10,7 @@ import { verificationCodeSchema, resendCodeSchema } from './schema.js';
  * @property {string} [code] - Error code
  */
 
-/** @type {import('./$types').PageServerLoad} */
+/** @type {import('./$types.js').PageServerLoad} */
 export function load({ cookies, url }) {
 	// Get email from query params or cookies
 	const email = url.searchParams.get('email') || cookies.get('pendingConfirmation') || '';
@@ -22,7 +22,7 @@ export function load({ cookies, url }) {
 	};
 }
 
-/** @type {import('./$types').Actions} */
+/** @type {import('./$types.js').Actions} */
 export const actions = {
 	/**
 	 * Default form action for verifying email
@@ -54,7 +54,7 @@ export const actions = {
 			const userType = cookies.get('pendingUserType') || 'merchant';
 
 			// Call verification service
-			const result = await accountsService.verifyEmail(userType, email, verificationCode);
+			const result = await accountsService.confirmUserSignUp(userType, email, verificationCode);
 
 			if (dev) {
 				console.log('Verification successful:', result);
@@ -73,7 +73,8 @@ export const actions = {
 				// Something went wrong, but verification was processed
 				return {
 					email,
-					error: 'Verification was processed, but sign-up could not be completed. Please contact support.'
+					error:
+						'Verification was processed, but sign-up could not be completed. Please contact support.'
 				};
 			}
 		} catch (error) {
@@ -88,7 +89,7 @@ export const actions = {
 			}
 
 			let errorMessage = 'Failed to verify email. Please try again.';
-			
+
 			// Extract error message if available
 			if (error && typeof error === 'object') {
 				if ('message' in error && typeof error.message === 'string') {

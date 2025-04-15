@@ -1,6 +1,6 @@
 const { Construct } = require("constructs");
 
-const SignUpConstruct = require("./sign-up/construct");
+const SignUpConstruct = require("./post/construct");
 
 class AccountsConstruct extends Construct {
   constructor(scope, id, props) {

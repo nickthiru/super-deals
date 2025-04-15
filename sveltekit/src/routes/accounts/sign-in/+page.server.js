@@ -10,7 +10,7 @@ import { signInSchema, forgotPasswordSchema } from './schema.js';
  * @property {string} [code] - Error code
  */
 
-/** @type {import('./$types').PageServerLoad} */
+/** @type {import('./$types.js').PageServerLoad} */
 export function load({ url, cookies }) {
 	// Check if the user was redirected from email verification
 	const verified = url.searchParams.get('verified') === 'true';
@@ -29,7 +29,7 @@ export function load({ url, cookies }) {
 	};
 }
 
-/** @type {import('./$types').Actions} */
+/** @type {import('./$types.js').Actions} */
 export const actions = {
 	/**
 	 * Default form action for signing in
