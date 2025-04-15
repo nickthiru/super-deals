@@ -33,7 +33,7 @@ exports.handler = async (event) => {
       productCategoriesString
     );
 
-    await addUserToMerchantsGroup(data.email, userPoolId, "Merchant");
+    await addUserToGroup(data.email, userPoolId, "Merchant");
 
     await publishSignUpCompletedEvent();
 
@@ -142,7 +142,7 @@ async function signUpUserWithCognito(
   return signUpResponse;
 }
 
-async function addUserToMerchantsGroup(username, userPoolId, userType) {
+async function addUserToGroup(username, userPoolId, userType) {
   await cognitoClient.send(
     new AdminAddUserToGroupCommand({
       UserPoolId: userPoolId,

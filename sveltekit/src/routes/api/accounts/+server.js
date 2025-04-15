@@ -23,26 +23,13 @@ export async function POST({ request, fetch }) {
 		// Get the request body
 		const data = await request.json();
 
-		// Extract user type from the data or default to 'merchant' since we're in the merchants endpoint
-		// This is used for logging and could be used for routing to different backend endpoints
-		const userType = data.userType || 'merchant';
-
-		if (dev) {
-			console.log(`Processing sign-up for user type: ${userType}`);
-		}
-
-		// Remove userType from the data to avoid duplication in the backend
-		// Use object destructuring to extract and discard the userType property
-		// eslint-disable-next-line no-unused-vars
-		const { userType: _, ...cleanData } = data;
-
 		// Forward the request to the backend API
 		const response = await fetch(`${apiConfig.apiBaseUrl}${ENDPOINTS.SIGN_UP}`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify(cleanData)
+			body: JSON.stringify(data)
 		});
 
 		// If the response is not ok, throw an error

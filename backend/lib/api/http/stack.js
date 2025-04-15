@@ -16,8 +16,8 @@ const AuthorizationConstruct = require("./authorization/construct");
  * @typedef {Object} HttpStackProps
  * @property {string} envName - Stage name (e.g., 'dev', 'prod')
  * @property {import('../../auth/stack').AuthStack} auth - Auth stack
- * @property {import('../../services/stack').LambdaStack} lambda - Lambda stack
  * @property {import('../../permissions/stack').PermissionsStack} permissions - Permissions stack
+ * @property {import('../../services/stack').ServicesStack} services - Services stack
  */
 
 /**
@@ -28,7 +28,7 @@ class HttpStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const { envName, auth, lambda, permissions } = props;
+    const { envName, auth, permissions, services } = props;
 
     /*** HTTP API ***/
 
@@ -66,7 +66,7 @@ class HttpStack extends Stack {
     /*** Endpoints ***/
 
     new EndpointsConstruct(this, "EndpointsConstruct", {
-      lambda,
+      services,
       http: {
         restApi: this.restApi,
         optionsWithCors,
