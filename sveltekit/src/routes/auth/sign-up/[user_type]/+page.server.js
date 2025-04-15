@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import { dev } from '$app/environment';
-import AuthService from '$lib/services/auth/_index.js';
+import { registerUser } from '$lib/services/auth.svelte.js';
 import { step1Schema, step2Schema, step3Schema } from './schema.js';
 
 /**
@@ -187,9 +187,9 @@ export const actions = {
 				// This prevents adding properties that aren't part of the expected type
 				const merchantDataWithType = { ...merchantData };
 
-				// Use the accounts service with user type for sign-up
+				// Use the enhanced auth service with user type for sign-up
 				// Pass the SvelteKit fetch function to the service
-				const result = await AuthService.signUp(userType, merchantDataWithType, fetch);
+				const result = await registerUser(userType, merchantDataWithType, fetch);
 
 				if (dev) {
 					console.log('Registration result:', result);
