@@ -23,6 +23,7 @@ class BackendStack extends Stack {
 
     const db = new DbStack(this, "DbStack", {
       envName,
+      email,
     });
 
     const storage = new StorageStack(this, "StorageStack", {
@@ -33,8 +34,11 @@ class BackendStack extends Stack {
       envName,
     });
 
+    const email = new EmailTemplatesStack(this, "EmailTemplatesStack");
+
     const auth = new AuthStack(this, "AuthStack", {
       envName,
+      email,
     });
 
     const iam = new IamStack(this, "IamStack", {
@@ -46,8 +50,6 @@ class BackendStack extends Stack {
       storage,
       auth,
     });
-
-    const email = new EmailTemplatesStack(this, "EmailTemplatesStack", {});
 
     const services = new ServicesStack(this, "ServicesStack", {
       envName,

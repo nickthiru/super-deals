@@ -89,7 +89,7 @@ class PostConstruct extends Construct {
       schema: merchantSchema,
     });
 
-    // const customerModel = new Model(this, `CustomerModel`, {
+    // this.customerModel = new Model(this, `CustomerModel`, {
     //   restApi: http.restApi,
     //   contentType: "application/json",
     //   description: "Accounts_SignUp",

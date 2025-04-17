@@ -1,14 +1,13 @@
 const {
   CognitoIdentityProviderClient,
-  SignUpCommand,
   AdminAddUserToGroupCommand,
 } = require("@aws-sdk/client-cognito-identity-provider");
+const R = require("ramda");
 
 /** @typedef {import('#types/deal-entity').DealEntity} DealItem */
 
 const AccountsService = require("#src/services/accounts/_index.js");
 const ApiService = require("#src/services/api/_index.js");
-const PubSubService = require("#src/services/pub-sub/_index.js");
 
 const cognitoClient = new CognitoIdentityProviderClient();
 
@@ -23,21 +22,20 @@ exports.handler = async (event) => {
   try {
     performDynamicBusinessValidations(data);
 
-    const { addressString, primaryContactString, productCategoriesString } =
-      prepareAddressAndContactInformationForAttributes(data);
+    const userAttributes = prepareUserAttributes(data);
 
     const signUpResponse = await signUpUserWithCognito(
-      data,
-      addressString,
-      primaryContactString,
-      productCategoriesString
+      cognitoClient,
+      userPoolClientId,
+      data.email,
+      data.password,
+      userAttributes
     );
 
-    await addUserToGroup(data.email, userPoolId, "Merchant");
+    // Add user to the appropriate group based on userType
+    await addUserToGroup(userPoolId, data.email, data.userType);
 
-    await publishSignUpCompletedEvent();
-
-    return prepareSuccessResponse(signUpResponse);
+    return prepareSuccessResponse(signUpResponse, data.userType);
   } catch (error) {
     return prepareErrorResponse(error);
   }
@@ -85,7 +83,36 @@ function performDynamicBusinessValidations(data) {
   }
 }
 
-function prepareAddressAndContactInformationForAttributes(data) {
+function prepareUserAttributes(data) {
+  // Create user attributes based on user type
+  const commonUserAttributes = [
+    { Name: "email", Value: data.email },
+    { Name: "custom:userGroup", Value: data.userType },
+  ];
+
+  // Add merchant-specific attributes if user type is Merchant
+  if (data.userType === "merchant") {
+    var completeUserAttributes = prepareMerchantAttributes(
+      commonUserAttributes,
+      data
+    );
+  }
+
+  // Add customer-specific attributes if user type is Customer
+  // This can be expanded as needed for different user types
+  if (data.userType === "customer") {
+    // Add customer-specific attributes here
+    // Example: { Name: "custom:preferredCategories", Value: data.preferredCategories || "" }
+    // var completeUserAttributes = prepareCustomerAttributes(userAttributes, data);
+    // return updatedUserAttributes;
+  }
+
+  return completeUserAttributes;
+}
+
+function prepareMerchantAttributes(commonUserAttributes, data) {
+  const copiedArray = R.clone(commonUserAttributes);
+
   const addressString = JSON.stringify({
     buildingNumber: data.address.buildingNumber,
     street: data.address.street,
@@ -103,46 +130,52 @@ function prepareAddressAndContactInformationForAttributes(data) {
 
   const productCategoriesString = JSON.stringify(data.productCategories);
 
-  return {
-    addressString,
-    primaryContactString,
-    productCategoriesString,
-  };
+  copiedArray.push(
+    { Name: "custom:businessName", Value: data.businessName },
+    { Name: "custom:userGroup", Value: "Merchant" },
+    { Name: "custom:registrationNumber", Value: data.registrationNumber },
+    {
+      Name: "custom:yearOfRegistration",
+      Value: data.yearOfRegistration.toString(),
+    },
+    { Name: "custom:website", Value: data.website || "" },
+    { Name: "custom:address", Value: addressString },
+    { Name: "custom:phone", Value: data.phone },
+    { Name: "custom:primaryContact", Value: primaryContactString },
+    { Name: "custom:productCategories", Value: productCategoriesString }
+  );
+
+  return copiedArray;
 }
 
+/**
+ * Sign up a user with Cognito
+ * @param {Object} data - User data from request
+ * @param {string} addressString - Stringified address data
+ * @param {string} primaryContactString - Stringified primary contact data
+ * @param {string} productCategoriesString - Stringified product categories
+ * @param {string} userType - Type of user (Merchant, Customer, etc.)
+ * @returns {Object} - Cognito sign-up response
+ */
 async function signUpUserWithCognito(
-  data,
-  addressString,
-  primaryContactString,
-  productCategoriesString
+  cognitoClient,
+  userPoolClientId,
+  username,
+  password,
+  userAttributes
 ) {
-  const signUpResponse = await cognitoClient.send(
-    new SignUpCommand({
-      ClientId: userPoolClientId,
-      Username: data.email,
-      Password: data.password,
-      UserAttributes: [
-        { Name: "email", Value: data.email },
-        { Name: "custom:businessName", Value: data.businessName },
-        { Name: "custom:userGroup", Value: "Merchant" },
-        { Name: "custom:registrationNumber", Value: data.registrationNumber },
-        {
-          Name: "custom:yearOfRegistration",
-          Value: data.yearOfRegistration.toString(),
-        },
-        { Name: "custom:website", Value: data.website || "" },
-        { Name: "custom:address", Value: addressString },
-        { Name: "custom:phone", Value: data.phone },
-        { Name: "custom:primaryContact", Value: primaryContactString },
-        { Name: "custom:productCategories", Value: productCategoriesString },
-      ],
-    })
+  const signUpResponse = await AccountsService.signUp(
+    cognitoClient,
+    username,
+    password,
+    userPoolClientId,
+    userAttributes
   );
-  console.log("(+) signUpResponse: " + JSON.stringify(signUpResponse, null, 2));
+
   return signUpResponse;
 }
 
-async function addUserToGroup(username, userPoolId, userType) {
+async function addUserToGroup(userPoolId, username, userType) {
   await cognitoClient.send(
     new AdminAddUserToGroupCommand({
       UserPoolId: userPoolId,
@@ -152,20 +185,23 @@ async function addUserToGroup(username, userPoolId, userType) {
   );
 }
 
-async function publishSignUpCompletedEvent() {
-  await PubSubService.publishToSns(snsClient, topicArn, topicName);
-}
-
 function prepareSuccessResponse() {
   const successResponse = ApiService.success(
     {
       message: "Merchant registered. Needs to submit OTP to complete sign-up",
       userConfirmed: signUpResponse.UserConfirmed,
-      merchantId: signUpResponse.UserSub,
+      userType,
+      userId,
       codeDeliveryDetails: signUpResponse.CodeDeliveryDetails,
     },
     201
   );
+
+  // Add backward compatibility for merchant-specific clients
+  if (userType === "Merchant") {
+    responseData.merchantId = userId;
+  }
+
   console.log(`Success Response: ${JSON.stringify(successResponse, null, 2)}`);
 
   return successResponse;

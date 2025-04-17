@@ -148,21 +148,24 @@ export async function registerUser(userType, signUpData, customFetch = defaultFe
 	auth.error = null;
 
 	try {
+		const enrichedData = { ...signUpData, userType };
+
 		// Use mock service if configured to do so
 		if (useMockApi()) {
 			// Pass the user type to the mock service if it supports it
-			const enrichedData = { ...signUpData, userType };
 			return await mockMerchantService.signUp(enrichedData);
 		}
 
 		// For direct API calls
+		// Note: userType should already be included in signUpData from the page.server.js action
+		// This ensures the backend receives the user type information
 		const fetchToUse = customFetch || defaultFetch;
 		const response = await fetchToUse(`/api/accounts`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify(signUpData)
+			body: JSON.stringify(enrichedData)
 		});
 
 		if (!response.ok) {

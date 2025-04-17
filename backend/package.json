@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.658.1",
-    "@aws-sdk/client-ses": "^3.782.0",
+    "@aws-sdk/client-sesv2": "^3.787.0",
     "@aws-sdk/client-verifiedpermissions": "^3.699.0",
     "@aws-sdk/util-dynamodb": "^3.658.1",
     "@aws-solutions-constructs/aws-sns-sqs": "^2.83.0",

@@ -27,7 +27,12 @@ export function load({ params }) {
 /** @type {Actions} */
 export const actions = {
 	default: async (
-		/** @type {{ request: Request, fetch: Function, cookies: any }} */ { request, fetch, cookies }
+		/** @type {{ request: Request, fetch: Function, cookies: any, params: { user_type: string } }} */ {
+			request,
+			fetch,
+			cookies,
+			params
+		}
 	) => {
 		const formData = await request.formData();
 		const currentStep = parseInt(formData.get('currentStep')?.toString() || '1', 10);
@@ -197,16 +202,10 @@ export const actions = {
 			}
 
 			try {
-				// Extract user type from the route path (merchants)
-				const userType = 'merchant';
+				// Extract user type from the URL parameter
+				const userType = params.user_type;
 
-				// Create a copy of merchant data to avoid modifying the original object
-				// This prevents adding properties that aren't part of the expected type
-				const merchantDataWithType = { ...merchantData };
-
-				// Use the enhanced auth service with user type for sign-up
-				// Pass the SvelteKit fetch function to the service
-				const result = await registerUser(userType, merchantDataWithType, fetch);
+				const result = await registerUser(userType, merchantData, fetch);
 
 				if (dev) {
 					console.log('Registration result:', result);
@@ -228,7 +227,7 @@ export const actions = {
 					maxAge: 60 * 30, // 30 minutes
 					sameSite: 'lax' // Ensure cookie is sent with same-site navigations
 				});
-				cookies.set('pendingUserType', 'merchant', {
+				cookies.set('pendingUserType', userType, {
 					path: '/',
 					httpOnly: false, // Allow client-side access
 					maxAge: 60 * 30, // 30 minutes
@@ -252,7 +251,7 @@ export const actions = {
 					step: 3,
 					completed: true,
 					email: email,
-					userType: 'merchant',
+					userType,
 					redirect: '/auth/verification-sent'
 				};
 			} catch (error) {

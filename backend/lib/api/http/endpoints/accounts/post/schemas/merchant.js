@@ -3,6 +3,7 @@ const schema = {
   title: "MerchantsAccountSignUpModel",
   type: "object",
   required: [
+    "userType",
     "email",
     "password",
     "businessName",
@@ -14,6 +15,10 @@ const schema = {
     "productCategories",
   ],
   properties: {
+    userType: {
+      type: "string",
+      enum: ["merchant", "customer", "admin"],
+    },
     email: {
       type: "string",
       format: "email",
@@ -21,8 +26,9 @@ const schema = {
     password: {
       type: "string",
       minLength: 8,
-      pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,}$",
-      description: "Password must be at least 8 characters and contain at least one lowercase letter, one uppercase letter, one number, and one special character",
+      pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[^a-zA-Zd]).{8,}$",
+      description:
+        "Password must be at least 8 characters and contain at least one lowercase letter, one uppercase letter, one number, and one special character",
     },
     businessName: {
       type: "string",

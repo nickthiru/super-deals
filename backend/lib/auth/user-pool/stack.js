@@ -9,20 +9,21 @@ const {
 } = require("aws-cdk-lib/aws-cognito");
 
 const ResourceServersStack = require("./resource-servers/stack");
-const CustomMessageConstruct = require("../../services/auth/custom-message/construct");
+const SendCustomSignUpMessageConstruct = require("../../services/accounts/send-custom-sign-up-message/construct");
 
 class UserPoolStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const { envName } = props;
+    const { envName, email } = props;
 
     // Create the custom message Lambda function
-    const customMessageLambda = new CustomMessageConstruct(
+    const customMessageLambda = new SendCustomSignUpMessageConstruct(
       this,
       "CustomMessageLambda",
       {
         appUrl: process.env.SITE_URL || "https://dbcxhkl1jwg4u.cloudfront.net",
+        email,
       }
     );
 

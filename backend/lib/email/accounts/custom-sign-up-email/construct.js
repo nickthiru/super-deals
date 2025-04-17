@@ -2,7 +2,7 @@ const { Construct } = require("constructs");
 const { MerchantConstruct } = require("./merchant/construct");
 // const { CustomerConstruct } = require("./customer/construct");
 
-class WelcomeEmailConstruct extends Construct {
+class CustomSignUpEmailConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id, props);
 
@@ -12,4 +12,4 @@ class WelcomeEmailConstruct extends Construct {
   }
 }
 
-module.exports = { WelcomeEmailConstruct };
+module.exports = { CustomSignUpEmailConstruct };

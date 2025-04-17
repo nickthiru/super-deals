@@ -1,13 +1,15 @@
 const { Stack } = require("aws-cdk-lib");
-const { WelcomeEmailConstruct } = require("./welcome-email/merchant/construct");
+const {
+  CustomSignUpEmailConstruct,
+} = require("./custom-sign-up-email/construct");
 
 class AccountsStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    this.welcomeEmail = new WelcomeEmailConstruct(
+    this.customSignUpEmail = new CustomSignUpEmailConstruct(
       this,
-      "WelcomeEmailConstruct",
+      "CustomSignUpEmailConstruct",
       {}
     );
   }
