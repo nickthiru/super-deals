@@ -5,6 +5,8 @@
  * based on user type (merchant vs customer). It is triggered by Cognito
  * during sign-up and password reset processes. It is set on the lambdaTriggers
  * property of the UserPool construct's props.
+ * 
+ * It uses SES templates for email content instead of hardcoding HTML.
  */
 
 const { Construct } = require("constructs");
@@ -19,8 +21,11 @@ class SendCustomSignUpMessageConstruct extends Construct {
 
     const { appUrl, email } = props;
 
-    const emailTemplateName =
-      email.accounts.customSignUpEmail.merchant.templateName;
+    // Get template names from the email constructs
+    const merchantSignUpTemplateName = email.accounts.customSignUpEmail.merchant.templateName;
+    const customerSignUpTemplateName = email.accounts.customSignUpEmail.customer.templateName;
+    const merchantPasswordResetTemplateName = email.accounts.passwordResetEmail.merchant.templateName;
+    const customerPasswordResetTemplateName = email.accounts.passwordResetEmail.customer.templateName;
 
     // Define the Lambda function for custom message handling
     this.function = new NodejsFunction(this, "NodejsFunction", {
@@ -34,14 +39,21 @@ class SendCustomSignUpMessageConstruct extends Construct {
       depsLockFilePath: require.resolve("#package-lock"),
       environment: {
         APP_URL: appUrl || "https://dbcxhkl1jwg4u.cloudfront.net",
-        EMAIL_TEMPLATE_NAME: emailTemplateName,
+        FROM_EMAIL: "no-reply@superdeals.com",
+        MERCHANT_SIGNUP_TEMPLATE: merchantSignUpTemplateName,
+        CUSTOMER_SIGNUP_TEMPLATE: customerSignUpTemplateName,
+        MERCHANT_PASSWORD_RESET_TEMPLATE: merchantPasswordResetTemplateName,
+        CUSTOMER_PASSWORD_RESET_TEMPLATE: customerPasswordResetTemplateName,
       },
     }).addToRolePolicy(
       new PolicyStatement({
         effect: Effect.ALLOW,
         resources: [
           "arn:aws:ses:us-east-1:346761569124:identity/*", //https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_IdentityInfo.html
-          `arn:aws:ses:us-east-1:346761569124:template/${emailTemplateName}`,
+          `arn:aws:ses:us-east-1:346761569124:template/${merchantSignUpTemplateName}`,
+          `arn:aws:ses:us-east-1:346761569124:template/${customerSignUpTemplateName}`,
+          `arn:aws:ses:us-east-1:346761569124:template/${merchantPasswordResetTemplateName}`,
+          `arn:aws:ses:us-east-1:346761569124:template/${customerPasswordResetTemplateName}`,
         ],
         actions: ["sesv2:SendEmail"],
       })

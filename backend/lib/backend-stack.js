@@ -23,7 +23,6 @@ class BackendStack extends Stack {
 
     const db = new DbStack(this, "DbStack", {
       envName,
-      email,
     });
 
     const storage = new StorageStack(this, "StorageStack", {

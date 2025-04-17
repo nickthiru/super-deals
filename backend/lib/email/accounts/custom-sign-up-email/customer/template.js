@@ -1,7 +1,7 @@
 const htmlPart = `
   <mjml>
     <mj-head>
-      <mj-title>Super Deals Merchant Verification</mj-title>
+      <mj-title>Super Deals Account Verification</mj-title>
       <mj-font name="Arial" href="https://fonts.googleapis.com/css?family=Arial" />
       <mj-attributes>
         <mj-all font-family="Arial, sans-serif" />
@@ -10,10 +10,10 @@ const htmlPart = `
     </mj-head>
     <mj-body background-color="#f9f9f9">
       <!-- Header Section -->
-      <mj-section background-color="#4F46E5" padding="20px">
+      <mj-section background-color="#3B82F6" padding="20px">
         <mj-column>
           <mj-text color="#ffffff" font-size="24px" font-weight="bold" align="center">
-            Super Deals Merchant Verification
+            Super Deals Account Verification
           </mj-text>
         </mj-column>
       </mj-section>
@@ -22,10 +22,10 @@ const htmlPart = `
       <mj-section background-color="#ffffff" padding="20px">
         <mj-column>
           <mj-text>
-            Hello {{businessName}},
+            Hello,
           </mj-text>
           <mj-text>
-            Thank you for registering your business with Super Deals! To complete your merchant account setup, please verify your email address.
+            Thank you for signing up with Super Deals! To complete your account setup, please verify your email address.
           </mj-text>
           <mj-text>
             Your verification code is:
@@ -34,13 +34,13 @@ const htmlPart = `
             {{code}}
           </mj-text>
           <mj-text>
-            This code is valid for 24 hours. Enter it on the verification page to activate your merchant account.
+            This code is valid for 24 hours. Enter it on the verification page to activate your account.
           </mj-text>
-          <mj-button background-color="#4F46E5" color="white" href="{{appUrl}}/auth/confirm-sign-up?username={{username}}" border-radius="4px" font-weight="bold" inner-padding="15px 30px">
+          <mj-button background-color="#3B82F6" color="white" href="{{appUrl}}/auth/confirm-sign-up?username={{username}}" border-radius="4px" font-weight="bold" inner-padding="15px 30px">
             Verify Email Address
           </mj-button>
           <mj-text>
-            Once verified, you'll be able to create deals, manage your business profile, and start reaching new customers.
+            Once verified, you'll be able to browse deals, save your favorites, and get personalized recommendations.
           </mj-text>
           <mj-text>
             If you didn't create this account, please ignore this email.
@@ -64,9 +64,9 @@ const htmlPart = `
 `;
 
 const template = {
-  templateName: "MerchantSignUpVerification",
-  subjectPart: "Verify your Super Deals Merchant Account",
-  textPart: "Thank you for registering your business with Super Deals! To complete your merchant account setup, please verify your email address using the verification code provided.",
+  templateName: "CustomerSignUpVerification",
+  subjectPart: "Verify your Super Deals Account",
+  textPart: "Thank you for signing up with Super Deals! To complete your account setup, please verify your email address using the verification code provided.",
   htmlPart: htmlPart,
   parsingOptions: {
     beautify: true,

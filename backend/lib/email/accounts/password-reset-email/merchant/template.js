@@ -1,7 +1,7 @@
 const htmlPart = `
   <mjml>
     <mj-head>
-      <mj-title>Super Deals Merchant Verification</mj-title>
+      <mj-title>Super Deals Merchant Password Reset</mj-title>
       <mj-font name="Arial" href="https://fonts.googleapis.com/css?family=Arial" />
       <mj-attributes>
         <mj-all font-family="Arial, sans-serif" />
@@ -13,7 +13,7 @@ const htmlPart = `
       <mj-section background-color="#4F46E5" padding="20px">
         <mj-column>
           <mj-text color="#ffffff" font-size="24px" font-weight="bold" align="center">
-            Super Deals Merchant Verification
+            Super Deals Merchant Password Reset
           </mj-text>
         </mj-column>
       </mj-section>
@@ -25,25 +25,19 @@ const htmlPart = `
             Hello {{businessName}},
           </mj-text>
           <mj-text>
-            Thank you for registering your business with Super Deals! To complete your merchant account setup, please verify your email address.
+            We received a request to reset your Super Deals merchant account password.
           </mj-text>
           <mj-text>
-            Your verification code is:
+            Your password reset code is:
           </mj-text>
           <mj-text font-size="24px" font-weight="bold" align="center" letter-spacing="5px" padding="15px 0">
             {{code}}
           </mj-text>
           <mj-text>
-            This code is valid for 24 hours. Enter it on the verification page to activate your merchant account.
-          </mj-text>
-          <mj-button background-color="#4F46E5" color="white" href="{{appUrl}}/auth/confirm-sign-up?username={{username}}" border-radius="4px" font-weight="bold" inner-padding="15px 30px">
-            Verify Email Address
-          </mj-button>
-          <mj-text>
-            Once verified, you'll be able to create deals, manage your business profile, and start reaching new customers.
+            This code is valid for 24 hours. Enter it on the password reset page to create a new password.
           </mj-text>
           <mj-text>
-            If you didn't create this account, please ignore this email.
+            If you didn't request a password reset, please ignore this email or contact support.
           </mj-text>
         </mj-column>
       </mj-section>
@@ -64,9 +58,9 @@ const htmlPart = `
 `;
 
 const template = {
-  templateName: "MerchantSignUpVerification",
-  subjectPart: "Verify your Super Deals Merchant Account",
-  textPart: "Thank you for registering your business with Super Deals! To complete your merchant account setup, please verify your email address using the verification code provided.",
+  templateName: "MerchantPasswordReset",
+  subjectPart: "Reset Your Super Deals Merchant Password",
+  textPart: "We received a request to reset your Super Deals merchant account password. Please use the verification code provided to create a new password.",
   htmlPart: htmlPart,
   parsingOptions: {
     beautify: true,

@@ -1,14 +1,13 @@
 const { Construct } = require("constructs");
 const { MerchantConstruct } = require("./merchant/construct");
-// const { CustomerConstruct } = require("./customer/construct");
+const { CustomerSignUpConstruct } = require("./customer/construct");
 
 class CustomSignUpEmailConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id, props);
 
     this.merchant = new MerchantConstruct(this, "MerchantConstruct", {});
-
-    // this.customer = new CustomerConstruct(this, "CustomerConstruct", {});
+    this.customer = new CustomerSignUpConstruct(this, "CustomerConstruct", {});
   }
 }
 

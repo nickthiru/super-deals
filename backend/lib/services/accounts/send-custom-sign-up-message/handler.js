@@ -3,9 +3,47 @@
  *
  * This Lambda function customizes the email verification message based on user type.
  * It's triggered when Cognito sends verification emails, forgot password emails, etc.
+ * It uses SES templates for email content instead of hardcoding HTML.
  *
  * @see https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-custom-message.html
  */
+
+const { SESv2Client, SendEmailCommand } = require("@aws-sdk/client-sesv2");
+
+// Initialize the SES client
+const sesClient = new SESv2Client({ region: "us-east-1" });
+
+/**
+ * Sends an email using an SES template
+ * @param {string} toAddress - Recipient email address
+ * @param {string} templateName - Name of the SES template to use
+ * @param {Object} templateData - Data to be used in the template
+ * @returns {Promise<Object>} - SES response
+ */
+async function sendTemplatedEmail(toAddress, templateName, templateData) {
+  const params = {
+    Content: {
+      Template: {
+        TemplateName: templateName,
+        TemplateData: JSON.stringify(templateData),
+      },
+    },
+    Destination: {
+      ToAddresses: [toAddress],
+    },
+    FromEmailAddress: process.env.FROM_EMAIL || "no-reply@superdeals.com",
+  };
+
+  try {
+    const command = new SendEmailCommand(params);
+    const response = await sesClient.send(command);
+    console.log("Email sent successfully:", response);
+    return response;
+  } catch (error) {
+    console.error("Error sending email:", error);
+    throw error;
+  }
+}
 
 exports.handler = async (event) => {
   console.log("Custom Message event:", JSON.stringify(event, null, 2));
@@ -16,19 +54,27 @@ exports.handler = async (event) => {
   // Get the user attributes
   const userAttributes = event.request.userAttributes || {};
   const username = userAttributes.userName || userAttributes.email || '';
+  const email = userAttributes.email || '';
 
   // Determine user type (merchant or customer)
   const userGroup = userAttributes["custom:userGroup"] || "";
   const businessName = userAttributes["custom:businessName"] || "";
   const isMerchant = userGroup === "Merchant" || businessName;
 
-  // Get the client app metadata
-  // const clientMetadata = event.callerContext.clientMetadata || {};
-  // const appUrl = clientMetadata.appUrl || process.env.APP_URL;
-  const appUrl = process.env.APP_URL;
+  // Get the app URL from environment variables
+  const appUrl = process.env.APP_URL || "https://dbcxhkl1jwg4u.cloudfront.net";
 
   // Get the trigger source to determine what type of message we're sending
   const { triggerSource } = event;
+
+  // Common template data
+  const templateData = {
+    code: codeParameter,
+    username: encodeURIComponent(username),
+    appUrl,
+    year: new Date().getFullYear(),
+    businessName: businessName || "Merchant"
+  };
 
   // Customize the message based on the trigger source and user type
   if (
@@ -37,162 +83,80 @@ exports.handler = async (event) => {
   ) {
     // This is a sign-up or resend verification code email
     if (isMerchant) {
-      // Merchant verification email
+      // Set response for Cognito (required even though we're sending via SES)
       event.response.emailSubject = "Verify your Super Deals Merchant Account";
-      event.response.emailMessage = `
-        <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background-color: #4F46E5; color: white; padding: 20px; text-align: center; }
-            .content { padding: 20px; background-color: #f9f9f9; }
-            .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
-            .button { display: inline-block; background-color: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; }
-            .verification-code { font-size: 24px; font-weight: bold; text-align: center; margin: 20px 0; letter-spacing: 5px; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>Super Deals Merchant Verification</h1>
-            </div>
-            <div class="content">
-              <p>Hello ${businessName || "Merchant"},</p>
-              <p>Thank you for registering your business with Super Deals! To complete your merchant account setup, please verify your email address.</p>
-              <p>Your verification code is:</p>
-              <div class="verification-code">${codeParameter}</div>
-              <p>This code is valid for 24 hours. Enter it on the verification page to activate your merchant account.</p>
-              <p style="text-align: center; margin-top: 20px;">
-                <a href="${appUrl}/auth/confirm-sign-up?username=${username}" class="button" style="display: inline-block; background-color: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Verify Email Address</a>
-              </p>
-              <p>Once verified, you'll be able to create deals, manage your business profile, and start reaching new customers.</p>
-              <p>If you didn't create this account, please ignore this email.</p>
-            </div>
-            <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} Super Deals. All rights reserved.</p>
-              <p>This is an automated message, please do not reply.</p>
-            </div>
-          </div>
-        </body>
-        </html>
-      `;
+      
+      // Attempt to send via SES template
+      try {
+        await sendTemplatedEmail(
+          email,
+          process.env.MERCHANT_SIGNUP_TEMPLATE || "MerchantSignUpVerification",
+          templateData
+        );
+        
+        // Set a minimal message for Cognito's records
+        event.response.emailMessage = `Your verification code is: ${codeParameter}`;
+      } catch (error) {
+        console.error("Failed to send templated email, falling back to default:", error);
+        // Let Cognito send the default message by not setting emailMessage
+      }
     } else {
       // Customer verification email
       event.response.emailSubject = "Verify your Super Deals Account";
-      event.response.emailMessage = `
-        <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background-color: #3B82F6; color: white; padding: 20px; text-align: center; }
-            .content { padding: 20px; background-color: #f9f9f9; }
-            .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
-            .button { display: inline-block; background-color: #3B82F6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; }
-            .verification-code { font-size: 24px; font-weight: bold; text-align: center; margin: 20px 0; letter-spacing: 5px; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>Welcome to Super Deals!</h1>
-            </div>
-            <div class="content">
-              <p>Hello there,</p>
-              <p>Thank you for signing up with Super Deals! To complete your registration, please verify your email address.</p>
-              <p>Your verification code is:</p>
-              <div class="verification-code">${codeParameter}</div>
-              <p>This code is valid for 24 hours. Enter it on the verification page to activate your account.</p>
-              <p style="text-align: center; margin-top: 20px;">
-                <a href="${appUrl}/auth/confirm-sign-up?username=${username}" class="button" style="display: inline-block; background-color: #3B82F6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Verify Email Address</a>
-              </p>
-              <p>Once verified, you'll have access to exclusive deals from our merchant partners.</p>
-              <p>If you didn't create this account, please ignore this email.</p>
-            </div>
-            <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} Super Deals. All rights reserved.</p>
-              <p>This is an automated message, please do not reply.</p>
-            </div>
-          </div>
-        </body>
-        </html>
-      `;
+      
+      // Attempt to send via SES template
+      try {
+        await sendTemplatedEmail(
+          email,
+          process.env.CUSTOMER_SIGNUP_TEMPLATE || "CustomerSignUpVerification",
+          templateData
+        );
+        
+        // Set a minimal message for Cognito's records
+        event.response.emailMessage = `Your verification code is: ${codeParameter}`;
+      } catch (error) {
+        console.error("Failed to send templated email, falling back to default:", error);
+        // Let Cognito send the default message by not setting emailMessage
+      }
     }
   } else if (triggerSource === "CustomMessage_ForgotPassword") {
     // This is a forgot password email
     if (isMerchant) {
       // Merchant forgot password email
       event.response.emailSubject = "Reset Your Super Deals Merchant Password";
-      event.response.emailMessage = `
-        <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background-color: #4F46E5; color: white; padding: 20px; text-align: center; }
-            .content { padding: 20px; background-color: #f9f9f9; }
-            .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
-            .verification-code { font-size: 24px; font-weight: bold; text-align: center; margin: 20px 0; letter-spacing: 5px; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>Super Deals Merchant Password Reset</h1>
-            </div>
-            <div class="content">
-              <p>Hello ${businessName || "Merchant"},</p>
-              <p>We received a request to reset your Super Deals merchant account password.</p>
-              <p>Your password reset code is:</p>
-              <div class="verification-code">${codeParameter}</div>
-              <p>This code is valid for 24 hours. Enter it on the password reset page to create a new password.</p>
-              <p>If you didn't request a password reset, please ignore this email or contact support.</p>
-            </div>
-            <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} Super Deals. All rights reserved.</p>
-              <p>This is an automated message, please do not reply.</p>
-            </div>
-          </div>
-        </body>
-        </html>
-      `;
+      
+      // Attempt to send via SES template
+      try {
+        await sendTemplatedEmail(
+          email,
+          process.env.MERCHANT_PASSWORD_RESET_TEMPLATE || "MerchantPasswordReset",
+          templateData
+        );
+        
+        // Set a minimal message for Cognito's records
+        event.response.emailMessage = `Your password reset code is: ${codeParameter}`;
+      } catch (error) {
+        console.error("Failed to send templated email, falling back to default:", error);
+        // Let Cognito send the default message by not setting emailMessage
+      }
     } else {
       // Customer forgot password email
       event.response.emailSubject = "Reset Your Super Deals Password";
-      event.response.emailMessage = `
-        <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background-color: #3B82F6; color: white; padding: 20px; text-align: center; }
-            .content { padding: 20px; background-color: #f9f9f9; }
-            .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
-            .verification-code { font-size: 24px; font-weight: bold; text-align: center; margin: 20px 0; letter-spacing: 5px; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>Super Deals Password Reset</h1>
-            </div>
-            <div class="content">
-              <p>Hello,</p>
-              <p>We received a request to reset your Super Deals account password.</p>
-              <p>Your password reset code is:</p>
-              <div class="verification-code">${codeParameter}</div>
-              <p>This code is valid for 24 hours. Enter it on the password reset page to create a new password.</p>
-              <p>If you didn't request a password reset, please ignore this email or contact support.</p>
-            </div>
-            <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} Super Deals. All rights reserved.</p>
-              <p>This is an automated message, please do not reply.</p>
-            </div>
-          </div>
-        </body>
-        </html>
-      `;
+      
+      // Attempt to send via SES template
+      try {
+        await sendTemplatedEmail(
+          email,
+          process.env.CUSTOMER_PASSWORD_RESET_TEMPLATE || "CustomerPasswordReset",
+          templateData
+        );
+        
+        // Set a minimal message for Cognito's records
+        event.response.emailMessage = `Your password reset code is: ${codeParameter}`;
+      } catch (error) {
+        console.error("Failed to send templated email, falling back to default:", error);
+        // Let Cognito send the default message by not setting emailMessage
+      }
     }
   }
 
