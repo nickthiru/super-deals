@@ -53,7 +53,7 @@ class PostConstruct extends Construct {
     // Add POST method with Lambda integration and request validation
     merchantsResource.addMethod(
       "POST",
-      new LambdaIntegration(services.accounts.signUp.function),
+      new LambdaIntegration(services.accounts.signUp.lambda),
       {
         operationName: "Accounts_SignUp",
         requestValidator,

@@ -5,8 +5,12 @@ class AccountsStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    this.signUpCompleted = new SignUpCompletedConstruct(this, "SignUpCompletedConstruct", {});
+    this.signUpCompleted = new SignUpCompletedConstruct(
+      this,
+      "SignUpCompletedConstruct",
+      {}
+    );
   }
 }
 
-module.exports = { AccountsStack };
+module.exports = AccountsStack;

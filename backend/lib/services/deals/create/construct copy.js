@@ -9,10 +9,7 @@ class CreateConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id);
 
-    const {
-      db,
-      stages,
-    } = props;
+    const { db, stages } = props;
 
     const tableNames = {};
     stages.forEach((stage) => {
@@ -21,7 +18,7 @@ class CreateConstruct extends Construct {
 
     const tableArns = stages.map((stage) => db[stage].table.tableArn);
 
-    this.function = new NodejsFunction(this, "NodejsFunction", {
+    this.lambda = new NodejsFunction(this, "NodejsFunction", {
       bundling: {
         externalModules: ["@aws-sdk"],
         forceDockerBundling: true,
@@ -30,7 +27,7 @@ class CreateConstruct extends Construct {
       // memorySize: 1024,
       // memorySize: 512,
       // timeout: Duration.minutes(1),
-      entry: (path.join(__dirname, "./handler.js")),
+      entry: path.join(__dirname, "./handler.js"),
       handler: "handler",
       depsLockFilePath: require.resolve("#package-lock"),
       environment: {
@@ -42,7 +39,7 @@ class CreateConstruct extends Construct {
           resources: tableArns,
           actions: ["dynamodb:PutItem"],
         }),
-      ]
+      ],
     });
   }
 }

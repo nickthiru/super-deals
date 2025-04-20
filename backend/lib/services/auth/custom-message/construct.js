@@ -17,7 +17,7 @@ class CustomMessageConstruct extends Construct {
     const { appUrl } = props || {};
 
     // Define the Lambda function for custom message handling
-    this.function = new NodejsFunction(this, "NodejsFunction", {
+    this.lambda = new NodejsFunction(this, "NodejsFunction", {
       bundling: {
         externalModules: ["@aws-sdk"],
         forceDockerBundling: true,

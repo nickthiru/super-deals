@@ -9,6 +9,9 @@ import {
 import { useMockApi } from '$lib/config/api';
 import * as mockMerchantService from '$lib/services/mock/merchantService';
 import { handleApiError } from '$lib/utils/errorHandling';
+import { publishToTopic } from '$lib/services/aws/sns.svelte.js';
+import { AWS_CONFIG } from '$lib/config/aws.js';
+import { dev } from '$app/environment';
 
 /**
  * @typedef {import('@super-deals/types').MerchantSignUpData} MerchantSignUpData
@@ -108,6 +111,15 @@ export async function confirmUserSignUp(email, code, userType = 'user') {
 			// Store the user type with the result
 			result.userType = userType;
 
+			// In mock mode, simulate publishing to SNS if verification was successful
+			if (result.isSignUpComplete) {
+				console.log('[MOCK] Would publish to SNS:', {
+					email,
+					userType,
+					verificationTime: new Date().toISOString()
+				});
+			}
+
 			return result;
 		}
 
@@ -117,7 +129,9 @@ export async function confirmUserSignUp(email, code, userType = 'user') {
 			confirmationCode: code
 		});
 
-		console.log('Email verification result:', { isSignUpComplete, nextStep });
+		if (dev) {
+			console.log('Email verification result:', { isSignUpComplete, nextStep });
+		}
 
 		// Create response object in the expected format
 		const data = {
@@ -126,6 +140,31 @@ export async function confirmUserSignUp(email, code, userType = 'user') {
 			message: isSignUpComplete ? 'Email verified successfully' : 'Email verification failed',
 			userType
 		};
+
+		// If sign-up is complete, publish to SNS to trigger welcome email
+		if (isSignUpComplete && AWS_CONFIG.signUpCompletedTopicArn) {
+			try {
+				// Publish to SNS topic with minimal required data
+				await publishToTopic(
+					AWS_CONFIG.signUpCompletedTopicArn,
+					{
+						email,
+						userType,
+						verificationTime: new Date().toISOString()
+					},
+					`User verification completed: ${email}`
+				);
+				
+				if (dev) {
+					console.log('Published sign-up completion event to SNS');
+				}
+			} catch (snsError) {
+				// Log the error but don't fail the verification
+				console.error('Failed to publish to SNS:', snsError);
+			}
+		} else if (isSignUpComplete && !AWS_CONFIG.signUpCompletedTopicArn) {
+			console.warn('Sign-up completed but SNS topic ARN is not configured');
+		}
 
 		return data;
 	} catch (/** @type {any} */ err) {

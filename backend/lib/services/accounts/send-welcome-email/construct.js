@@ -16,8 +16,7 @@ class SendWelcomeEmailConstruct extends Construct {
 
     const triggerEvent = sns.accounts.signUpCompleted.topic;
 
-    const emailTemplateName =
-      email.accounts.sendWelcomeEmail.merchant.templateName;
+    const emailTemplateName = email.accounts.welcome.merchant.templateName;
 
     const queue = new Queue(this, "Queue");
 
@@ -54,4 +53,4 @@ class SendWelcomeEmailConstruct extends Construct {
   }
 }
 
-module.exports = { SendWelcomeEmailConstruct };
+module.exports = SendWelcomeEmailConstruct;

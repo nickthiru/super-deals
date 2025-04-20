@@ -11,7 +11,7 @@ class SignInConstruct extends Construct {
 
     const { auth } = props;
 
-    this.function = new NodejsFunction(this, "NodejsFunction", {
+    this.lambda = new NodejsFunction(this, "NodejsFunction", {
       bundling: {
         externalModules: ["@aws-sdk"],
         forceDockerBundling: true,

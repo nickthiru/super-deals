@@ -61,7 +61,7 @@ class PostConstruct extends Construct {
     // // Add POST method with Lambda integration and request validation
     // accountsResource.addMethod(
     //   "POST",
-    //   new LambdaIntegration(services.accounts.signUp.function),
+    //   new LambdaIntegration(services.accounts.signUp.lambda),
     //   {
     //     operationName: "Accounts_SignUp",
     //     requestValidator,
@@ -75,7 +75,6 @@ class PostConstruct extends Construct {
     this.createRequestValidator(http);
     this.addCustomGatewayResponseForValidationErrors(http);
     this.addPostMethodWithLambdaIntegrationAndRequestValidation(
-      http,
       services,
       accountsResource
     );
@@ -136,7 +135,7 @@ class PostConstruct extends Construct {
   ) {
     accountsResource.addMethod(
       "POST",
-      new LambdaIntegration(services.accounts.signUp.function),
+      new LambdaIntegration(services.accounts.signUp.lambda),
       {
         operationName: "Accounts_SignUp",
         requestValidator: this.requestValidator,

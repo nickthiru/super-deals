@@ -6,10 +6,10 @@ const {
 
 const template = require("./template.js");
 
-class MerchantPasswordResetConstruct extends Construct {
+class MerchantConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id, props);
-    console.log("(+) template: \n" + JSON.stringify(template, null, 2));
+    // console.log("(+) template: \n" + JSON.stringify(template, null, 2));
 
     const { templateName, subjectPart, textPart, htmlPart, parsingOptions } =
       template;
@@ -26,4 +26,4 @@ class MerchantPasswordResetConstruct extends Construct {
   }
 }
 
-module.exports = { MerchantPasswordResetConstruct };
+module.exports = MerchantConstruct;

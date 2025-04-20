@@ -6,7 +6,7 @@
   },
   "scripts": {
     "build": "echo \"The build step is not required when using JavaScript!\" && exit 0",
-    "deploy": "cdk deploy --all --outputs-file outputs.json",
+    "deploy": "npx cdk deploy --all --outputs-file outputs.json",
     "cdk": "cdk",
     "test": "jest",
     "test:api": "jest tests/api",
@@ -21,7 +21,7 @@
     "#package-lock": "./package-lock.json"
   },
   "devDependencies": {
-    "aws-cdk": "^2.177.0",
+    "aws-cdk": "^2.1010.0",
     "jest": "^29.7.0",
     "supertest": "^7.1.0"
   },
@@ -30,13 +30,12 @@
     "@aws-sdk/client-sesv2": "^3.787.0",
     "@aws-sdk/client-verifiedpermissions": "^3.699.0",
     "@aws-sdk/util-dynamodb": "^3.658.1",
-    "@aws-solutions-constructs/aws-sns-sqs": "^2.83.0",
-    "@aws-solutions-constructs/aws-sqs-lambda": "^2.83.0",
+    "@aws-solutions-constructs/aws-sns-sqs": "^2.84.0",
+    "@aws-solutions-constructs/aws-sqs-lambda": "^2.84.0",
     "@cdklabs/cdk-verified-permissions": "^0.1.4",
     "@cloudcomponents/cdk-responsive-email-template": "^2.3.0",
     "@super-deals/types": "file:../types",
-    "@wheatstalk/cdk-sns-log-group-subscription": "^0.0.12",
-    "aws-cdk-lib": "^2.177.0",
+    "aws-cdk-lib": "^2.190.0",
     "constructs": "^10.4.2",
     "dotenv": "^16.4.7",
     "ksuid": "^3.0.0",

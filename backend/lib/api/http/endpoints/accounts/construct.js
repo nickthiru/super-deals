@@ -26,38 +26,11 @@ class AccountsConstruct extends Construct {
       accountsResource,
     });
 
-    new SendWelcomeEmailConstruct(this, "SendWelcomeEmailConstruct", {
-      http,
-      services,
-      accountsResource,
-    });
-  }
-}
-
-module.exports = AccountsConstruct;
-
-    const accountsResource = http.restApi.root.addResource(
-      "accounts",
-      http.optionsWithCors
-    );
-
-    // new SignUpConstruct(this, "SignUpConstruct", {
+    // new SendWelcomeEmailConstruct(this, "SendWelcomeEmailConstruct", {
     //   http,
     //   services,
     //   accountsResource,
     // });
-
-    new PostConstruct(this, "PostConstruct", {
-      http,
-      services,
-      accountsResource,
-    });
-
-    new SendWelcomeEmailConstruct(this, "SendWelcomeEmailConstruct", {
-      http,
-      services,
-      accountsResource,
-    });
   }
 }
 

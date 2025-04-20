@@ -1,6 +1,7 @@
 const { Construct } = require("constructs");
 const { Topic } = require("aws-cdk-lib/aws-sns");
 const { LogGroup } = require("aws-cdk-lib/aws-logs");
+const { CfnOutput } = require("aws-cdk-lib");
 const {
   LogGroupSubscription,
   LogFormat,
@@ -20,7 +21,14 @@ class SignUpCompletedConstruct extends Construct {
         logFormat: LogFormat.MESSAGE,
       })
     );
+
+    // Add CfnOutput for the topic ARN
+    new CfnOutput(this, "SignUpCompletedTopicArn", {
+      value: this.topic.topicArn,
+      description: "ARN of the SNS topic for sign-up completed events",
+      exportName: "SignUpCompletedTopicArn",
+    });
   }
 }
 
-module.exports = { SignUpCompletedConstruct };
+module.exports = SignUpCompletedConstruct;

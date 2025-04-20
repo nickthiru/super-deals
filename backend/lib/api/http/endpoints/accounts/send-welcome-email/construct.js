@@ -1,12 +1,11 @@
 const { Construct } = require("constructs");
-
-const SendWelcomeEmailConstruct = require("./send-welcome-email/construct");
+const { LambdaIntegration } = require("aws-cdk-lib/aws-apigateway");
 
 class SendWelcomeEmailConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const { services, accountsResource } = props;
+    const { http, services, accountsResource } = props;
 
     const sendWelcomeEmailResource = accountsResource.addResource(
       "send-welcome-email",
@@ -15,7 +14,7 @@ class SendWelcomeEmailConstruct extends Construct {
 
     sendWelcomeEmailResource.addMethod(
       "POST",
-      new LambdaIntegration(services.accounts.sendWelcomeEmail.function),
+      new LambdaIntegration(services.accounts.sendWelcomeEmail.lambda),
       {
         operationName: "SendWelcomeEmail",
       }

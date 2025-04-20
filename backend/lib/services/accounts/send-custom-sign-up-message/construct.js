@@ -5,7 +5,7 @@
  * based on user type (merchant vs customer). It is triggered by Cognito
  * during sign-up and password reset processes. It is set on the lambdaTriggers
  * property of the UserPool construct's props.
- * 
+ *
  * It uses SES templates for email content instead of hardcoding HTML.
  */
 
@@ -22,13 +22,17 @@ class SendCustomSignUpMessageConstruct extends Construct {
     const { appUrl, email } = props;
 
     // Get template names from the email constructs
-    const merchantSignUpTemplateName = email.accounts.customSignUpEmail.merchant.templateName;
-    const customerSignUpTemplateName = email.accounts.customSignUpEmail.customer.templateName;
-    const merchantPasswordResetTemplateName = email.accounts.passwordResetEmail.merchant.templateName;
-    const customerPasswordResetTemplateName = email.accounts.passwordResetEmail.customer.templateName;
+    const merchantSignUpTemplateName =
+      email.accounts.customSignUp.merchant.templateName;
+    const customerSignUpTemplateName =
+      email.accounts.customSignUp.customer.templateName;
+    const merchantPasswordResetTemplateName =
+      email.accounts.passwordReset.merchant.templateName;
+    // const customerPasswordResetTemplateName =
+    //   email.accounts.passwordReset.customer.templateName;
 
     // Define the Lambda function for custom message handling
-    this.function = new NodejsFunction(this, "NodejsFunction", {
+    this.lambda = new NodejsFunction(this, "NodejsFunction", {
       bundling: {
         externalModules: ["@aws-sdk"],
         forceDockerBundling: true,
@@ -43,7 +47,7 @@ class SendCustomSignUpMessageConstruct extends Construct {
         MERCHANT_SIGNUP_TEMPLATE: merchantSignUpTemplateName,
         CUSTOMER_SIGNUP_TEMPLATE: customerSignUpTemplateName,
         MERCHANT_PASSWORD_RESET_TEMPLATE: merchantPasswordResetTemplateName,
-        CUSTOMER_PASSWORD_RESET_TEMPLATE: customerPasswordResetTemplateName,
+        // CUSTOMER_PASSWORD_RESET_TEMPLATE: customerPasswordResetTemplateName,
       },
     }).addToRolePolicy(
       new PolicyStatement({
@@ -53,7 +57,7 @@ class SendCustomSignUpMessageConstruct extends Construct {
           `arn:aws:ses:us-east-1:346761569124:template/${merchantSignUpTemplateName}`,
           `arn:aws:ses:us-east-1:346761569124:template/${customerSignUpTemplateName}`,
           `arn:aws:ses:us-east-1:346761569124:template/${merchantPasswordResetTemplateName}`,
-          `arn:aws:ses:us-east-1:346761569124:template/${customerPasswordResetTemplateName}`,
+          // `arn:aws:ses:us-east-1:346761569124:template/${customerPasswordResetTemplateName}`,
         ],
         actions: ["sesv2:SendEmail"],
       })

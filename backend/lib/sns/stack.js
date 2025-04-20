@@ -9,4 +9,4 @@ class SnsStack extends Stack {
   }
 }
 
-module.exports = { SnsStack };
+module.exports = SnsStack;

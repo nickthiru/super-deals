@@ -11,7 +11,7 @@ class SignUpConstruct extends Construct {
 
     const { auth } = props;
 
-    this.function = new NodejsFunction(this, "NodejsFunction", {
+    this.lambda = new NodejsFunction(this, "NodejsFunction", {
       name: "Accounts_SignUp",
       bundling: {
         externalModules: ["@aws-sdk"],

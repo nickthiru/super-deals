@@ -53,7 +53,7 @@ class UserPoolStack extends Stack {
         emailStyle: VerificationEmailStyle.CODE,
       },
       lambdaTriggers: {
-        customMessage: customMessageLambda.function,
+        customMessage: customMessageLambda.lambda,
       },
       accountRecovery: AccountRecovery.EMAIL_ONLY,
       standardAttributes: {

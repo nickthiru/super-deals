@@ -25,7 +25,7 @@ class CreateConstruct extends Construct {
 
     dealsResource.addMethod(
       "POST",
-      new LambdaIntegration(lambda.merchants.deals.create.function),
+      new LambdaIntegration(lambda.merchants.deals.create.lambda),
       {
         operationName: "CreateDeal",
         requestValidator,
