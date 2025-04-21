@@ -1,7 +1,30 @@
 {
   "BackendStackDevStorageStackC0FC6599": {
-    "ExportsOutputFnGetAttS3Bucket07682993Arn6D6BF9FF": "arn:aws:s3:::backendstackdevstoragestackc0fc65-s3bucket07682993-wqp3we7jjmse",
-    "S3BucketArn": "arn:aws:s3:::backendstackdevstoragestackc0fc65-s3bucket07682993-wqp3we7jjmse",
-    "S3BucketName": "backendstackdevstoragestackc0fc65-s3bucket07682993-wqp3we7jjmse"
+    "ExportsOutputFnGetAttS3Bucket07682993Arn6D6BF9FF": "arn:aws:s3:::backendstackdevstoragestackc0fc65-s3bucket07682993-alktmmh7ladb",
+    "S3BucketArn": "arn:aws:s3:::backendstackdevstoragestackc0fc65-s3bucket07682993-alktmmh7ladb",
+    "S3BucketName": "backendstackdevstoragestackc0fc65-s3bucket07682993-alktmmh7ladb"
+  },
+  "BackendStackDevSnsStackAccountsStack7255D79C": {
+    "SignUpCompletedConstructSignUpCompletedTopicArnBE06E59C": "arn:aws:sns:us-east-1:654654543926:SignUpCompleted",
+    "ExportsOutputRefSignUpCompletedConstructSignUpCompletedTopic2C0E320B12483696": "arn:aws:sns:us-east-1:654654543926:SignUpCompleted"
+  },
+  "BackendStackDevAuthStackUserPoolStackD90C0FF4": {
+    "ExportsOutputFnGetAttUserPool6BA7E5F2Arn686ACC00": "arn:aws:cognito-idp:us-east-1:654654543926:userpool/us-east-1_Th5i8b49F",
+    "UserPoolClientId": "43h0cjh0a5j7tt0hdqao148n6v",
+    "UserPoolId": "us-east-1_Th5i8b49F",
+    "ExportsOutputRefUserPool6BA7E5F296FD7236": "us-east-1_Th5i8b49F",
+    "ExportsOutputRefUserPoolUserPoolClient40176907044A36CF": "43h0cjh0a5j7tt0hdqao148n6v",
+    "UserPoolDomainName": "super-deals-dev",
+    "ExportsOutputFnGetAttUserPool6BA7E5F2ProviderNameA3E1F80D": "cognito-idp.us-east-1.amazonaws.com/us-east-1_Th5i8b49F"
+  },
+  "BackendStackDevAuthStackIdentityPoolStack0DECD2C0": {
+    "ExportsOutputRefIdentityPoolF5C140BA": "us-east-1:9056300a-7d74-4e97-bd71-746c5068be03",
+    "IdentityPoolId": "us-east-1:9056300a-7d74-4e97-bd71-746c5068be03"
+  },
+  "BackendStackDevServicesStackAccountsStack4B815BDF": {
+    "ExportsOutputFnGetAttSignUpConstructNodejsFunction75CDDCFBArnDCC898BC": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackDevServicesSt-SignUpConstructNodejsFun-T80eCpFqGBrO"
+  },
+  "BackendStackDevApiStackHttpStackB0C9C4D3": {
+    "RestApiUrldev": "https://micjn2jqfc.execute-api.us-east-1.amazonaws.com/dev/"
   }
 }

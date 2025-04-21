@@ -1,11 +1,10 @@
 const { Construct } = require("constructs");
 const { Topic } = require("aws-cdk-lib/aws-sns");
-const { LogGroup } = require("aws-cdk-lib/aws-logs");
+const { LogGroup, RetentionDays } = require("aws-cdk-lib/aws-logs");
 const { CfnOutput } = require("aws-cdk-lib");
 const {
-  LogGroupSubscription,
-  LogFormat,
-} = require("@wheatstalk/cdk-sns-log-group-subscription");
+  SnsToCloudWatchLogsSubscription,
+} = require("../../../shared/sns-log-subscription/construct");
 
 class SignUpCompletedConstruct extends Construct {
   constructor(scope, id, props) {
@@ -15,12 +14,24 @@ class SignUpCompletedConstruct extends Construct {
       topicName: "SignUpCompleted",
     });
 
+    // Option 1: Create a log group separately and pass it
+    const logGroup = new LogGroup(this, "SignUpCompletedTopicLogGroup", {
+      retention: RetentionDays.ONE_MONTH,
+    });
+
     this.topic.addSubscription(
-      new LogGroupSubscription({
-        logGroup: new LogGroup(this, "SignUpCompletedTopicLogGroup"),
-        logFormat: LogFormat.MESSAGE,
+      new SnsToCloudWatchLogsSubscription(this, "LogSubscription", {
+        logGroup,
       })
     );
+
+    // Option 2: Let the subscription create its own log group
+    // this.topic.addSubscription(
+    //   new SnsToCloudWatchLogsSubscription(this, "LogSubscription", {
+    //     logGroupName: "/aws/sns/SignUpCompleted",
+    //     retention: RetentionDays.ONE_MONTH
+    //   })
+    // );
 
     // Add CfnOutput for the topic ARN
     new CfnOutput(this, "SignUpCompletedTopicArn", {

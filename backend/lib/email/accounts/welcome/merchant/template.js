@@ -64,9 +64,10 @@ const htmlPart = `
 `;
 
 const template = {
-  templateName: "MerchantSignUpVerification",
-  subjectPart: "Verify your Super Deals Merchant Account",
-  textPart: "Thank you for registering your business with Super Deals! To complete your merchant account setup, please verify your email address using the verification code provided.",
+  templateName: "MerchantWelcome",
+  subjectPart: "Welcome to Super Deals Merchant Account",
+  textPart:
+    "Thank you for registering your business with Super Deals! To complete your merchant account setup, please verify your email address using the verification code provided.",
   htmlPart: htmlPart,
   parsingOptions: {
     beautify: true,
