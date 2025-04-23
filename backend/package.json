@@ -7,12 +7,15 @@
   "scripts": {
     "build": "echo \"The build step is not required when using JavaScript!\" && exit 0",
     "deploy": "npx cdk deploy --all --outputs-file outputs.json",
-    "cdk": "cdk",
+    "synth": "npx cdk synth",
+    "diff": "npx cdk diff",
+    "cdk": "npx cdk",
     "test": "jest",
     "test:api": "jest tests/api",
     "pretest:api": "node scripts/update-test-config.js"
   },
   "imports": {
+    "#config/*": "./config/*",
     "#src/*": "./src/*",
     "#lib/*": "./lib/*",
     "#schemas/*": "./schemas/*",
@@ -27,6 +30,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.658.1",
+    "@aws-sdk/client-ses": "^3.787.0",
     "@aws-sdk/client-sesv2": "^3.787.0",
     "@aws-sdk/client-verifiedpermissions": "^3.699.0",
     "@aws-sdk/util-dynamodb": "^3.658.1",

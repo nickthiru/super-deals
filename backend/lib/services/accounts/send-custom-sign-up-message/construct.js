@@ -6,30 +6,28 @@
  * during sign-up and password reset processes. It is set on the lambdaTriggers
  * property of the UserPool construct's props.
  *
- * It uses SES templates for email content instead of hardcoding HTML.
+ * The Lambda modifies the event.response properties to customize the email content
+ * that Cognito sends to users.
  */
 
 const { Construct } = require("constructs");
+const { Duration } = require("aws-cdk-lib");
 const { NodejsFunction } = require("aws-cdk-lib/aws-lambda-nodejs");
 const { Runtime } = require("aws-cdk-lib/aws-lambda");
 const path = require("path");
-const { PolicyStatement, Effect } = require("aws-cdk-lib/aws-iam");
+const { ServicePrincipal } = require("aws-cdk-lib/aws-iam");
+
+// Import configuration
+const config = require("../../../../config/_index");
 
 class SendCustomSignUpMessageConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id);
 
-    const { appUrl, email } = props;
+    const { appUrl, email, userPool } = props;
 
-    // Get template names from the email constructs
-    const merchantSignUpTemplateName =
-      email.accounts.customSignUp.merchant.templateName;
-    const customerSignUpTemplateName =
-      email.accounts.customSignUp.customer.templateName;
-    const merchantPasswordResetTemplateName =
-      email.accounts.passwordReset.merchant.templateName;
-    // const customerPasswordResetTemplateName =
-    //   email.accounts.passwordReset.customer.templateName;
+    // App URL for confirmation links
+    const applicationUrl = appUrl || "https://dbcxhkl1jwg4u.cloudfront.net";
 
     // Define the Lambda function for custom message handling
     this.lambda = new NodejsFunction(this, "NodejsFunction", {
@@ -41,27 +39,23 @@ class SendCustomSignUpMessageConstruct extends Construct {
       entry: path.join(__dirname, "./handler.js"),
       handler: "handler",
       depsLockFilePath: require.resolve("#package-lock"),
+      timeout: Duration.seconds(30), // Increase timeout to 30 seconds
+      memorySize: 256, // Increase memory to 256 MB
       environment: {
-        APP_URL: appUrl || "https://dbcxhkl1jwg4u.cloudfront.net",
-        FROM_EMAIL: "no-reply@superdeals.com",
-        MERCHANT_SIGNUP_TEMPLATE: merchantSignUpTemplateName,
-        CUSTOMER_SIGNUP_TEMPLATE: customerSignUpTemplateName,
-        MERCHANT_PASSWORD_RESET_TEMPLATE: merchantPasswordResetTemplateName,
-        // CUSTOMER_PASSWORD_RESET_TEMPLATE: customerPasswordResetTemplateName,
+        APP_URL: applicationUrl,
       },
-    }).addToRolePolicy(
-      new PolicyStatement({
-        effect: Effect.ALLOW,
-        resources: [
-          "arn:aws:ses:us-east-1:346761569124:identity/*", //https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_IdentityInfo.html
-          `arn:aws:ses:us-east-1:346761569124:template/${merchantSignUpTemplateName}`,
-          `arn:aws:ses:us-east-1:346761569124:template/${customerSignUpTemplateName}`,
-          `arn:aws:ses:us-east-1:346761569124:template/${merchantPasswordResetTemplateName}`,
-          // `arn:aws:ses:us-east-1:346761569124:template/${customerPasswordResetTemplateName}`,
-        ],
-        actions: ["sesv2:SendEmail"],
-      })
-    );
+    });
+
+    // No additional permissions needed for the Lambda function
+    // Cognito will handle sending the emails using its own service
+
+    // Grant permissions for Cognito to invoke the Lambda function if userPool is provided
+    if (userPool) {
+      this.lambda.addPermission("InvokePermission", {
+        principal: new ServicePrincipal("cognito-idp.amazonaws.com"),
+        sourceArn: userPool.userPoolArn,
+      });
+    }
   }
 }
 

@@ -12,17 +12,20 @@ class UserGroupsStack extends Stack {
 
     new CfnUserPoolGroup(this, "CustomersGroup", {
       userPoolId: userPool.pool.userPoolId,
-      groupName: "Customers",
+      groupName: "customer",
+      description: "Group for customer users",
     });
 
     new CfnUserPoolGroup(this, "MerchantsGroup", {
       userPoolId: userPool.pool.userPoolId,
-      groupName: "Merchants",
+      groupName: "merchant",
+      description: "Group for merchant users",
     });
 
     new CfnUserPoolGroup(this, "AdminsGroup", {
       userPoolId: userPool.pool.userPoolId,
-      groupName: "Admins",
+      groupName: "admin",
+      description: "Group for admin users",
     });
   }
 }

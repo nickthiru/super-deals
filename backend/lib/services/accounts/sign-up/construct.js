@@ -9,7 +9,7 @@ class SignUpConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id);
 
-    const { auth } = props;
+    const { auth, db } = props;
 
     this.lambda = new NodejsFunction(this, "NodejsFunction", {
       name: "Accounts_SignUp",
@@ -27,6 +27,7 @@ class SignUpConstruct extends Construct {
       environment: {
         USER_POOL_ID: auth.userPool.pool.userPoolId,
         USER_POOL_CLIENT_ID: auth.userPool.poolClient.userPoolClientId,
+        TABLE_NAME: db.table.tableName,
       },
       initialPolicy: [
         new PolicyStatement({
@@ -38,6 +39,11 @@ class SignUpConstruct extends Construct {
           effect: Effect.ALLOW,
           actions: ["cognito-idp:AdminAddUserToGroup"],
           resources: [auth.userPool.pool.userPoolArn],
+        }),
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          actions: ["dynamodb:PutItem"],
+          resources: [db.table.tableArn],
         }),
       ],
     });

@@ -177,26 +177,23 @@ export async function confirmUserSignUp(email, code, userType = 'user') {
 
 /**
  * Sign up a new user
- * @param {string} userType - User type (merchant, customer, admin)
- * @param {SignUpData} signUpData - User sign-up data
+ * @param {SignUpData} signUpData - User sign-up data (must include userType field)
  * @param {Function} [customFetch=defaultFetch] - Optional fetch function to use
  * @returns {Promise<SignUpResponse>} Sign-up response
  */
-export async function registerUser(userType, signUpData, customFetch = defaultFetch) {
+export async function registerUser(signUpData, customFetch = defaultFetch) {
 	auth.isLoading = true;
 	auth.error = null;
 
 	try {
-		const enrichedData = { ...signUpData, userType };
-
 		// Use mock service if configured to do so
 		if (useMockApi()) {
-			// Pass the user type to the mock service if it supports it
-			return await mockMerchantService.signUp(enrichedData);
+			// Pass the data to the mock service
+			return await mockMerchantService.signUp(signUpData);
 		}
 
 		// For direct API calls
-		// Note: userType should already be included in signUpData from the page.server.js action
+		// Note: userType must be included in signUpData from the page.server.js action
 		// This ensures the backend receives the user type information
 		const fetchToUse = customFetch || defaultFetch;
 		const response = await fetchToUse(`/api/accounts`, {
@@ -204,7 +201,7 @@ export async function registerUser(userType, signUpData, customFetch = defaultFe
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify(enrichedData)
+			body: JSON.stringify(signUpData)
 		});
 
 		if (!response.ok) {

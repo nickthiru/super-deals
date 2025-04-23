@@ -10,6 +10,7 @@ class AccountsStack extends Stack {
 
     this.signUp = new SignUpConstruct(this, "SignUpConstruct", {
       auth,
+      db,
     });
 
     this.sendWelcomeEmail = new SendWelcomeEmailConstruct(

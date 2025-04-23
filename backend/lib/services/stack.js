@@ -8,6 +8,7 @@ class ServicesStack extends Stack {
     const { envName, auth, db, sns, email } = props;
 
     this.accounts = new AccountsStack(this, "AccountsStack", {
+      envName,
       auth,
       db,
       sns,

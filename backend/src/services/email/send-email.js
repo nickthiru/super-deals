@@ -4,7 +4,8 @@ module.exports = async function sendEmail(
   sesClient,
   emailTemplateName,
   emailAddress,
-  data
+  data,
+  sourceEmail
 ) {
   console.log("(+) Inside 'sendEmail()'");
   console.log("(+) emailTemplateName: " + emailTemplateName);
@@ -14,7 +15,7 @@ module.exports = async function sendEmail(
   try {
     const response = await sesClient.send(
       new SendTemplatedEmailCommand({
-        Source: "goldpricestracker@gmail.com",
+        Source: sourceEmail,
         Destination: {
           ToAddresses: [emailAddress],
         },

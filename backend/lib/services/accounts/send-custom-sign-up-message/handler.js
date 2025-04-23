@@ -3,163 +3,136 @@
  *
  * This Lambda function customizes the email verification message based on user type.
  * It's triggered when Cognito sends verification emails, forgot password emails, etc.
- * It uses SES templates for email content instead of hardcoding HTML.
+ * 
+ * It modifies the event.response properties to customize the email content
+ * that Cognito sends to users.
  *
  * @see https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-custom-message.html
  */
 
-const { SESv2Client, SendEmailCommand } = require("@aws-sdk/client-sesv2");
-
-// Initialize the SES client
-const sesClient = new SESv2Client({ region: "us-east-1" });
-
-/**
- * Sends an email using an SES template
- * @param {string} toAddress - Recipient email address
- * @param {string} templateName - Name of the SES template to use
- * @param {Object} templateData - Data to be used in the template
- * @returns {Promise<Object>} - SES response
- */
-async function sendTemplatedEmail(toAddress, templateName, templateData) {
-  const params = {
-    Content: {
-      Template: {
-        TemplateName: templateName,
-        TemplateData: JSON.stringify(templateData),
-      },
-    },
-    Destination: {
-      ToAddresses: [toAddress],
-    },
-    FromEmailAddress: process.env.FROM_EMAIL || "no-reply@superdeals.com",
-  };
-
-  try {
-    const command = new SendEmailCommand(params);
-    const response = await sesClient.send(command);
-    console.log("Email sent successfully:", response);
-    return response;
-  } catch (error) {
-    console.error("Error sending email:", error);
-    throw error;
-  }
-}
-
 exports.handler = async (event) => {
   console.log("Custom Message event:", JSON.stringify(event, null, 2));
 
-  // Get the verification code from the event
-  const { codeParameter } = event.request;
+  // Only customize messages for sign-up
+  if (event.triggerSource !== "CustomMessage_SignUp") {
+    console.log(`Not customizing message for trigger source: ${event.triggerSource}`);
+    return event;
+  }
 
   // Get the user attributes
   const userAttributes = event.request.userAttributes || {};
-  const username = userAttributes.userName || userAttributes.email || '';
-  const email = userAttributes.email || '';
-
+  const username = userAttributes.email || "";
+  
   // Determine user type (merchant or customer)
-  const userGroup = userAttributes["custom:userGroup"] || "";
-  const businessName = userAttributes["custom:businessName"] || "";
-  const isMerchant = userGroup === "Merchant" || businessName;
+  const userType = userAttributes["custom:userType"] || "";
+  const isMerchant = userType === "merchant";
 
   // Get the app URL from environment variables
   const appUrl = process.env.APP_URL || "https://dbcxhkl1jwg4u.cloudfront.net";
+  
+  // Get the verification code
+  const code = event.request.codeParameter;
+  
+  // Business name for merchants
+  const businessName = userAttributes.name || "Merchant";
+  
+  // Current year for copyright
+  const year = new Date().getFullYear();
+  
+  // Create a confirmation URL - only passing the username, not the code
+  const confirmationUrl = `${appUrl}/accounts/confirm-sign-up?username=${encodeURIComponent(username)}`;
 
-  // Get the trigger source to determine what type of message we're sending
-  const { triggerSource } = event;
-
-  // Common template data
-  const templateData = {
-    code: codeParameter,
-    username: encodeURIComponent(username),
-    appUrl,
-    year: new Date().getFullYear(),
-    businessName: businessName || "Merchant"
-  };
-
-  // Customize the message based on the trigger source and user type
-  if (
-    triggerSource === "CustomMessage_SignUp" ||
-    triggerSource === "CustomMessage_ResendCode"
-  ) {
-    // This is a sign-up or resend verification code email
+  try {
+    // Create a custom email message based on user type
+    let emailSubject = "";
+    let emailMessage = "";
+    
     if (isMerchant) {
-      // Set response for Cognito (required even though we're sending via SES)
-      event.response.emailSubject = "Verify your Super Deals Merchant Account";
-      
-      // Attempt to send via SES template
-      try {
-        await sendTemplatedEmail(
-          email,
-          process.env.MERCHANT_SIGNUP_TEMPLATE || "MerchantSignUpVerification",
-          templateData
-        );
-        
-        // Set a minimal message for Cognito's records
-        event.response.emailMessage = `Your verification code is: ${codeParameter}`;
-      } catch (error) {
-        console.error("Failed to send templated email, falling back to default:", error);
-        // Let Cognito send the default message by not setting emailMessage
-      }
+      emailSubject = "Verify your merchant account for Super Deals";
+      emailMessage = `
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background-color: #4CAF50; color: white; padding: 10px; text-align: center; }
+            .content { padding: 20px; text-align: center; }
+            .code { font-size: 32px; font-weight: bold; color: #4CAF50; letter-spacing: 5px; padding: 15px 0; display: block; }
+            .message { text-align: left; margin-bottom: 20px; }
+            .footer { font-size: 12px; color: #777; text-align: center; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Welcome to Super Deals!</h1>
+            </div>
+            <div class="content">
+              <div class="message">
+                <p>Hello ${businessName},</p>
+                <p>Thank you for registering as a merchant on Super Deals. To complete your registration, please verify your email address using the verification code below:</p>
+              </div>
+              <div class="code">${code}</div>
+              <p>You can also click the button below to go to the verification page:</p>
+              <p><a href="${confirmationUrl}" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify Email Address</a></p>
+              <p>If you did not request this verification, please ignore this email.</p>
+            </div>
+            <div class="footer">
+              <p>&copy; ${year} Super Deals. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
     } else {
-      // Customer verification email
-      event.response.emailSubject = "Verify your Super Deals Account";
-      
-      // Attempt to send via SES template
-      try {
-        await sendTemplatedEmail(
-          email,
-          process.env.CUSTOMER_SIGNUP_TEMPLATE || "CustomerSignUpVerification",
-          templateData
-        );
-        
-        // Set a minimal message for Cognito's records
-        event.response.emailMessage = `Your verification code is: ${codeParameter}`;
-      } catch (error) {
-        console.error("Failed to send templated email, falling back to default:", error);
-        // Let Cognito send the default message by not setting emailMessage
-      }
+      emailSubject = "Verify your Super Deals account";
+      emailMessage = `
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background-color: #4CAF50; color: white; padding: 10px; text-align: center; }
+            .content { padding: 20px; text-align: center; }
+            .code { font-size: 32px; font-weight: bold; color: #4CAF50; letter-spacing: 5px; padding: 15px 0; display: block; }
+            .message { text-align: left; margin-bottom: 20px; }
+            .footer { font-size: 12px; color: #777; text-align: center; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Welcome to Super Deals!</h1>
+            </div>
+            <div class="content">
+              <div class="message">
+                <p>Hello,</p>
+                <p>Thank you for registering on Super Deals. To complete your registration, please verify your email address using the verification code below:</p>
+              </div>
+              <div class="code">${code}</div>
+              <p>You can also click the button below to go to the verification page:</p>
+              <p><a href="${confirmationUrl}" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify Email Address</a></p>
+              <p>If you did not request this verification, please ignore this email.</p>
+            </div>
+            <div class="footer">
+              <p>&copy; ${year} Super Deals. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
     }
-  } else if (triggerSource === "CustomMessage_ForgotPassword") {
-    // This is a forgot password email
-    if (isMerchant) {
-      // Merchant forgot password email
-      event.response.emailSubject = "Reset Your Super Deals Merchant Password";
-      
-      // Attempt to send via SES template
-      try {
-        await sendTemplatedEmail(
-          email,
-          process.env.MERCHANT_PASSWORD_RESET_TEMPLATE || "MerchantPasswordReset",
-          templateData
-        );
-        
-        // Set a minimal message for Cognito's records
-        event.response.emailMessage = `Your password reset code is: ${codeParameter}`;
-      } catch (error) {
-        console.error("Failed to send templated email, falling back to default:", error);
-        // Let Cognito send the default message by not setting emailMessage
-      }
-    } else {
-      // Customer forgot password email
-      event.response.emailSubject = "Reset Your Super Deals Password";
-      
-      // Attempt to send via SES template
-      try {
-        await sendTemplatedEmail(
-          email,
-          process.env.CUSTOMER_PASSWORD_RESET_TEMPLATE || "CustomerPasswordReset",
-          templateData
-        );
-        
-        // Set a minimal message for Cognito's records
-        event.response.emailMessage = `Your password reset code is: ${codeParameter}`;
-      } catch (error) {
-        console.error("Failed to send templated email, falling back to default:", error);
-        // Let Cognito send the default message by not setting emailMessage
-      }
-    }
+
+    // Set the custom message in the response
+    event.response.emailSubject = emailSubject;
+    event.response.emailMessage = emailMessage;
+    
+    console.log("Custom email message created successfully");
+  } catch (error) {
+    console.error("Error in custom message handler:", error);
+    // In case of error, return the original event to allow default message
   }
 
-  // Return the updated event
+  // Return the modified event to Cognito
   return event;
 };

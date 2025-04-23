@@ -6,6 +6,7 @@ const {
   StringAttribute,
   OAuthScope,
   UserPoolDomain,
+  UserPoolOperation,
 } = require("aws-cdk-lib/aws-cognito");
 
 const ResourceServersStack = require("./resource-servers/stack");
@@ -16,16 +17,6 @@ class UserPoolStack extends Stack {
     super(scope, id, props);
 
     const { envName, email } = props;
-
-    // Create the custom message Lambda function
-    const customMessageLambda = new SendCustomSignUpMessageConstruct(
-      this,
-      "CustomMessageLambda",
-      {
-        appUrl: process.env.SITE_URL || "https://dbcxhkl1jwg4u.cloudfront.net",
-        email,
-      }
-    );
 
     this.pool = new UserPool(this, `UserPool`, {
       selfSignUpEnabled: true,
@@ -52,9 +43,7 @@ class UserPoolStack extends Stack {
           "Thanks for signing up to our awesome app! Your verification code is {####}. This code is valid for 24 hours.",
         emailStyle: VerificationEmailStyle.CODE,
       },
-      lambdaTriggers: {
-        customMessage: customMessageLambda.lambda,
-      },
+      // Lambda triggers will be added after the pool is created
       accountRecovery: AccountRecovery.EMAIL_ONLY,
       standardAttributes: {
         email: {
@@ -63,15 +52,9 @@ class UserPoolStack extends Stack {
         },
       },
       customAttributes: {
-        businessName: new StringAttribute({ mutable: true }),
-        userGroup: new StringAttribute({ mutable: false }),
-        registrationNumber: new StringAttribute({ mutable: false }),
-        yearOfRegistration: new StringAttribute({ mutable: false }),
-        website: new StringAttribute({ mutable: true }),
-        address: new StringAttribute({ mutable: true }),
-        phone: new StringAttribute({ mutable: true }),
-        primaryContact: new StringAttribute({ mutable: true }),
-        productCategories: new StringAttribute({ mutable: true }),
+        // Only keep essential attributes in Cognito
+        // Store the rest in DynamoDB
+        userType: new StringAttribute({ mutable: false }),
       },
       removalPolicy: RemovalPolicy.RETAIN, // Default to RETAIN for safety
     });
@@ -83,6 +66,20 @@ class UserPoolStack extends Stack {
         domainPrefix: `super-deals-${envName}`,
       },
     });
+
+    // Create the custom message Lambda function now that we have the UserPool
+    const customMessageLambda = new SendCustomSignUpMessageConstruct(
+      this,
+      "CustomMessageLambda",
+      {
+        appUrl: process.env.SITE_URL || "https://dbcxhkl1jwg4u.cloudfront.net",
+        email,
+        userPool: this.pool,
+      }
+    );
+
+    // Add the Lambda trigger to the UserPool
+    this.pool.addTrigger(UserPoolOperation.CUSTOM_MESSAGE, customMessageLambda.lambda);
 
     // Create app client with OAuth scopes
     this.poolClient = this.pool.addClient(`UserPoolClient`, {
@@ -111,7 +108,6 @@ class UserPoolStack extends Stack {
         envName,
       }
     );
-
     /*** Outputs ***/
     new CfnOutput(this, `UserPoolId`, {
       value: this.pool.userPoolId,

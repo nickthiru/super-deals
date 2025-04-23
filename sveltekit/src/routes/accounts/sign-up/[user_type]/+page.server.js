@@ -171,8 +171,13 @@ export const actions = {
 				productCategories
 			} = result.data;
 
+			// Extract user type from the URL parameter and convert to singular form
+			const userType = params.user_type;
+			const singularUserType = userType.endsWith('s') ? userType.slice(0, -1) : userType;
+
 			// Construct merchant data object
 			const merchantData = {
+				userType: singularUserType, // Add the userType directly to the merchantData
 				businessName,
 				email,
 				password,
@@ -202,10 +207,7 @@ export const actions = {
 			}
 
 			try {
-				// Extract user type from the URL parameter
-				const userType = params.user_type;
-
-				const result = await registerUser(userType, merchantData, fetch);
+				const result = await registerUser(merchantData, fetch);
 
 				if (dev) {
 					console.log('Registration result:', result);

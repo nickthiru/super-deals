@@ -1,5 +1,5 @@
 const { Stack } = require("aws-cdk-lib");
-const CustomSignUpConstruct = require("./custom-sign-up/construct");
+const CustomSignUpConstruct = require("./sign-up/construct");
 const PasswordResetConstruct = require("./password-reset/construct");
 const WelcomeConstruct = require("./welcome/construct");
 

@@ -1,4 +1,8 @@
 {
+  "BackendStackDevDbStackCF4BC1B9": {
+    "ExportsOutputFnGetAttTableV26B253703Arn9502DAD0": "arn:aws:dynamodb:us-east-1:654654543926:table/BackendStackDevDbStackCF4BC1B9-TableV26B253703-11580H7JOFWK5",
+    "ExportsOutputRefTableV26B2537034F95C1C6": "BackendStackDevDbStackCF4BC1B9-TableV26B253703-11580H7JOFWK5"
+  },
   "BackendStackDevStorageStackC0FC6599": {
     "ExportsOutputFnGetAttS3Bucket07682993Arn6D6BF9FF": "arn:aws:s3:::backendstackdevstoragestackc0fc65-s3bucket07682993-alktmmh7ladb",
     "S3BucketArn": "arn:aws:s3:::backendstackdevstoragestackc0fc65-s3bucket07682993-alktmmh7ladb",
@@ -9,22 +13,22 @@
     "ExportsOutputRefSignUpCompletedConstructSignUpCompletedTopic2C0E320B12483696": "arn:aws:sns:us-east-1:654654543926:SignUpCompleted"
   },
   "BackendStackDevAuthStackUserPoolStackD90C0FF4": {
-    "ExportsOutputFnGetAttUserPool6BA7E5F2Arn686ACC00": "arn:aws:cognito-idp:us-east-1:654654543926:userpool/us-east-1_Th5i8b49F",
-    "UserPoolClientId": "43h0cjh0a5j7tt0hdqao148n6v",
-    "UserPoolId": "us-east-1_Th5i8b49F",
-    "ExportsOutputRefUserPool6BA7E5F296FD7236": "us-east-1_Th5i8b49F",
-    "ExportsOutputRefUserPoolUserPoolClient40176907044A36CF": "43h0cjh0a5j7tt0hdqao148n6v",
+    "ExportsOutputFnGetAttUserPool6BA7E5F2Arn686ACC00": "arn:aws:cognito-idp:us-east-1:654654543926:userpool/us-east-1_JQDzoqukS",
+    "UserPoolClientId": "10149f9pdmbudrer9oh5bt104v",
+    "UserPoolId": "us-east-1_JQDzoqukS",
+    "ExportsOutputRefUserPool6BA7E5F296FD7236": "us-east-1_JQDzoqukS",
+    "ExportsOutputRefUserPoolUserPoolClient40176907044A36CF": "10149f9pdmbudrer9oh5bt104v",
     "UserPoolDomainName": "super-deals-dev",
-    "ExportsOutputFnGetAttUserPool6BA7E5F2ProviderNameA3E1F80D": "cognito-idp.us-east-1.amazonaws.com/us-east-1_Th5i8b49F"
+    "ExportsOutputFnGetAttUserPool6BA7E5F2ProviderNameA3E1F80D": "cognito-idp.us-east-1.amazonaws.com/us-east-1_JQDzoqukS"
   },
   "BackendStackDevAuthStackIdentityPoolStack0DECD2C0": {
-    "ExportsOutputRefIdentityPoolF5C140BA": "us-east-1:9056300a-7d74-4e97-bd71-746c5068be03",
-    "IdentityPoolId": "us-east-1:9056300a-7d74-4e97-bd71-746c5068be03"
+    "ExportsOutputRefIdentityPoolF5C140BA": "us-east-1:b97cc0ac-5b7a-4588-9801-e63c71539026",
+    "IdentityPoolId": "us-east-1:b97cc0ac-5b7a-4588-9801-e63c71539026"
   },
   "BackendStackDevServicesStackAccountsStack4B815BDF": {
-    "ExportsOutputFnGetAttSignUpConstructNodejsFunction75CDDCFBArnDCC898BC": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackDevServicesSt-SignUpConstructNodejsFun-T80eCpFqGBrO"
+    "ExportsOutputFnGetAttSignUpConstructNodejsFunction75CDDCFBArnDCC898BC": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackDevServicesSt-SignUpConstructNodejsFun-GnxwWAwkuBcj"
   },
   "BackendStackDevApiStackHttpStackB0C9C4D3": {
-    "RestApiUrldev": "https://micjn2jqfc.execute-api.us-east-1.amazonaws.com/dev/"
+    "RestApiUrldev": "https://vano8yhmnc.execute-api.us-east-1.amazonaws.com/dev/"
   }
 }

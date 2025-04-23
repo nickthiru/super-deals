@@ -2,41 +2,71 @@ const {
   CognitoIdentityProviderClient,
   AdminAddUserToGroupCommand,
 } = require("@aws-sdk/client-cognito-identity-provider");
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const R = require("ramda");
-
-/** @typedef {import('#types/deal-entity').DealEntity} DealItem */
 
 const AccountsService = require("#src/services/accounts/_index.js");
 const ApiService = require("#src/services/api/_index.js");
+const DbService = require("#src/services/db/_index.js");
 
 const cognitoClient = new CognitoIdentityProviderClient();
+const ddbClient = new DynamoDBClient();
 
+/**
+ * Handler for the user sign-up process
+ * 
+ * This handler manages the complete user registration flow:
+ * 1. Normalizes and validates user input data
+ * 2. Registers the user in Cognito with minimal attributes
+ * 3. Adds the user to the appropriate user group
+ * 4. Stores the complete user profile in DynamoDB
+ * 5. Returns a formatted success response
+ * 
+ * @param {Object} event - API Gateway Lambda proxy event
+ * @returns {Object} - API Gateway Lambda proxy response
+ */
 exports.handler = async (event) => {
-  console.log("Received event:", JSON.stringify(event, null, 2));
+  logEventReceived(event);
 
   const data = JSON.parse(event.body);
 
   const userPoolId = process.env.USER_POOL_ID;
   const userPoolClientId = process.env.USER_POOL_CLIENT_ID;
+  const tableName = process.env.TABLE_NAME;
 
   try {
-    performDynamicBusinessValidations(data);
+    // Normalize user data
+    const normalizedData = normalizeUserData(data);
 
-    const userAttributes = prepareUserAttributes(data);
+    // Validate the data before proceeding
+    validateUserData(normalizedData);
 
-    const signUpResponse = await signUpUserWithCognito(
+    // Prepare user attributes for Cognito
+    const userAttributes = prepareUserAttributesForCognito(normalizedData);
+
+    // Register the user with Cognito
+    const signUpResponse = await registerUserWithCognito(
       cognitoClient,
       userPoolClientId,
-      data.email,
-      data.password,
+      normalizedData.email,
+      normalizedData.password,
       userAttributes
     );
 
     // Add user to the appropriate group based on userType
-    await addUserToGroup(userPoolId, data.email, data.userType);
+    await addUserToGroup(userPoolId, normalizedData.email, normalizedData.userType);
+    
+    // Prepare user profile for DynamoDB
+    const userId = extractUserIdFromSignUpResponse(signUpResponse);
+    const userProfile = prepareUserProfileForDynamoDB(normalizedData, userId);
+    
+    // Save user profile to DynamoDB
+    await saveUserProfileToDynamoDB(tableName, userProfile);
 
-    return prepareSuccessResponse(signUpResponse, data.userType);
+    // Prepare and return the success response
+    return prepareSuccessResponse(signUpResponse, normalizedData.userType);
   } catch (error) {
+    logError(error);
     return prepareErrorResponse(error);
   }
 };
@@ -55,7 +85,28 @@ function isValidUrl(url) {
   }
 }
 
-function performDynamicBusinessValidations(data) {
+/**
+ * Logs the received event
+ * @param {Object} event - API Gateway Lambda proxy event
+ */
+function logEventReceived(event) {
+  console.log("Received event:", JSON.stringify(event, null, 2));
+}
+
+/**
+ * Logs an error that occurred during processing
+ * @param {Error} error - The error that occurred
+ */
+function logError(error) {
+  console.error("Error in sign-up handler:", error);
+}
+
+/**
+ * Validates user data against business rules
+ * @param {Object} data - Normalized user data
+ * @throws {Error} - If validation fails
+ */
+function validateUserData(data) {
   const currentYear = new Date().getFullYear();
 
   // Validate year of registration is not in the future
@@ -83,69 +134,110 @@ function performDynamicBusinessValidations(data) {
   }
 }
 
-function prepareUserAttributes(data) {
-  // Create user attributes based on user type
-  const commonUserAttributes = [
-    { Name: "email", Value: data.email },
-    { Name: "custom:userGroup", Value: data.userType },
-  ];
-
-  // Add merchant-specific attributes if user type is Merchant
-  if (data.userType === "merchant") {
-    var completeUserAttributes = prepareMerchantAttributes(
-      commonUserAttributes,
-      data
-    );
-  }
-
-  // Add customer-specific attributes if user type is Customer
-  // This can be expanded as needed for different user types
-  if (data.userType === "customer") {
-    // Add customer-specific attributes here
-    // Example: { Name: "custom:preferredCategories", Value: data.preferredCategories || "" }
-    // var completeUserAttributes = prepareCustomerAttributes(userAttributes, data);
-    // return updatedUserAttributes;
-  }
-
-  return completeUserAttributes;
+/**
+ * Normalizes user data by standardizing formats and values
+ * @param {Object} data - Raw user data from the request
+ * @returns {Object} - Normalized user data
+ */
+function normalizeUserData(data) {
+  const normalizedData = { ...data };
+  
+  // Ensure userType is lowercase for consistency
+  normalizedData.userType = data.userType.toLowerCase();
+  
+  return normalizedData;
 }
 
-function prepareMerchantAttributes(commonUserAttributes, data) {
-  const copiedArray = R.clone(commonUserAttributes);
+/**
+ * Prepares user attributes for Cognito
+ * @param {Object} data - Normalized user data
+ * @returns {Array} - Array of user attributes for Cognito
+ */
+function prepareUserAttributesForCognito(data) {
+  // Only include essential attributes needed for authentication
+  return [
+    { Name: "email", Value: data.email },
+    { Name: "custom:userType", Value: data.userType }
+  ];
+}
 
-  const addressString = JSON.stringify({
-    buildingNumber: data.address.buildingNumber,
-    street: data.address.street,
-    city: data.address.city,
-    state: data.address.state,
-    zip: data.address.zip,
-    country: data.address.country,
+/**
+ * Extracts the user ID from the Cognito sign-up response
+ * @param {Object} signUpResponse - Response from Cognito sign-up
+ * @returns {string} - User ID
+ */
+function extractUserIdFromSignUpResponse(signUpResponse) {
+  return signUpResponse.UserSub || signUpResponse.user?.username || "";
+}
+
+/**
+ * Prepares user profile for DynamoDB
+ * @param {Object} data - Normalized user data
+ * @param {string} userId - Cognito user ID
+ * @returns {Object} - User profile ready for DynamoDB
+ */
+function prepareUserProfileForDynamoDB(data, userId) {
+  // Create a timestamp for created/updated fields
+  const timestamp = new Date().toISOString();
+
+  // Prepare the item using the single-table design pattern
+  const userProfile = {
+    // Primary key - using the same value for PK and SK as requested
+    PK: `USER#${userId}`,
+    SK: `USER#${userId}`,
+    
+    // Data fields
+    userId,
+    userType: data.userType,
+    email: data.email,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+
+  // Add merchant-specific fields if user is a merchant
+  if (data.userType === 'merchant') {
+    userProfile.businessName = data.businessName;
+    userProfile.registrationNumber = data.registrationNumber;
+    userProfile.yearOfRegistration = data.yearOfRegistration;
+    userProfile.businessType = data.businessType;
+    userProfile.website = data.website;
+    userProfile.phone = data.phone;
+    
+    // Store complex objects directly in DynamoDB
+    userProfile.address = data.address;
+    userProfile.primaryContact = data.primaryContact;
+    userProfile.productCategories = data.productCategories;
+  }
+
+  // Add GSI1 keys for querying users by type
+  userProfile.GSI1PK = `USERTYPE#${data.userType}`;
+  userProfile.GSI1SK = `USER#${userId}`;
+  
+  return userProfile;
+}
+
+/**
+ * Saves user profile to DynamoDB
+ * @param {string} tableName - The DynamoDB table name
+ * @param {Object} userProfile - Prepared user profile
+ * @returns {Object} - Result of the DynamoDB save operation
+ */
+async function saveUserProfileToDynamoDB(tableName, userProfile) {
+  console.log("Saving user profile to DynamoDB:", {
+    userId: userProfile.userId,
+    userType: userProfile.userType,
+    tableName
   });
 
-  const primaryContactString = JSON.stringify({
-    name: data.primaryContact.name,
-    email: data.primaryContact.email,
-    phone: data.primaryContact.phone,
-  });
-
-  const productCategoriesString = JSON.stringify(data.productCategories);
-
-  copiedArray.push(
-    { Name: "custom:businessName", Value: data.businessName },
-    { Name: "custom:userGroup", Value: "Merchant" },
-    { Name: "custom:registrationNumber", Value: data.registrationNumber },
-    {
-      Name: "custom:yearOfRegistration",
-      Value: data.yearOfRegistration.toString(),
-    },
-    { Name: "custom:website", Value: data.website || "" },
-    { Name: "custom:address", Value: addressString },
-    { Name: "custom:phone", Value: data.phone },
-    { Name: "custom:primaryContact", Value: primaryContactString },
-    { Name: "custom:productCategories", Value: productCategoriesString }
-  );
-
-  return copiedArray;
+  try {
+    // Use the DbService to save the item
+    const result = await DbService.item.saveItem(ddbClient, tableName, userProfile);
+    console.log("User profile saved to DynamoDB:", result);
+    return result;
+  } catch (error) {
+    console.error("Error saving user profile to DynamoDB:", error);
+    throw error;
+  }
 }
 
 /**
@@ -157,25 +249,38 @@ function prepareMerchantAttributes(commonUserAttributes, data) {
  * @param {string} userType - Type of user (Merchant, Customer, etc.)
  * @returns {Object} - Cognito sign-up response
  */
-async function signUpUserWithCognito(
+async function registerUserWithCognito(
   cognitoClient,
   userPoolClientId,
   username,
   password,
   userAttributes
 ) {
+  console.log("Signing up user with Cognito:", {
+    email: username,
+    userPoolClientId: userPoolClientId,
+    attributesCount: userAttributes.length,
+  });
+
   const signUpResponse = await AccountsService.signUp(
     cognitoClient,
+    userPoolClientId,
     username,
     password,
-    userPoolClientId,
     userAttributes
+  );
+
+  console.log(
+    "Cognito sign-up response:",
+    JSON.stringify(signUpResponse, null, 2)
   );
 
   return signUpResponse;
 }
 
 async function addUserToGroup(userPoolId, username, userType) {
+  console.log(`Adding user ${username} to group ${userType}`);
+  
   await cognitoClient.send(
     new AdminAddUserToGroupCommand({
       UserPoolId: userPoolId,
@@ -183,24 +288,34 @@ async function addUserToGroup(userPoolId, username, userType) {
       GroupName: userType,
     })
   );
+  
+  console.log(`User ${username} successfully added to group ${userType}`);
 }
 
-function prepareSuccessResponse() {
-  const successResponse = ApiService.success(
-    {
-      message: "Merchant registered. Needs to submit OTP to complete sign-up",
-      userConfirmed: signUpResponse.UserConfirmed,
-      userType,
-      userId,
-      codeDeliveryDetails: signUpResponse.CodeDeliveryDetails,
-    },
-    201
-  );
+function prepareSuccessResponse(signUpResponse, userType) {
+  // Extract the user ID from the response
+  const userId = signUpResponse.UserSub || signUpResponse.user?.username || "";
+
+  // Prepare the response data
+  const responseData = {
+    message: "Merchant registered. Needs to submit OTP to complete sign-up",
+    userConfirmed: signUpResponse.UserConfirmed || false,
+    userType: userType,
+    userId: userId,
+  };
+
+  // Add code delivery details if available
+  if (signUpResponse.CodeDeliveryDetails) {
+    responseData.codeDeliveryDetails = signUpResponse.CodeDeliveryDetails;
+  }
 
   // Add backward compatibility for merchant-specific clients
-  if (userType === "Merchant") {
+  if (userType === "merchant") {
     responseData.merchantId = userId;
   }
+
+  // Create the success response
+  const successResponse = ApiService.success(responseData, 201);
 
   console.log(`Success Response: ${JSON.stringify(successResponse, null, 2)}`);
 
