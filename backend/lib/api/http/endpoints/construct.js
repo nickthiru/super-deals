@@ -6,11 +6,11 @@ class EndpointsConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const { http, lambda } = props;
+    const { http, services } = props;
 
     new AccountsConstruct(this, "AccountsConstruct", {
       http,
-      lambda,
+      services,
     });
   }
 }

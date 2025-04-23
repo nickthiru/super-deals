@@ -2,31 +2,26 @@ const { SignUpCommand } = require("@aws-sdk/client-cognito-identity-provider");
 
 /**
  * Sign up the user with Cognito
- * @param {*} client // CognitoIdentityProviderClient
- * @param {*} props
+ * @param {*} cognitoClient // CognitoIdentityProviderClient
+ * @param {string} userPoolClientId
+ * @param {string} username
+ * @param {string} password
+ * @param {Object} userAttributes // User Attributes
  * @returns
  */
-async function signUp(client, props) {
-  const signUpResponse = await client.send(
+async function signUp(
+  cognitoClient,
+  userPoolClientId,
+  username,
+  password,
+  userAttributes
+) {
+  const signUpResponse = await cognitoClient.send(
     new SignUpCommand({
       ClientId: userPoolClientId,
-      Username: props.email,
-      Password: props.password,
-      UserAttributes: [
-        { Name: "email", Value: props.email },
-        { Name: "custom:businessName", Value: props.businessName },
-        { Name: "custom:userGroup", Value: "Merchant" },
-        { Name: "custom:registrationNumber", Value: props.registrationNumber },
-        {
-          Name: "custom:yearOfRegistration",
-          Value: data.yearOfRegistration.toString(),
-        },
-        { Name: "custom:website", Value: data.website || "" },
-        { Name: "custom:address", Value: addressString },
-        { Name: "custom:phone", Value: data.phone },
-        { Name: "custom:primaryContact", Value: primaryContactString },
-        { Name: "custom:productCategories", Value: productCategoriesString },
-      ],
+      Username: username,
+      Password: password,
+      UserAttributes: userAttributes,
     })
   );
 

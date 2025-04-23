@@ -1,16 +1,26 @@
 const { Stack } = require("aws-cdk-lib");
-const { WelcomeEmailConstruct } = require("./welcome-email/merchant/construct");
+const CustomSignUpConstruct = require("./sign-up/construct");
+const PasswordResetConstruct = require("./password-reset/construct");
+const WelcomeConstruct = require("./welcome/construct");
 
 class AccountsStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    this.welcomeEmail = new WelcomeEmailConstruct(
+    this.customSignUp = new CustomSignUpConstruct(
       this,
-      "WelcomeEmailConstruct",
+      "CustomSignUpConstruct",
+      {}
+    );
+
+    this.welcome = new WelcomeConstruct(this, "WelcomeConstruct", {});
+
+    this.passwordReset = new PasswordResetConstruct(
+      this,
+      "PasswordResetConstruct",
       {}
     );
   }
 }
 
-module.exports = { AccountsStack };
+module.exports = AccountsStack;

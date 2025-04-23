@@ -29,6 +29,7 @@ try {
   const identityPoolId = outputsData.BackendStackDevAuthStackIdentityPoolStack0DECD2C0?.IdentityPoolId;
   const apiUrl = outputsData.BackendStackDevApiStackHttpStackB0C9C4D3?.RestApiUrldev;
   const s3BucketName = outputsData.BackendStackDevStorageStackC0FC6599?.S3BucketName;
+  const signUpCompletedTopicArn = outputsData.BackendStackDevSnsStackAccountsStackSignUpCompletedConstructSignUpCompletedTopicArn;
   
   console.log('Extracted values from outputs.json:');
   console.log(`- User Pool ID: ${userPoolId}`);
@@ -36,6 +37,7 @@ try {
   console.log(`- Identity Pool ID: ${identityPoolId}`);
   console.log(`- API URL: ${apiUrl}`);
   console.log(`- S3 Bucket Name: ${s3BucketName}`);
+  console.log(`- Sign-Up Completed Topic ARN: ${signUpCompletedTopicArn}`);
   
   // Read existing .env.local file or create from template
   let envContent;
@@ -88,6 +90,19 @@ VITE_SITE_URL=
   if (!envContent.match(/^VITE_SITE_URL=.*$/m) || envContent.match(/^VITE_SITE_URL=\s*$/m)) {
     // Only replace if empty or not set
     envContent = envContent.replace(/^VITE_SITE_URL=.*$/m, `VITE_SITE_URL=http://localhost:5173`);
+  }
+  
+  // Add or update the SNS topic ARN
+  if (signUpCompletedTopicArn) {
+    if (envContent.includes('VITE_SIGN_UP_COMPLETED_TOPIC_ARN=')) {
+      envContent = envContent.replace(
+        /^VITE_SIGN_UP_COMPLETED_TOPIC_ARN=.*$/m,
+        `VITE_SIGN_UP_COMPLETED_TOPIC_ARN=${signUpCompletedTopicArn}`
+      );
+    } else {
+      // Add it if it doesn't exist
+      envContent += `\n# SNS Topics\nVITE_SIGN_UP_COMPLETED_TOPIC_ARN=${signUpCompletedTopicArn}`;
+    }
   }
   
   // Write updated content to .env.local

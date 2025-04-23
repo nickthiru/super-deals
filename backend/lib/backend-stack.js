@@ -20,6 +20,10 @@ class BackendStack extends Stack {
     super(scope, id, props);
 
     const { envName } = props; // this is mainly for config purposes, i think e.g. used by DbStack to determine retention policy for DDB
+    
+    // Set the CDK_ENV environment variable for the config system
+    // This makes the environment available to all constructs
+    process.env.CDK_ENV = envName;
 
     const db = new DbStack(this, "DbStack", {
       envName,
@@ -33,8 +37,11 @@ class BackendStack extends Stack {
       envName,
     });
 
+    const email = new EmailTemplatesStack(this, "EmailTemplatesStack");
+
     const auth = new AuthStack(this, "AuthStack", {
       envName,
+      email,
     });
 
     const iam = new IamStack(this, "IamStack", {
@@ -46,8 +53,6 @@ class BackendStack extends Stack {
       storage,
       auth,
     });
-
-    const email = new EmailTemplatesStack(this, "EmailTemplatesStack", {});
 
     const services = new ServicesStack(this, "ServicesStack", {
       envName,
