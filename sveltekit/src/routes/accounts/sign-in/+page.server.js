@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import { dev } from '$app/environment';
-import * as merchantService from '$lib/services/api/merchantService';
+import * as accountsService from '$lib/services/accounts.svelte.js';
 import { ERROR_CODES } from '$lib/utils/errorHandling';
 import { signInSchema, forgotPasswordSchema } from './schema.js';
 
@@ -56,7 +56,7 @@ export const actions = {
 
 		try {
 			// Call sign-in service
-			const signInResult = await merchantService.signIn(email, password);
+			const signInResult = await accountsService.loginUser(email, password, userType);
 
 			if (dev) {
 				console.log('Sign-in successful:', signInResult);

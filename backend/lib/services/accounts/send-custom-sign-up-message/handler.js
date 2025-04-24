@@ -3,7 +3,7 @@
  *
  * This Lambda function customizes the email verification message based on user type.
  * It's triggered when Cognito sends verification emails, forgot password emails, etc.
- * 
+ *
  * It modifies the event.response properties to customize the email content
  * that Cognito sends to users.
  *
@@ -15,38 +15,42 @@ exports.handler = async (event) => {
 
   // Only customize messages for sign-up
   if (event.triggerSource !== "CustomMessage_SignUp") {
-    console.log(`Not customizing message for trigger source: ${event.triggerSource}`);
+    console.log(
+      `Not customizing message for trigger source: ${event.triggerSource}`
+    );
     return event;
   }
 
   // Get the user attributes
   const userAttributes = event.request.userAttributes || {};
   const username = userAttributes.email || "";
-  
+
   // Determine user type (merchant or customer)
   const userType = userAttributes["custom:userType"] || "";
   const isMerchant = userType === "merchant";
 
   // Get the app URL from environment variables
   const appUrl = process.env.APP_URL || "https://dbcxhkl1jwg4u.cloudfront.net";
-  
+
   // Get the verification code
   const code = event.request.codeParameter;
-  
+
   // Business name for merchants
   const businessName = userAttributes.name || "Merchant";
-  
+
   // Current year for copyright
   const year = new Date().getFullYear();
-  
+
   // Create a confirmation URL - only passing the username, not the code
-  const confirmationUrl = `${appUrl}/accounts/confirm-sign-up?username=${encodeURIComponent(username)}`;
+  const confirmationUrl = `${appUrl}/accounts/confirm-sign-up?username=${encodeURIComponent(
+    username
+  )}`;
 
   try {
     // Create a custom email message based on user type
     let emailSubject = "";
     let emailMessage = "";
-    
+
     if (isMerchant) {
       emailSubject = "Verify your merchant account for Super Deals";
       emailMessage = `
@@ -55,10 +59,9 @@ exports.handler = async (event) => {
           <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background-color: #4CAF50; color: white; padding: 10px; text-align: center; }
-            .content { padding: 20px; text-align: center; }
-            .code { font-size: 32px; font-weight: bold; color: #4CAF50; letter-spacing: 5px; padding: 15px 0; display: block; }
-            .message { text-align: left; margin-bottom: 20px; }
+            .header { background-color: #3B5998; color: white; padding: 10px; text-align: center; }
+            .content { padding: 20px; }
+            .code { font-size: 24px; font-weight: bold; color: #3B5998; }
             .footer { font-size: 12px; color: #777; text-align: center; margin-top: 20px; }
           </style>
         </head>
@@ -68,13 +71,11 @@ exports.handler = async (event) => {
               <h1>Welcome to Super Deals!</h1>
             </div>
             <div class="content">
-              <div class="message">
-                <p>Hello ${businessName},</p>
-                <p>Thank you for registering as a merchant on Super Deals. To complete your registration, please verify your email address using the verification code below:</p>
-              </div>
-              <div class="code">${code}</div>
+              <p>Hello ${businessName},</p>
+              <p>Thank you for registering as a merchant on Super Deals. To complete your registration, please verify your email address using the verification code below:</p>
+              <p class="code">${code}</p>
               <p>You can also click the button below to go to the verification page:</p>
-              <p><a href="${confirmationUrl}" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify Email Address</a></p>
+              <p><a href="${confirmationUrl}" style="display: inline-block; background-color: #3B5998; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify Email Address</a></p>
               <p>If you did not request this verification, please ignore this email.</p>
             </div>
             <div class="footer">
@@ -92,10 +93,9 @@ exports.handler = async (event) => {
           <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background-color: #4CAF50; color: white; padding: 10px; text-align: center; }
-            .content { padding: 20px; text-align: center; }
-            .code { font-size: 32px; font-weight: bold; color: #4CAF50; letter-spacing: 5px; padding: 15px 0; display: block; }
-            .message { text-align: left; margin-bottom: 20px; }
+            .header { background-color: #2196F3; color: white; padding: 10px; text-align: center; }
+            .content { padding: 20px; }
+            .code { font-size: 24px; font-weight: bold; color: #2196F3; }
             .footer { font-size: 12px; color: #777; text-align: center; margin-top: 20px; }
           </style>
         </head>
@@ -105,13 +105,11 @@ exports.handler = async (event) => {
               <h1>Welcome to Super Deals!</h1>
             </div>
             <div class="content">
-              <div class="message">
-                <p>Hello,</p>
-                <p>Thank you for registering on Super Deals. To complete your registration, please verify your email address using the verification code below:</p>
-              </div>
-              <div class="code">${code}</div>
+              <p>Hello,</p>
+              <p>Thank you for registering on Super Deals. To complete your registration, please verify your email address using the verification code below:</p>
+              <p class="code">${code}</p>
               <p>You can also click the button below to go to the verification page:</p>
-              <p><a href="${confirmationUrl}" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify Email Address</a></p>
+              <p><a href="${confirmationUrl}" style="display: inline-block; background-color: #2196F3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify Email Address</a></p>
               <p>If you did not request this verification, please ignore this email.</p>
             </div>
             <div class="footer">
@@ -126,7 +124,7 @@ exports.handler = async (event) => {
     // Set the custom message in the response
     event.response.emailSubject = emailSubject;
     event.response.emailMessage = emailMessage;
-    
+
     console.log("Custom email message created successfully");
   } catch (error) {
     console.error("Error in custom message handler:", error);

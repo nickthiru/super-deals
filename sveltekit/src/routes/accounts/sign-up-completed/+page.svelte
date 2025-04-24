@@ -1,23 +1,31 @@
 <!-- 
-  Sign-up Success Page
+  Sign-up Completed Page
   Displayed after successful email verification
 -->
 
 <script>
+  import { browser } from '$app/environment';
+  
+  import { untrack } from 'svelte';
+  
   // Using Svelte 5 runes for reactivity
-  // Extract user type from URL or data
-  let userType = $state('merchant');
-
+  const userType = $state({ value: 'merchant' });
+  
+  // One-time initialization using $effect with untrack
+  // This prevents infinite loops by not tracking the state changes
   $effect(() => {
     // Get user type from URL params if available
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      userType = params.get('userType') || 'merchant';
+    if (browser) {
+      // Using untrack to prevent this from being a dependency
+      untrack(() => {
+        const params = new URLSearchParams(window.location.search);
+        userType.value = params.get('userType') || 'merchant';
+      });
     }
   });
 </script>
 
-<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center items-center py-12 sm:px-6 lg:px-8">
   <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
     <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
       <div class="text-center">
@@ -48,7 +56,7 @@
       <div class="mt-6">
         <div class="flex justify-center">
           <a 
-            href="/auth/sign-in" 
+            href="/accounts/sign-in" 
             class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Sign In
@@ -57,10 +65,10 @@
         
         <div class="mt-4 text-center">
           <a 
-            href="/{userType}s" 
+            href="/{userType.value}s" 
             class="text-sm font-medium text-blue-600 hover:text-blue-500"
           >
-            Go to {userType === 'merchant' ? 'Merchant' : 'Customer'} Home
+            Go to {userType.value === 'merchant' ? 'Merchant' : 'Customer'} Home Page
           </a>
         </div>
       </div>

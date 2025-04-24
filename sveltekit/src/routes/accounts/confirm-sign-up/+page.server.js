@@ -54,7 +54,7 @@ export const actions = {
 			const userType = cookies.get('pendingUserType') || 'merchant';
 
 			// Call verification service
-			const result = await accountsService.confirmUserSignUp(userType, email, verificationCode);
+			const result = await accountsService.confirmUserSignUp(email, verificationCode, userType);
 
 			if (dev) {
 				console.log('Verification successful:', result);
@@ -67,8 +67,8 @@ export const actions = {
 
 			// Check if sign-up is complete
 			if (result.isSignUpComplete) {
-				// Redirect to sign-up-success page
-				throw redirect(303, `/auth/sign-up-success?userType=${userType}`);
+				// Redirect to sign-up-completed page
+				throw redirect(303, `/accounts/sign-up-completed?userType=${userType}`);
 			} else {
 				// Something went wrong, but verification was processed
 				return {
