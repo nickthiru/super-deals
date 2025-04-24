@@ -76,7 +76,7 @@
         formState.message = form.message;
         
         // If resend was successful, reset the form
-        if (form.type === 'resend') {
+        if (form && typeof form === 'object' && 'type' in form && form.type === 'resend') {
           formState.isResending = false;
         }
       }

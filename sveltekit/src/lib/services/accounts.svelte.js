@@ -21,6 +21,19 @@ import { dev } from '$app/environment';
  * @typedef {any} SignUpData Generic sign-up data for any user type
  * @typedef {any} SignUpResponse Generic sign-up response for any user type
  * @typedef {any} UserProfile Generic user profile for any user type
+ * 
+ * @typedef {Object} VerificationResponse
+ * @property {boolean} success - Whether the verification was successful
+ * @property {boolean} isSignUpComplete - Whether the sign-up process is complete
+ * @property {string} message - A message describing the result
+ * @property {string} userType - The type of user being verified
+ */
+
+/**
+ * @typedef {Object} MockVerificationResponse
+ * @property {boolean} success - Whether the verification was successful
+ * @property {boolean} [isSignUpComplete] - Whether the sign-up process is complete
+ * @property {string} message - A message describing the result
  */
 
 /**
@@ -101,6 +114,7 @@ export async function confirmUserSignUp(email, code, userType = 'user') {
 		// Use mock service if configured to do so
 		if (useMockApi()) {
 			// Mock service might not support userType parameter yet
+			/** @type {MockVerificationResponse} */
 			const result = await mockMerchantService.verifyEmail(email, code);
 
 			// Ensure the result has the isSignUpComplete property
@@ -109,10 +123,15 @@ export async function confirmUserSignUp(email, code, userType = 'user') {
 			}
 
 			// Store the user type with the result
-			result.userType = userType;
+			/** @type {VerificationResponse} */
+			const typedResult = {
+				...result,
+				userType,
+				isSignUpComplete: result.isSignUpComplete || result.success
+			};
 
 			// In mock mode, simulate publishing to SNS if verification was successful
-			if (result.isSignUpComplete) {
+			if (typedResult.isSignUpComplete) {
 				console.log('[MOCK] Would publish to SNS:', {
 					email,
 					userType,
@@ -120,7 +139,7 @@ export async function confirmUserSignUp(email, code, userType = 'user') {
 				});
 			}
 
-			return result;
+			return typedResult;
 		}
 
 		// Use AWS Amplify for email verification
@@ -163,7 +182,18 @@ export async function confirmUserSignUp(email, code, userType = 'user') {
 				console.error('Failed to publish to SNS:', snsError);
 			}
 		} else if (isSignUpComplete && !AWS_CONFIG.signUpCompletedTopicArn) {
-			console.warn('Sign-up completed but SNS topic ARN is not configured');
+			console.log('Sign-up completed but SNS topic ARN is not configured');
+			
+			// For development: mock the welcome email sending
+			if (dev) {
+				console.log('MOCK: Would send welcome email to:', email);
+				console.log('MOCK: Email data:', {
+					email,
+					userType,
+					businessName: userType === 'merchant' ? 'Your Business' : 'Customer Account',
+					verificationTime: new Date().toISOString()
+				});
+			}
 		}
 
 		return data;

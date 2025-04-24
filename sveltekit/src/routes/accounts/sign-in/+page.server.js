@@ -89,11 +89,11 @@ export const actions = {
 				const apiError = /** @type {ApiError} */ (error);
 
 				if ('code' in apiError) {
-					if (apiError.code === ERROR_CODES.USER_NOT_FOUND) {
+					if (apiError.code === ERROR_CODES.EMAIL_NOT_FOUND) {
 						errorMessage = 'Account not found. Please check your email or sign up.';
-					} else if (apiError.code === ERROR_CODES.INCORRECT_PASSWORD) {
+					} else if (apiError.code === ERROR_CODES.INVALID_CREDENTIALS) {
 						errorMessage = 'Incorrect password. Please try again.';
-					} else if (apiError.code === ERROR_CODES.USER_NOT_CONFIRMED) {
+					} else if (apiError.code === ERROR_CODES.EMAIL_NOT_VERIFIED) {
 						errorMessage = 'Email not verified. Please check your email for a verification link.';
 					}
 				}
@@ -130,25 +130,26 @@ export const actions = {
 		// We'll use these variables in the future implementation
 		// const { email, userType } = result.data;
 
+		// For security, we always return the same message regardless of whether the email exists
+		// This prevents user enumeration attacks
+
 		try {
 			// Call forgot password service (to be implemented)
 			// const result = await merchantService.forgotPassword(email);
-
-			// For now, return a success message
-			return {
-				success: true,
-				message: 'If an account exists with this email, a password reset link will be sent.'
-			};
+			
+			// Future implementation will go here
+			// For now, we're just simulating a successful request
 		} catch (error) {
+			// Log the error in development mode, but still return the same message
 			if (dev) {
 				console.error('Forgot password error:', error);
 			}
-
-			// Always return a generic message for security
-			return {
-				success: true,
-				message: 'If an account exists with this email, a password reset link will be sent.'
-			};
 		}
+
+		// Always return the same message regardless of success or failure
+		return {
+			success: true,
+			message: 'If an account exists with this email, a password reset link will be sent.'
+		};
 	}
 };
