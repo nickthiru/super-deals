@@ -1,59 +1,78 @@
+/**
+ * Cognito Post Confirmation Lambda Trigger
+ *
+ * This Lambda function is triggered after a user confirms their account (verifies their email).
+ * For merchant accounts, it sends a welcome email with document verification instructions.
+ *
+ * The function must return the event object to allow the confirmation flow to continue.
+ *
+ * @see https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-post-confirmation.html
+ */
+
 const { SESClient } = require("@aws-sdk/client-ses");
 
-const Email = require("#src/services/email/_index.js");
+// Import the email service module
+const EmailService = require("#src/services/email/_index.js");
 
-const sesConfig = {
-  region: "us-east-1",
-};
+// Configure SES client
+const sesClient = new SESClient({ region: "us-east-1" });
 
-const sesClient = new SESClient(sesConfig);
+exports.handler = async (event) => {
+  console.log("Post Confirmation event:", JSON.stringify(event, null, 2));
 
-exports.handler = async function sendWelcomeEmail(event, context) {
-  console.log("Inside 'send-welcome-email' handler");
-  console.log("event: \n" + JSON.stringify(event, null, 2));
-  console.log("context: \n" + JSON.stringify(context, null, 2));
-
-  const emailTemplateName = process.env.EMAIL_TEMPLATE_NAME;
-  console.log("(+) emailTemplateName: " + emailTemplateName);
+  // Only process post confirmation events for sign-up
+  if (event.triggerSource !== "PostConfirmation_ConfirmSignUp") {
+    console.log(
+      `Not processing event from trigger source: ${event.triggerSource}`
+    );
+    return event;
+  }
 
   try {
-    // Process SQS messages
-    for (const record of event.Records) {
-      const messageBody = JSON.parse(record.body);
-      const snsMessage = JSON.parse(messageBody.Message);
-      
-      console.log("Processing message:", JSON.stringify(snsMessage, null, 2));
-      
-      // Extract user data from the message
-      const { email, businessName, userType } = snsMessage;
-      
-      if (!email) {
-        console.log("(-) Missing email address in message");
-        continue;
-      }
-      
-      // Prepare template data
-      const templateData = {
-        businessName: businessName || "Merchant",
-        loginUrl: "https://super-deals.com/accounts/sign-in",
-        supportEmail: "support@super-deals.com",
-        currentYear: new Date().getFullYear()
-      };
-      
-      // Send the welcome email
-      const emailService = new Email(sesClient);
-      const result = await emailService.sendTemplatedEmail({
-        templateName: emailTemplateName,
-        destination: email,
-        templateData: templateData
-      });
-      
-      console.log("(+) Welcome email sent successfully:", result);
+    // Get the user attributes
+    const userAttributes = event.request.userAttributes || {};
+    const email = userAttributes.email;
+    const userType = userAttributes["custom:userType"] || "";
+    const businessName = userAttributes.name || (userType === "merchant" ? "Merchant" : "Customer");
+
+    // Only send welcome email for merchant accounts
+    if (userType !== "merchant") {
+      console.log(`Skipping welcome email for non-merchant user: ${userType}`);
+      return event;
     }
-    
-    return { success: true };
+
+    console.log(`Sending welcome email to merchant: ${email}`);
+
+    // Get the email template name from environment variables
+    const emailTemplateName = process.env.EMAIL_TEMPLATE_NAME;
+    console.log("Using email template:", emailTemplateName);
+
+    // Prepare template data
+    const templateData = {
+      businessName: businessName,
+      loginUrl: `${process.env.SITE_URL || "https://super-deals.com"}/accounts/sign-in`,
+      supportEmail: "support@super-deals.com",
+      currentYear: new Date().getFullYear(),
+    };
+
+    // Send the welcome email using the email service
+    const sourceEmail = process.env.SOURCE_EMAIL || "superdeals616@gmail.com";
+    const result = await EmailService.sendEmail(
+      sesClient,
+      emailTemplateName,
+      email,
+      templateData,
+      sourceEmail
+    );
+
+    console.log("Welcome email sent successfully:", result);
   } catch (error) {
-    console.log("(-) Error sending welcome email:", error);
-    throw error;
+    console.error("Error sending welcome email:", error);
+    // Don't throw the error, as we don't want to block the user confirmation
+    // Just log it and continue the flow
   }
+
+  // Return the event object to continue the user confirmation flow
+  return event;
 };
+

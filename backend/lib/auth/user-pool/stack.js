@@ -11,6 +11,7 @@ const {
 
 const ResourceServersStack = require("./resource-servers/stack");
 const SendCustomSignUpMessageConstruct = require("../../services/accounts/send-custom-sign-up-message/construct");
+const SendWelcomeEmailConstruct = require("../../services/accounts/send-welcome-email/construct");
 
 class UserPoolStack extends Stack {
   constructor(scope, id, props) {
@@ -78,8 +79,27 @@ class UserPoolStack extends Stack {
       }
     );
 
-    // Add the Lambda trigger to the UserPool
-    this.pool.addTrigger(UserPoolOperation.CUSTOM_MESSAGE, customMessageLambda.lambda);
+    // Create the post confirmation Lambda function for sending welcome emails
+    const welcomeEmailLambda = new SendWelcomeEmailConstruct(
+      this,
+      "WelcomeEmailLambda",
+      {
+        appUrl: process.env.SITE_URL || "https://dbcxhkl1jwg4u.cloudfront.net",
+        email,
+        userPool: this.pool,
+      }
+    );
+
+    // Add the Lambda triggers to the UserPool
+    this.pool.addTrigger(
+      UserPoolOperation.CUSTOM_MESSAGE,
+      customMessageLambda.lambda
+    );
+
+    this.pool.addTrigger(
+      UserPoolOperation.POST_CONFIRMATION,
+      welcomeEmailLambda.lambda
+    );
 
     // Create app client with OAuth scopes
     this.poolClient = this.pool.addClient(`UserPoolClient`, {

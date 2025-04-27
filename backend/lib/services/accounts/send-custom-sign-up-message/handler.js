@@ -75,7 +75,7 @@ exports.handler = async (event) => {
               <p>Thank you for registering as a merchant on Super Deals. To complete your registration, please verify your email address using the verification code below:</p>
               <p class="code">${code}</p>
               <p>You can also click the button below to go to the verification page:</p>
-              <p><a href="${confirmationUrl}" style="display: inline-block; background-color: #3B5998; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify Email Address</a></p>
+              <p style="text-align: center;"><a href="${confirmationUrl}" style="display: inline-block; background-color: #3B5998; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify Email Address</a></p>
               <p>If you did not request this verification, please ignore this email.</p>
             </div>
             <div class="footer">
@@ -109,7 +109,7 @@ exports.handler = async (event) => {
               <p>Thank you for registering on Super Deals. To complete your registration, please verify your email address using the verification code below:</p>
               <p class="code">${code}</p>
               <p>You can also click the button below to go to the verification page:</p>
-              <p><a href="${confirmationUrl}" style="display: inline-block; background-color: #2196F3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify Email Address</a></p>
+              <p style="text-align: center;"><a href="${confirmationUrl}" style="display: inline-block; background-color: #2196F3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify Email Address</a></p>
               <p>If you did not request this verification, please ignore this email.</p>
             </div>
             <div class="footer">

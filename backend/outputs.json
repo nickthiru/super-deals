@@ -8,10 +8,6 @@
     "S3BucketArn": "arn:aws:s3:::backendstackdevstoragestackc0fc65-s3bucket07682993-alktmmh7ladb",
     "S3BucketName": "backendstackdevstoragestackc0fc65-s3bucket07682993-alktmmh7ladb"
   },
-  "BackendStackDevSnsStackAccountsStack7255D79C": {
-    "SignUpCompletedConstructSignUpCompletedTopicArnBE06E59C": "arn:aws:sns:us-east-1:654654543926:SignUpCompleted",
-    "ExportsOutputRefSignUpCompletedConstructSignUpCompletedTopic2C0E320B12483696": "arn:aws:sns:us-east-1:654654543926:SignUpCompleted"
-  },
   "BackendStackDevAuthStackUserPoolStackD90C0FF4": {
     "ExportsOutputFnGetAttUserPool6BA7E5F2Arn686ACC00": "arn:aws:cognito-idp:us-east-1:654654543926:userpool/us-east-1_JQDzoqukS",
     "UserPoolClientId": "10149f9pdmbudrer9oh5bt104v",
@@ -26,9 +22,9 @@
     "IdentityPoolId": "us-east-1:b97cc0ac-5b7a-4588-9801-e63c71539026"
   },
   "BackendStackDevServicesStackAccountsStack4B815BDF": {
-    "ExportsOutputFnGetAttSignUpConstructNodejsFunction75CDDCFBArnDCC898BC": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackDevServicesSt-SignUpConstructNodejsFun-GnxwWAwkuBcj"
+    "ExportsOutputFnGetAttSignUpConstructNodejsFunction75CDDCFBArnDCC898BC": "arn:aws:lambda:us-east-1:654654543926:function:BackendStackDevServicesSt-SignUpConstructNodejsFun-Po7Ozr4UNUuB"
   },
   "BackendStackDevApiStackHttpStackB0C9C4D3": {
-    "RestApiUrldev": "https://vano8yhmnc.execute-api.us-east-1.amazonaws.com/dev/"
+    "RestApiUrldev": "https://pbqg7ln140.execute-api.us-east-1.amazonaws.com/dev/"
   }
 }

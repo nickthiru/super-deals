@@ -17,14 +17,11 @@ const { Runtime } = require("aws-cdk-lib/aws-lambda");
 const path = require("path");
 const { ServicePrincipal } = require("aws-cdk-lib/aws-iam");
 
-// Import configuration
-const config = require("../../../../config/_index");
-
 class SendCustomSignUpMessageConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id);
 
-    const { appUrl, email, userPool } = props;
+    const { appUrl, userPool } = props;
 
     // App URL for confirmation links
     const applicationUrl = appUrl || "https://dbcxhkl1jwg4u.cloudfront.net";

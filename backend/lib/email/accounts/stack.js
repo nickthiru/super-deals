@@ -1,17 +1,10 @@
 const { Stack } = require("aws-cdk-lib");
-const CustomSignUpConstruct = require("./sign-up/construct");
 const PasswordResetConstruct = require("./password-reset/construct");
 const WelcomeConstruct = require("./welcome/construct");
 
 class AccountsStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
-
-    this.customSignUp = new CustomSignUpConstruct(
-      this,
-      "CustomSignUpConstruct",
-      {}
-    );
 
     this.welcome = new WelcomeConstruct(this, "WelcomeConstruct", {});
 
