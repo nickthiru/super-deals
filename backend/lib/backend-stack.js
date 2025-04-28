@@ -26,6 +26,10 @@ class BackendStack extends Stack {
     // This makes the environment available to all constructs
     process.env.CDK_ENV = envName;
 
+    const monitor = new MonitorStack(this, "MonitorStack", {
+      envName,
+    });
+
     const db = new DbStack(this, "DbStack", {
       envName,
     });
@@ -68,10 +72,6 @@ class BackendStack extends Stack {
       auth,
       permissions,
       services,
-    });
-
-    new MonitorStack(this, "MonitorStack", {
-      envName,
     });
   }
 }
