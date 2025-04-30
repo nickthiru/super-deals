@@ -1,7 +1,7 @@
 const { Construct } = require("constructs");
-const { Alarm4xxConstruct } = require("./4xx/construct");
+const Alarm4xxConstruct = require("./4xx/construct");
 
-class ApiConstruct extends Construct {
+class ApiMonitoringConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id, props);
 
@@ -11,4 +11,4 @@ class ApiConstruct extends Construct {
   }
 }
 
-module.exports = ApiConstruct;
+module.exports = ApiMonitoringConstruct;

@@ -17,7 +17,7 @@ class UserPoolStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    const { envName, email } = props;
+    const { envName, email, monitor } = props;
 
     this.pool = new UserPool(this, `UserPool`, {
       selfSignUpEnabled: true,
@@ -44,7 +44,6 @@ class UserPoolStack extends Stack {
           "Thanks for signing up to our awesome app! Your verification code is {####}. This code is valid for 24 hours.",
         emailStyle: VerificationEmailStyle.CODE,
       },
-      // Lambda triggers will be added after the pool is created
       accountRecovery: AccountRecovery.EMAIL_ONLY,
       standardAttributes: {
         email: {
@@ -53,14 +52,11 @@ class UserPoolStack extends Stack {
         },
       },
       customAttributes: {
-        // Only keep essential attributes in Cognito
-        // Store the rest in DynamoDB
         userType: new StringAttribute({ mutable: false }),
       },
       removalPolicy: RemovalPolicy.RETAIN, // Default to RETAIN for safety
     });
 
-    // Create Cognito domain
     this.domain = new UserPoolDomain(this, "UserPoolDomain", {
       userPool: this.pool,
       cognitoDomain: {
@@ -68,7 +64,6 @@ class UserPoolStack extends Stack {
       },
     });
 
-    // Create the custom message Lambda function now that we have the UserPool
     const customMessageLambda = new SendCustomSignUpMessageConstruct(
       this,
       "CustomMessageLambda",
@@ -79,7 +74,6 @@ class UserPoolStack extends Stack {
       }
     );
 
-    // Create the post confirmation Lambda function for sending welcome emails
     const welcomeEmailLambda = new SendWelcomeEmailConstruct(
       this,
       "WelcomeEmailLambda",
@@ -87,10 +81,10 @@ class UserPoolStack extends Stack {
         appUrl: process.env.SITE_URL || "https://dbcxhkl1jwg4u.cloudfront.net",
         email,
         userPool: this.pool,
+        configurationSetName: monitor.ses.configurationSetName,
       }
     );
 
-    // Add the Lambda triggers to the UserPool
     this.pool.addTrigger(
       UserPoolOperation.CUSTOM_MESSAGE,
       customMessageLambda.lambda
@@ -101,9 +95,7 @@ class UserPoolStack extends Stack {
       welcomeEmailLambda.lambda
     );
 
-    // Create app client with OAuth scopes
     this.poolClient = this.pool.addClient(`UserPoolClient`, {
-      // generateSecret: true,
       authFlows: {
         userPassword: true,
         adminUserPassword: true,
@@ -119,7 +111,6 @@ class UserPoolStack extends Stack {
       preventUserExistenceErrors: true,
     });
 
-    /*** Resource Servers ***/
     this.resourceServers = new ResourceServersStack(
       this,
       "ResourceServersStack",
@@ -128,7 +119,7 @@ class UserPoolStack extends Stack {
         envName,
       }
     );
-    /*** Outputs ***/
+
     new CfnOutput(this, `UserPoolId`, {
       value: this.pool.userPoolId,
       description: "Cognito user pool ID used by the web client's auth service",
@@ -147,16 +138,6 @@ class UserPoolStack extends Stack {
       description: "Cognito domain for OAuth flows",
       exportName: `UserPoolDomainName`,
     });
-
-    // Remove or comment out the IdentityPoolId output since it doesn't exist yet
-    // We'll need to implement the identity pool before using this
-    /*
-    new CfnOutput(this, `IdentityPoolId`, {
-      value: this.resourceServers.identityPool.identityPoolId,
-      description: "Cognito identity pool ID",
-      exportName: `IdentityPoolId`,
-    });
-    */
   }
 }
 

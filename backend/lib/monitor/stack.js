@@ -1,5 +1,6 @@
 const { Stack } = require("aws-cdk-lib");
-const { ApiConstruct } = require("./api/construct");
+const ApiMonitoringConstruct = require("./api/construct");
+const SesMonitoringConstruct = require("./ses/construct");
 
 class MonitorStack extends Stack {
   constructor(scope, id, props) {
@@ -7,7 +8,11 @@ class MonitorStack extends Stack {
 
     const { envName } = props;
 
-    new ApiConstruct(this, "ApiConstruct", { envName });
+    this.ses = new SesMonitoringConstruct(this, "SesMonitoringConstruct");
+
+    // this.sesConfigurationSetName = sesMonitoring.configurationSetName;
+
+    new ApiMonitoringConstruct(this, "ApiMonitoringConstruct", { envName });
   }
 }
 

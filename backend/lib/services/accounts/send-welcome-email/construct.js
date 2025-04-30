@@ -1,10 +1,12 @@
 const { Construct } = require("constructs");
 const { NodejsFunction } = require("aws-cdk-lib/aws-lambda-nodejs");
 const { Runtime } = require("aws-cdk-lib/aws-lambda");
-const { PolicyStatement, Effect } = require("aws-cdk-lib/aws-iam");
-const { UserPoolOperation } = require("aws-cdk-lib/aws-cognito");
+const {
+  PolicyStatement,
+  Effect,
+  ServicePrincipal,
+} = require("aws-cdk-lib/aws-iam");
 const { Duration } = require("aws-cdk-lib");
-const { ServicePrincipal } = require("aws-cdk-lib/aws-iam");
 const path = require("path");
 
 /**
@@ -18,9 +20,12 @@ class SendWelcomeEmailConstruct extends Construct {
   constructor(scope, id, props) {
     super(scope, id);
 
-    const { email, userPool, appUrl } = props;
+    // Destructure props, including the new configurationSetName
+    const { email, userPool, appUrl, configurationSetName } = props;
 
-    const emailTemplateName = email.accounts.welcome.merchant.templateName;
+    // Get template names for both user types
+    const merchantEmailTemplateName = email.accounts.welcome.merchant.templateName;
+    const customerEmailTemplateName = email.accounts.welcome.customer?.templateName || "CustomerWelcome";
 
     // Define the Lambda function for post confirmation handling
     this.lambda = new NodejsFunction(this, "Lambda", {
@@ -28,12 +33,19 @@ class SendWelcomeEmailConstruct extends Construct {
       entry: path.join(__dirname, "./handler.js"),
       handler: "handler",
       depsLockFilePath: require.resolve("#package-lock"),
-      timeout: Duration.seconds(30), // Increase timeout to 30 seconds
-      memorySize: 256, // Increase memory to 256 MB
+      timeout: Duration.seconds(30),
+      memorySize: 256,
       environment: {
-        EMAIL_TEMPLATE_NAME: emailTemplateName,
+        // Include both template names for different user types
+        MERCHANT_EMAIL_TEMPLATE_NAME: merchantEmailTemplateName,
+        CUSTOMER_EMAIL_TEMPLATE_NAME: customerEmailTemplateName,
+        EMAIL_TEMPLATE_NAME: merchantEmailTemplateName, // For backward compatibility
         SOURCE_EMAIL: process.env.FROM_EMAIL || "superdeals616@gmail.com",
         SITE_URL: appUrl || "https://super-deals.com",
+        // Conditionally add CONFIGURATION_SET_NAME only if it's provided
+        ...(configurationSetName && {
+          CONFIGURATION_SET_NAME: configurationSetName,
+        }),
       },
     });
 
@@ -41,31 +53,32 @@ class SendWelcomeEmailConstruct extends Construct {
     this.lambda.addToRolePolicy(
       new PolicyStatement({
         effect: Effect.ALLOW,
-        resources: ["*"],
         actions: [
           "ses:SendEmail",
-          "ses:SendRawEmail",
           "ses:SendTemplatedEmail",
+          "ses:SendRawEmail",
         ],
+        resources: ["*"], // Consider restricting if possible
       })
     );
 
-    // Add specific permissions for the email template
+    // Add specific permissions for both email templates
     this.lambda.addToRolePolicy(
       new PolicyStatement({
         effect: Effect.ALLOW,
         resources: [
-          `arn:aws:ses:us-east-1:346761569124:template/${emailTemplateName}`,
+          `arn:aws:ses:us-east-1:346761569124:template/${merchantEmailTemplateName}`,
+          `arn:aws:ses:us-east-1:346761569124:template/${customerEmailTemplateName}`,
         ],
         actions: ["ses:GetTemplate"],
       })
     );
 
-    // Grant permissions for Cognito to invoke the Lambda function if userPool is provided
+    // Grant the Lambda permission to be invoked by Cognito
     if (userPool) {
-      // Add permission for Cognito to invoke this Lambda
-      this.lambda.addPermission("InvokePermission", {
+      this.lambda.addPermission("CognitoInvocation", {
         principal: new ServicePrincipal("cognito-idp.amazonaws.com"),
+        action: "lambda:InvokeFunction",
         sourceArn: userPool.userPoolArn,
       });
     }

@@ -1,4 +1,4 @@
-const { SNSEvent } = require("aws-lambda");
+// const { SNSEvent } = require("aws-lambda");
 
 // Workspace: Super Deals Alarms -> App: Super Deals -> Channel: #api-4xx
 const slackWebHookUrl =

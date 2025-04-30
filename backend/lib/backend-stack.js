@@ -47,6 +47,7 @@ class BackendStack extends Stack {
     const auth = new AuthStack(this, "AuthStack", {
       envName,
       email,
+      monitor,
     });
 
     const iam = new IamStack(this, "IamStack", {
