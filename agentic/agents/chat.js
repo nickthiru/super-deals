@@ -17,8 +17,8 @@ const agentAnnotation = Annotation.Root({
 const researcherNode = createAgentNode(researcherAgent, "researcher");
 
 const chatGraph = new StateGraph(agentAnnotation)
-  .addNode("supervisor", supervisorAgent)
-  .addNode("researcher", researcherNode);
+  .addNode("researcher", researcherNode)
+  .addNode("supervisor", supervisorAgent);
 
 teamMembers.forEach((member) => chatGraph.addEdge(member, "supervisor"));
 
