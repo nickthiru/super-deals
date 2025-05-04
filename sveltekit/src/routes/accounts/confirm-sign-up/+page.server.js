@@ -5,6 +5,14 @@ import { ERROR_CODES } from '$lib/utils/errorHandling';
 import { verificationCodeSchema, resendCodeSchema } from './schema.js';
 
 /**
+ * @typedef {Object} VerificationResult
+ * @property {boolean} success - Whether the verification was successful
+ * @property {boolean} isSignUpComplete - Whether the sign-up process is complete
+ * @property {string} message - A message describing the result
+ * @property {string} userType - The type of user being verified
+ */
+
+/**
  * @typedef {Object} ApiError
  * @property {string} message - Error message
  * @property {string} [code] - Error code
@@ -37,7 +45,8 @@ export const actions = {
 			const errors = result.error.flatten().fieldErrors;
 			return {
 				success: false,
-				error: Object.values(errors)[0]?.[0] || 'Please enter a valid verification code'
+				error: Object.values(errors)[0]?.[0] || 'Please enter a valid verification code',
+				type: 'verify'
 			};
 		}
 
@@ -54,7 +63,12 @@ export const actions = {
 			const userType = cookies.get('pendingUserType') || 'merchant';
 
 			// Call verification service
-			const result = await accountsService.confirmUserSignUp(userType, email, verificationCode);
+			const result = await accountsService.confirmUserSignUp(email, verificationCode, userType);
+			
+			// Check if the result has the expected properties
+			const isSignUpComplete = typeof result === 'object' && result !== null && 'isSignUpComplete' in result 
+				? result.isSignUpComplete 
+				: false;
 
 			if (dev) {
 				console.log('Verification successful:', result);
@@ -66,15 +80,16 @@ export const actions = {
 			cookies.delete('devVerificationCode', { path: '/' });
 
 			// Check if sign-up is complete
-			if (result.isSignUpComplete) {
-				// Redirect to sign-up-success page
-				throw redirect(303, `/auth/sign-up-success?userType=${userType}`);
+			if (isSignUpComplete) {
+				// Redirect to sign-up-completed page
+				throw redirect(303, `/accounts/sign-up-completed?userType=${userType}`);
 			} else {
 				// Something went wrong, but verification was processed
 				return {
 					email,
 					error:
-						'Verification was processed, but sign-up could not be completed. Please contact support.'
+						'Verification was processed, but sign-up could not be completed. Please contact support.',
+					type: 'verify'
 				};
 			}
 		} catch (error) {
@@ -130,7 +145,8 @@ export const actions = {
 
 			return {
 				success: false,
-				error: errorMessage
+				error: errorMessage,
+				type: 'resend'
 			};
 		}
 	},
@@ -148,7 +164,8 @@ export const actions = {
 			const errors = result.error.flatten().fieldErrors;
 			return {
 				success: false,
-				error: Object.values(errors)[0]?.[0] || 'Please provide a valid email address'
+				error: Object.values(errors)[0]?.[0] || 'Please provide a valid email address',
+				type: 'resend'
 			};
 		}
 
@@ -173,7 +190,8 @@ export const actions = {
 
 			return {
 				success: true,
-				message: 'A new verification code has been sent to your email'
+				message: 'A new verification code has been sent to your email',
+				type: 'resend'
 			};
 		} catch (error) {
 			if (dev) {
@@ -194,7 +212,8 @@ export const actions = {
 
 			return {
 				success: false,
-				error: errorMessage
+				error: errorMessage,
+				type: 'resend'
 			};
 		}
 	}

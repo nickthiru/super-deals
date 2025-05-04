@@ -1,55 +1,90 @@
 const { Construct } = require("constructs");
-const { Queue } = require("aws-cdk-lib/aws-sqs");
-const { Duration } = require("aws-cdk-lib");
 const { NodejsFunction } = require("aws-cdk-lib/aws-lambda-nodejs");
 const { Runtime } = require("aws-cdk-lib/aws-lambda");
-const { PolicyStatement, Effect } = require("aws-cdk-lib/aws-iam");
-const { SnsToSqs } = require("@aws-solutions-constructs/aws-sns-sqs");
-const { SqsToLambda } = require("@aws-solutions-constructs/aws-sqs-lambda");
+const {
+  PolicyStatement,
+  Effect,
+  ServicePrincipal,
+} = require("aws-cdk-lib/aws-iam");
+const { Duration } = require("aws-cdk-lib");
 const path = require("path");
 
+/**
+ * Construct for the Post Confirmation Lambda trigger
+ * This Lambda is triggered after a user confirms their account (verifies their email)
+ * and sends a welcome email using the specified email template.
+ *
+ * @see https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-post-confirmation.html
+ */
 class SendWelcomeEmailConstruct extends Construct {
   constructor(scope, id, props) {
-    super(scope, id, props);
+    super(scope, id);
 
-    const { sns, email } = props;
+    // Destructure props, including the new configurationSetName
+    const { email, userPool, appUrl, configurationSetName } = props;
 
-    const triggerEvent = sns.accounts.signUpCompleted.topic;
+    // Get template names for both user types
+    const merchantEmailTemplateName =
+      email.accounts.welcome.merchant.templateName;
+    const customerEmailTemplateName =
+      email.accounts.welcome.customer?.templateName || "CustomerWelcome";
 
-    const emailTemplateName = email.accounts.welcome.merchant.templateName;
-
-    const queue = new Queue(this, "Queue");
-
-    const lambda = new NodejsFunction(this, "Lambda", {
-      runtime: Runtime.NODEJS_18_X,
+    // Define the Lambda function for post confirmation handling
+    this.lambda = new NodejsFunction(this, "Lambda", {
+      runtime: Runtime.NODEJS_20_X,
       entry: path.join(__dirname, "./handler.js"),
       handler: "handler",
       depsLockFilePath: require.resolve("#package-lock"),
+      timeout: Duration.seconds(30),
+      memorySize: 256,
       environment: {
-        EMAIL_TEMPLATE_NAME: emailTemplateName,
+        // Include both template names for different user types
+        MERCHANT_EMAIL_TEMPLATE_NAME: merchantEmailTemplateName,
+        CUSTOMER_EMAIL_TEMPLATE_NAME: customerEmailTemplateName,
+        EMAIL_TEMPLATE_NAME: merchantEmailTemplateName, // For backward compatibility
+        SOURCE_EMAIL: process.env.FROM_EMAIL || "superdeals616@gmail.com",
+        SITE_URL: appUrl || "https://super-deals.com",
+        // Conditionally add CONFIGURATION_SET_NAME only if it's provided
+        ...(configurationSetName && {
+          CONFIGURATION_SET_NAME: configurationSetName,
+        }),
       },
     });
 
-    lambda.addToRolePolicy(
+    // Add permissions for sending emails via SES
+    this.lambda.addToRolePolicy(
       new PolicyStatement({
         effect: Effect.ALLOW,
-        resources: [
-          "arn:aws:ses:us-east-1:346761569124:identity/*", //https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_IdentityInfo.html
-          `arn:aws:ses:us-east-1:346761569124:template/${emailTemplateName}`,
+        actions: [
+          "ses:SendEmail",
+          "ses:SendTemplatedEmail",
+          "ses:SendRawEmail",
         ],
-        actions: ["ses:SendTemplatedEmail"],
+        resources: ["*"], // Consider restricting if possible
       })
     );
 
-    new SnsToSqs(this, "SendWelcomeEmailSnsToSqs", {
-      existingTopicObj: triggerEvent,
-      existingQueueObj: queue,
-    });
+    // Add specific permissions for both email templates
+    this.lambda.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [
+          // `arn:aws:ses:us-east-1:346761569124:template/${merchantEmailTemplateName}`,
+          // `arn:aws:ses:us-east-1:346761569124:template/${customerEmailTemplateName}`,
+          "arn:aws:ses:us-east-1:346761569124:template/*",
+        ],
+        actions: ["ses:GetTemplate"],
+      })
+    );
 
-    new SqsToLambda(this, "SendWelcomeEmailSqsToLambda", {
-      existingQueueObj: queue,
-      existingLambdaObj: lambda,
-    });
+    // Grant the Lambda permission to be invoked by Cognito
+    if (userPool) {
+      this.lambda.addPermission("CognitoInvocation", {
+        principal: new ServicePrincipal("cognito-idp.amazonaws.com"),
+        action: "lambda:InvokeFunction",
+        sourceArn: userPool.userPoolArn,
+      });
+    }
   }
 }
 

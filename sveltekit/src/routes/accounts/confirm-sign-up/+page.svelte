@@ -4,7 +4,7 @@
 -->
 
 <script>
-  import { enhance } from '$app/forms';
+  import { enhance, applyAction } from '$app/forms';
   import { goto } from '$app/navigation';
   import { browser } from '$app/environment';
   import { dev } from '$app/environment';
@@ -27,37 +27,42 @@
     userTypeValue: 'merchant'
   });
   
-  // Initialize on component mount
+  import { untrack } from 'svelte';
+
+  // Initialize on component mount - using untrack to prevent infinite loops
   $effect(() => {
-    // Get email from data (server)
-    formState.emailAddress = data?.email || '';
-    formState.userTypeValue = data?.userType || 'merchant';
-    
-    // Only access browser APIs when in browser environment
-    if (browser) {
-      // If we don't have an email from the server, try localStorage
-      if (!formState.emailAddress) {
-        formState.emailAddress = localStorage.getItem('pendingConfirmation') || '';
-        formState.userTypeValue = localStorage.getItem('pendingUserType') || 'merchant';
-        
-        if (dev) {
-          console.log('Email from localStorage:', formState.emailAddress);
-        }
-      } else if (formState.emailAddress) {
-        // If we have an email from the server, store it in localStorage
-        localStorage.setItem('pendingConfirmation', formState.emailAddress);
-        localStorage.setItem('pendingUserType', formState.userTypeValue);
-        
-        if (dev) {
-          console.log('Email from server stored in localStorage:', formState.emailAddress);
-        }
-      }
+    // Use untrack to prevent reactivity tracking for initialization
+    untrack(() => {
+      // Get email from data (server)
+      formState.emailAddress = data?.email || '';
+      formState.userTypeValue = data?.userType || 'merchant';
       
-      // In dev mode, show verification code from localStorage
-      if (dev) {
-        formState.showDevInfo = true;
+      // Only access browser APIs when in browser environment
+      if (browser) {
+        // If we don't have an email from the server, try localStorage
+        if (!formState.emailAddress) {
+          formState.emailAddress = localStorage.getItem('pendingConfirmation') || '';
+          formState.userTypeValue = localStorage.getItem('pendingUserType') || 'merchant';
+          
+          if (dev) {
+            console.log('Email from localStorage:', formState.emailAddress);
+          }
+        } else if (formState.emailAddress) {
+          // If we have an email from the server, store it in localStorage
+          localStorage.setItem('pendingConfirmation', formState.emailAddress);
+          localStorage.setItem('pendingUserType', formState.userTypeValue);
+          
+          if (dev) {
+            console.log('Email from server stored in localStorage:', formState.emailAddress);
+          }
+        }
+        
+        // In dev mode, show verification code from localStorage
+        if (dev) {
+          formState.showDevInfo = true;
+        }
       }
-    }
+    });
   });
   
   // Handle form results from server
@@ -71,7 +76,7 @@
         formState.message = form.message;
         
         // If resend was successful, reset the form
-        if (form.type === 'resend') {
+        if (form && typeof form === 'object' && 'type' in form && form.type === 'resend') {
           formState.isResending = false;
         }
       }
@@ -85,16 +90,38 @@
   function handleInputChange(event, index) {
     const value = /** @type {HTMLInputElement} */ (event.target).value;
     
-    // Only allow digits
+    // Only allow digits and handle the case where multiple digits are entered
     if (/^\d*$/.test(value)) {
-      // Update the value in our state array
-      const newCodeInputs = [...formState.codeInputs];
-      newCodeInputs[index] = value;
-      formState.codeInputs = newCodeInputs;
-      
-      // Auto-advance to next field if this one is filled
-      if (value && index < 5) {
-        formState.inputRefs[index + 1]?.focus();
+      // If more than one digit is entered (e.g., from paste), distribute them
+      if (value.length > 1) {
+        const digits = value.split('');
+        
+        // Update current and subsequent inputs
+        for (let i = 0; i < digits.length && index + i < 6; i++) {
+          formState.codeInputs[index + i] = digits[i];
+          // Update the actual input field
+          if (formState.inputRefs[index + i]) {
+            formState.inputRefs[index + i].value = digits[i];
+          }
+        }
+        
+        // Focus on the next empty field or the last field
+        const nextEmptyIndex = formState.codeInputs.findIndex((val, idx) => idx > index && !val);
+        if (nextEmptyIndex !== -1 && nextEmptyIndex < 6) {
+          formState.inputRefs[nextEmptyIndex]?.focus();
+        } else if (index + digits.length < 6) {
+          formState.inputRefs[index + digits.length]?.focus();
+        } else {
+          formState.inputRefs[5]?.focus();
+        }
+      } else {
+        // Single digit entered - normal case
+        formState.codeInputs[index] = value;
+        
+        // Auto-advance to next field if this one is filled
+        if (value && index < 5) {
+          formState.inputRefs[index + 1]?.focus();
+        }
       }
     } else {
       // Reset to previous value if non-digit was entered
@@ -130,31 +157,42 @@
   function handlePaste(event) {
     if (!event || !event.clipboardData) return;
     
-    // Prevent default paste behavior
     event.preventDefault();
     
     // Get pasted data
     const pastedData = event.clipboardData.getData('text');
     
-    // Filter out non-digits
-    const digits = pastedData.replace(/\D/g, '').slice(0, 6);
+    // Extract digits only - up to 6 digits
+    const digits = pastedData.replace(/\D/g, '').slice(0, 6).split('');
     
     if (digits.length > 0) {
-      // Distribute digits across input fields
+      // Create a copy of the current code inputs
       const newCodeInputs = [...formState.codeInputs];
       
-      for (let i = 0; i < Math.min(digits.length, 6); i++) {
-        newCodeInputs[i] = digits[i];
-      }
+      // Update inputs with pasted digits
+      digits.forEach((digit, i) => {
+        if (i < 6) {
+          newCodeInputs[i] = digit;
+          
+          // Update the DOM input field directly
+          if (formState.inputRefs[i]) {
+            formState.inputRefs[i].value = digit;
+          }
+        }
+      });
       
+      // Update state with all digits at once
       formState.codeInputs = newCodeInputs;
       
-      // Focus on the next empty field or the last field
-      const nextEmptyIndex = newCodeInputs.findIndex(val => !val);
-      if (nextEmptyIndex !== -1 && nextEmptyIndex < 6) {
-        formState.inputRefs[nextEmptyIndex]?.focus();
-      } else {
+      // If we filled all inputs, focus on the last one
+      if (digits.length >= 6) {
         formState.inputRefs[5]?.focus();
+      } else {
+        // Otherwise focus on the next empty field
+        const nextEmptyIndex = digits.length;
+        if (nextEmptyIndex < 6) {
+          formState.inputRefs[nextEmptyIndex]?.focus();
+        }
       }
     }
   }
@@ -227,6 +265,9 @@
             if (result.type === 'redirect') {
               formState.redirecting = true;
             }
+            
+            // Let applyAction handle all result types properly
+            await applyAction(result);
           };
         }}
       >
@@ -267,7 +308,7 @@
           <button 
             type="submit" 
             class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            disabled={formState.isLoading || formState.redirecting || !formState.codeInputs.every(code => code)}
+            disabled={formState.isLoading || formState.redirecting || !formState.codeInputs.every(code => code !== '')}
           >
             {#if formState.isLoading}
               Verifying...

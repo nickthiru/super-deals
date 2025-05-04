@@ -12,6 +12,7 @@ class SignUpCompletedConstruct extends Construct {
 
     this.topic = new Topic(this, "SignUpCompletedTopic", {
       topicName: "SignUpCompleted",
+      displayName: "SignUpCompleted",
     });
 
     // Option 1: Create a log group separately and pass it

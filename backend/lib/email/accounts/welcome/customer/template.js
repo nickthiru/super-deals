@@ -1,7 +1,7 @@
 const htmlPart = `
   <mjml>
     <mj-head>
-      <mj-title>Welcome to Super Deals Merchant Platform</mj-title>
+      <mj-title>Welcome to Super Deals - Start Saving Today!</mj-title>
       <mj-font name="Arial" href="https://fonts.googleapis.com/css?family=Arial" />
       <mj-attributes>
         <mj-all font-family="Arial, sans-serif" />
@@ -22,33 +22,33 @@ const htmlPart = `
       <mj-section background-color="#ffffff" padding="20px">
         <mj-column>
           <mj-text>
-            Hello {{businessName}},
+            Hello {{customerName}},
           </mj-text>
           <mj-text>
-            Congratulations! Your email has been verified and your Super Deals merchant account is now active. We're excited to have you join our platform.
+            Congratulations! Your email has been verified and your Super Deals account is now active. We're excited to have you join our community of savvy shoppers.
           </mj-text>
           <mj-text font-weight="bold">
-            Next Steps: Document Verification
+            Start Exploring Amazing Deals
           </mj-text>
           <mj-text>
-            Before you can start creating and publishing deals, you'll need to complete the document verification process. This helps us ensure the security and quality of our marketplace.
+            Super Deals brings you exclusive offers from top merchants across various categories. From dining and entertainment to retail and services, we've got incredible savings waiting for you.
           </mj-text>
           <mj-text>
-            Please log in to your merchant dashboard and navigate to the "Document Verification" section to upload the following documents:
+            Here's what you can do now:
           </mj-text>
           <mj-text>
             <ul>
-              <li>Business registration certificate</li>
-              <li>Tax identification documents</li>
-              <li>Proof of business address</li>
-              <li>Owner/manager identification</li>
+              <li>Browse the latest deals in your area</li>
+              <li>Save your favorite offers for later</li>
+              <li>Purchase and redeem deals instantly</li>
+              <li>Set up deal alerts for categories you love</li>
             </ul>
           </mj-text>
-          <mj-button background-color="#2196F3" color="white" href="{{loginUrl}}" border-radius="4px" font-weight="bold" inner-padding="15px 30px" align="center">
-            Sign In to Your Account
+          <mj-button background-color="#2196F3" color="white" href="{{dealsUrl}}" border-radius="4px" font-weight="bold" inner-padding="15px 30px" align="center">
+            Explore Deals Now
           </mj-button>
           <mj-text>
-            Our team will review your documents within 1-2 business days. Once approved, you'll have full access to create and publish deals to our growing customer base.
+            We regularly add new deals from our trusted merchant partners. Check back often to discover new savings opportunities or set up notifications to stay informed about deals in your favorite categories.
           </mj-text>
         </mj-column>
       </mj-section>
@@ -58,7 +58,7 @@ const htmlPart = `
         <mj-column>
           <mj-divider border-color="#f0f0f0" padding="10px 0" />
           <mj-text>
-            Need help? Contact our merchant support team at {{supportEmail}}.
+            Need help? Contact our customer support team at {{supportEmail}}.
           </mj-text>
         </mj-column>
       </mj-section>
@@ -79,10 +79,10 @@ const htmlPart = `
 `;
 
 const template = {
-  templateName: "MerchantWelcome",
-  subjectPart: "Welcome to Super Deals - Next Steps for Your Merchant Account",
+  templateName: "CustomerWelcome",
+  subjectPart: "Welcome to Super Deals - Start Saving Today!",
   textPart:
-    "Congratulations! Your email has been verified and your Super Deals merchant account is now active. Before you can start creating deals, please complete the document verification process by signing in to your account.",
+    "Congratulations! Your email has been verified and your Super Deals account is now active. We're excited to have you join our community of savvy shoppers. Start exploring amazing deals from our trusted merchant partners today!",
   htmlPart: htmlPart,
   parsingOptions: {
     beautify: true,
