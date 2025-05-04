@@ -24,8 +24,10 @@ class SendWelcomeEmailConstruct extends Construct {
     const { email, userPool, appUrl, configurationSetName } = props;
 
     // Get template names for both user types
-    const merchantEmailTemplateName = email.accounts.welcome.merchant.templateName;
-    const customerEmailTemplateName = email.accounts.welcome.customer?.templateName || "CustomerWelcome";
+    const merchantEmailTemplateName =
+      email.accounts.welcome.merchant.templateName;
+    const customerEmailTemplateName =
+      email.accounts.welcome.customer?.templateName || "CustomerWelcome";
 
     // Define the Lambda function for post confirmation handling
     this.lambda = new NodejsFunction(this, "Lambda", {
@@ -67,8 +69,9 @@ class SendWelcomeEmailConstruct extends Construct {
       new PolicyStatement({
         effect: Effect.ALLOW,
         resources: [
-          `arn:aws:ses:us-east-1:346761569124:template/${merchantEmailTemplateName}`,
-          `arn:aws:ses:us-east-1:346761569124:template/${customerEmailTemplateName}`,
+          // `arn:aws:ses:us-east-1:346761569124:template/${merchantEmailTemplateName}`,
+          // `arn:aws:ses:us-east-1:346761569124:template/${customerEmailTemplateName}`,
+          "arn:aws:ses:us-east-1:346761569124:template/*",
         ],
         actions: ["ses:GetTemplate"],
       })

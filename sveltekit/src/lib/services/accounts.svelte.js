@@ -9,8 +9,7 @@ import {
 import { useMockApi } from '$lib/config/api';
 import * as mockMerchantService from '$lib/services/mock/merchantService';
 import { handleApiError } from '$lib/utils/errorHandling';
-import { publishToTopic } from '$lib/services/aws/sns.svelte.js';
-import { AWS_CONFIG } from '$lib/config/aws.js';
+
 import { dev } from '$app/environment';
 
 /**
@@ -21,7 +20,7 @@ import { dev } from '$app/environment';
  * @typedef {any} SignUpData Generic sign-up data for any user type
  * @typedef {any} SignUpResponse Generic sign-up response for any user type
  * @typedef {any} UserProfile Generic user profile for any user type
- * 
+ *
  * @typedef {Object} VerificationResponse
  * @property {boolean} success - Whether the verification was successful
  * @property {boolean} isSignUpComplete - Whether the sign-up process is complete
@@ -130,9 +129,9 @@ export async function confirmUserSignUp(email, code, userType = 'user') {
 				isSignUpComplete: result.isSignUpComplete || result.success
 			};
 
-			// In mock mode, simulate publishing to SNS if verification was successful
+			// In mock mode, simulate publishing to  if verification was successful
 			if (typedResult.isSignUpComplete) {
-				console.log('[MOCK] Would publish to SNS:', {
+				console.log('[MOCK] Would publish to :', {
 					email,
 					userType,
 					verificationTime: new Date().toISOString()
@@ -160,40 +159,14 @@ export async function confirmUserSignUp(email, code, userType = 'user') {
 			userType
 		};
 
-		// If sign-up is complete, publish to SNS to trigger welcome email
-		if (isSignUpComplete && AWS_CONFIG.signUpCompletedTopicArn) {
-			try {
-				// Publish to SNS topic with minimal required data
-				await publishToTopic(
-					AWS_CONFIG.signUpCompletedTopicArn,
-					{
-						email,
-						userType,
-						verificationTime: new Date().toISOString()
-					},
-					`User verification completed: ${email}`
-				);
-				
-				if (dev) {
-					console.log('Published sign-up completion event to SNS');
-				}
-			} catch (snsError) {
-				// Log the error but don't fail the verification
-				console.error('Failed to publish to SNS:', snsError);
-			}
-		} else if (isSignUpComplete && !AWS_CONFIG.signUpCompletedTopicArn) {
-			console.log('Sign-up completed but SNS topic ARN is not configured');
-			
-			// For development: mock the welcome email sending
-			if (dev) {
-				console.log('MOCK: Would send welcome email to:', email);
-				console.log('MOCK: Email data:', {
-					email,
-					userType,
-					businessName: userType === 'merchant' ? 'Your Business' : 'Customer Account',
-					verificationTime: new Date().toISOString()
-				});
-			}
+		// If sign-up is complete, mock welcome email in development
+		if (isSignUpComplete && dev) {
+			console.log('MOCK: Would send welcome email to:', email);
+			console.log('MOCK: Email data:', {
+				email,
+				userType,
+				verificationTime: new Date().toISOString()
+			});
 		}
 
 		return data;

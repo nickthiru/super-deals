@@ -46,18 +46,7 @@ try {
 	const apiUrl = findValueInOutputs('ApiStackHttpStack', 'RestApiUrldev');
 	const s3BucketName = findValueInOutputs('StorageStack', 'S3BucketName');
 
-	// For SNS topic, we need to be more specific since there could be multiple topics
-	let signUpCompletedTopicArn = null;
-	const snsStackKey = Object.keys(outputsData).find((key) => key.includes('SnsStackAccountsStack'));
-	if (snsStackKey) {
-		// Look for property containing both 'SignUpCompleted' and 'TopicArn'
-		const topicArnKey = Object.keys(outputsData[snsStackKey]).find(
-			(key) => key.includes('SignUpCompleted') && key.includes('TopicArn')
-		);
-		if (topicArnKey) {
-			signUpCompletedTopicArn = outputsData[snsStackKey][topicArnKey];
-		}
-	}
+// SNS/topic ARN extraction removed as it is no longer needed.
 
 	console.log('Extracted values from outputs.json:');
 	console.log(`- User Pool ID: ${userPoolId}`);
@@ -65,7 +54,7 @@ try {
 	console.log(`- Identity Pool ID: ${identityPoolId}`);
 	console.log(`- API URL: ${apiUrl}`);
 	console.log(`- S3 Bucket Name: ${s3BucketName}`);
-	console.log(`- Sign-Up Completed Topic ARN: ${signUpCompletedTopicArn}`);
+
 
 	// Read existing .env.local file or create from template
 	let envContent;
@@ -126,18 +115,7 @@ try {
 		envContent = envContent.replace(/^VITE_SITE_URL=.*$/m, `VITE_SITE_URL=http://localhost:5173`);
 	}
 
-	// Add or update the SNS topic ARN
-	if (signUpCompletedTopicArn) {
-		if (envContent.includes('VITE_SIGN_UP_COMPLETED_TOPIC_ARN=')) {
-			envContent = envContent.replace(
-				/^VITE_SIGN_UP_COMPLETED_TOPIC_ARN=.*$/m,
-				`VITE_SIGN_UP_COMPLETED_TOPIC_ARN=${signUpCompletedTopicArn}`
-			);
-		} else {
-			// Add it if it doesn't exist
-			envContent += `\n# SNS Topics\nVITE_SIGN_UP_COMPLETED_TOPIC_ARN=${signUpCompletedTopicArn}`;
-		}
-	}
+// SNS/topic ARN environment variable logic removed as it is no longer needed.
 
 	// Write updated content to .env.local
 	console.log('Writing updated values to .env.local...');
