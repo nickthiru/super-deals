@@ -2,7 +2,7 @@
   "name": "app",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,11 +11,11 @@
   "license": "ISC",
   "description": "",
   "imports": {
-    "#utils/*": "./utils/*",
-    "#tools/*": "./tools/*",
-    "#agents/*": "./agents/*",
-    "#nodes/*": "./nodes/*",
-    "#edges/*": "./edges/*"
+    "#utils/*": "./src/utils/*",
+    "#tools/*": "./src/tools/*",
+    "#agents/*": "./src/agents/*",
+    "#nodes/*": "./src/nodes/*",
+    "#edges/*": "./src/edges/*"
   },
   "dependencies": {
     "@langchain/community": "^0.3.29",
