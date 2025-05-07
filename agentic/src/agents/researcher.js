@@ -1,4 +1,3 @@
-import { ChatGroq } from "@langchain/groq";
 import { SystemMessage } from "@langchain/core/messages";
 import {
   END,
@@ -10,12 +9,10 @@ import {
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 
 import { tavilySearchTool } from "#tools/_index.js";
-import { buildModel, hasToolCalls, generateGraphImage } from "#utils/_index.js";
+import { hasToolCalls, generateGraphImage } from "#utils/_index.js";
+import LLM from "#LLMs/_index.js";
 
-const agentModel = buildModel(ChatGroq, {
-  model: "llama-3.3-70b-versatile",
-  temperature: 0,
-});
+const model = LLM.groqLlama3_3_70b_versatile;
 
 const agentAnnotation = Annotation.Root({
   messages: Annotation({
@@ -33,7 +30,7 @@ const toolNode = new ToolNode(tools);
 
 async function modelNode(state) {
   const { messages } = state;
-  const result = await agentModel.bindTools(tools).invoke(messages);
+  const result = await model.bindTools(tools).invoke(messages);
   return { messages: [result] };
 }
 
