@@ -17,6 +17,9 @@ let digits = $state(Array(length).fill(''));
 let refs = $state(Array(length));
 let focused = $state(-1);
 
+// Generate a unique base id for this component instance
+const baseId = `verification-code-${Math.random().toString(36).substring(2, 10)}`;
+
 // Update digits when value changes
 $effect(() => {
   if (value) {
@@ -124,7 +127,7 @@ export function clear() {
 
 <div class={`mb-4 ${fullWidth ? 'w-full' : ''} ${className}`}>
   {#if label}
-    <label class="block text-sm font-medium text-gray-700 mb-2">
+    <label class="block text-sm font-medium text-gray-700 mb-2" for={baseId + '-0'}>
       {label}
     </label>
   {/if}
@@ -132,6 +135,7 @@ export function clear() {
   <div class="flex gap-2 justify-center">
     {#each Array(length) as _, index}
       <input
+        id={baseId + '-' + index}
         type="text"
         inputmode="numeric"
         maxlength="1"
@@ -140,10 +144,10 @@ export function clear() {
         class={`w-12 h-12 text-center text-xl border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
           focused === index ? 'border-primary-500' : 'border-gray-300'
         } ${error ? 'border-red-500 focus:ring-red-500' : ''}`}
-        on:input={(e) => handleInput(index, e)}
-        on:keydown={(e) => handleKeyDown(index, e)}
-        on:focus={() => focused = index}
-        on:blur={() => focused = -1}
+        oninput={(e) => handleInput(index, e)}
+        onkeydown={(e) => handleKeyDown(index, e)}
+        onfocus={() => focused = index}
+        onblur={() => focused = -1}
         bind:this={refs[index]}
       />
     {/each}
