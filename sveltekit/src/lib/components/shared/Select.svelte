@@ -1,55 +1,56 @@
 <script>
-// Select component with validation support
-// Universal component format (Svelte 5)
+  // Svelte 5 runes mode - JavaScript
 
-const props = $props({
-  name: /** @type {string} */ '',
-  id: /** @type {string} */ '',
-  value: /** @type {string | number} */ '',
-  options: /** @type {Array<{value: string | number, label: string}>} */ [],
-  placeholder: /** @type {string} */ 'Select an option',
-  required: /** @type {boolean} */ false,
-  disabled: /** @type {boolean} */ false,
-  error: /** @type {string | null} */ null,
-  label: /** @type {string | null} */ null,
-  helperText: /** @type {string | null} */ null,
-  fullWidth: /** @type {boolean} */ false,
-  class: /** @type {string} */ ''
-});
+  // 1. $props takes no arguments
+  const props = $props();
 
-// Internal state
-let selectElement;
-let touched = $state(false);
+  // 2. Destructure with defaults
+  const {
+    name = '',
+    id = '',
+    value = '',
+    options = [],
+    placeholder = 'Select an option',
+    required = false,
+    disabled = false,
+    error = null,
+    label = null,
+    helperText = null,
+    fullWidth = false,
+    class: className = ''
+  } = props;
 
-// Computed classes
-const selectClasses = $derived(() => {
-  const baseClasses = 'px-3 py-2 bg-white border rounded-md text-sm shadow-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 appearance-none';
-  const errorClasses = props.error ? 'border-red-500 text-red-600 focus:border-red-500 focus:ring-red-500' : 'border-slate-300';
-  const widthClass = props.fullWidth ? 'w-full' : '';
-  const disabledClass = props.disabled ? 'bg-slate-100 cursor-not-allowed' : '';
-  
-  return `${baseClasses} ${errorClasses} ${widthClass} ${disabledClass} ${props.class}`;
-});
+  // 3. Internal state
+  let selectElement = null;
+  let touched = $state(false);
 
-// Handle blur event to mark field as touched
-function handleBlur() {
-  touched = true;
-}
+  // 4. Computed classes
+  const selectClasses = $derived(() => {
+    const baseClasses = 'px-3 py-2 bg-white border rounded-md text-sm shadow-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 appearance-none';
+    const errorClasses = error ? 'border-red-500 text-red-600 focus:border-red-500 focus:ring-red-500' : 'border-slate-300';
+    const widthClass = fullWidth ? 'w-full' : '';
+    const disabledClass = disabled ? 'bg-slate-100 cursor-not-allowed' : '';
+    return `${baseClasses} ${errorClasses} ${widthClass} ${disabledClass} ${className}`;
+  });
 
-// Expose focus method
-export function focus() {
-  selectElement?.focus();
-}
+  function handleBlur() {
+    touched = true;
+  }
+
+  // 5. Expose focus method
+  export function focus() {
+    selectElement?.focus();
+  }
 </script>
 
-<div class={`mb-4 ${props.fullWidth ? 'w-full' : ''}`}>
-  {#if props.label}
+<div class={`mb-4 ${fullWidth ? 'w-full' : ''}`}>
+  {#if label}
     <label 
-      for={props.id || props.name} 
+      for={id || name} 
       class="block text-sm font-medium text-gray-700 mb-1"
     >
-      {props.label}
-      {#if props.required}
+      {label}
+      {#if required}
         <span class="text-red-500">*</span>
       {/if}
     </label>
@@ -58,17 +59,16 @@ export function focus() {
   <div class="relative">
     <select
       bind:this={selectElement}
-      id={props.id || props.name}
-      name={props.name}
-      value={props.value}
-      required={props.required}
-      disabled={props.disabled}
+      id={id || name}
+      name={name}
+      value={value}
+      required={required}
+      disabled={disabled}
       class={selectClasses}
-      on:blur={handleBlur}
-      {...$$restProps}
+      onblur={handleBlur}
     >
-      <option value="" disabled selected={!props.value}>{props.placeholder}</option>
-      {#each props.options as option}
+      <option value="" disabled selected={!value}>{placeholder}</option>
+      {#each options as option}
         <option value={option.value}>{option.label}</option>
       {/each}
     </select>
@@ -81,11 +81,11 @@ export function focus() {
     </div>
   </div>
   
-  {#if props.error && (touched || props.error)}
-    <p class="mt-1 text-sm text-red-600">{props.error}</p>
+  {#if error && touched}
+    <p class="mt-1 text-sm text-red-600">{error}</p>
   {/if}
   
-  {#if props.helperText && !props.error}
-    <p class="mt-1 text-sm text-gray-500">{props.helperText}</p>
+  {#if helperText && !error}
+    <p class="mt-1 text-sm text-gray-500">{helperText}</p>
   {/if}
 </div>
