@@ -30,6 +30,7 @@
 		"@tailwindcss/typography": "^0.5.15",
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/svelte": "^5.2.4",
+		"@testing-library/user-event": "^14.6.1",
 		"autoprefixer": "^10.4.20",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
@@ -50,8 +51,8 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
-		"@super-deals/types": "file:../types",
 		"@aws-sdk/client-sns": "^3.535.0",
+		"@super-deals/types": "file:../types",
 		"aws-amplify": "^6.14.1",
 		"ramda": "^0.30.1",
 		"zod": "^3.24.2",

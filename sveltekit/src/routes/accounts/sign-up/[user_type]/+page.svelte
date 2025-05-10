@@ -1,6 +1,6 @@
 <script>
   // Import the merchant sign-up page component
-  import MerchantSignUpPage from '$lib/components/pages/auth/sign-up/merchants/Page.svelte';
+  import MerchantSignUpPage from '$lib/components/pages/accounts/sign-up/merchants/Page.svelte';
   
   /**
    * @typedef {Object} Props

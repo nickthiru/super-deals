@@ -21,21 +21,30 @@ export default defineConfig({
 					name: 'client',
 					environment: 'jsdom',
 					clearMocks: true,
-					include: ['src/**/*.svelte.{test,spec}.{js,ts}'],
-					exclude: ['src/lib/server/**'],
-					setupFiles: ['./vitest-setup-client.js']
-				}
-			},
-			{
-				extends: './vite.config.js',
-
-				test: {
-					name: 'server',
-					environment: 'node',
-					include: ['src/**/*.{test,spec}.{js,ts}'],
-					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}']
+					include: [
+						// './tests/**/*.svelte.{test,spec}.{js,ts}',
+						'./tests/**/*.{test,spec}.js'
+					],
+					// exclude: ['src/lib/server/**'],
+					setupFiles: [
+						'./vitest-setup-client.js',
+						'./tests/register-matchers.js',
+						'./tests/clean-up-dom.js'
+					],
+					reporters: ['verbose'],
+					restoreMocks: true
 				}
 			}
+			// {
+			// 	extends: './vite.config.js',
+
+			// 	test: {
+			// 		name: 'server',
+			// 		environment: 'node',
+			// 		include: ['src/**/*.{test,spec}.{js,ts}'],
+			// 		exclude: ['src/**/*.svelte.{test,spec}.{js,ts}']
+			// 	}
+			// }
 		]
 	}
 });
