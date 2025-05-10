@@ -7,10 +7,8 @@ import {
   messagesStateReducer,
 } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
-import Utils from "#utils/_index.js";
-import { loadMcpTools } from "@langchain/mcp-adapters";
 
-// import { tavilySearchTool } from "#tools/_index.js";
+import { tavilySearchTool } from "#tools/_index.js";
 import { hasToolCalls, generateGraphImage } from "#utils/_index.js";
 import LLM from "#LLMs/_index.js";
 
@@ -27,13 +25,7 @@ const agentAnnotation = Annotation.Root({
   }),
 });
 
-const sseClient = await Utils.initSseMcpClient(
-  "researcher",
-  "http://localhost:8080/sse"
-);
-
-const tools = await loadMcpTools("search-mcp", sseClient);
-// const tools = [tavilySearchTool];
+const tools = [tavilySearchTool];
 const toolNode = new ToolNode(tools);
 
 async function modelNode(state) {

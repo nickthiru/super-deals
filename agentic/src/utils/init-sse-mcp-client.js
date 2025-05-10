@@ -1,7 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 
-const initSseClient = async (name, url) => {
+const initSseMcpClient = async (name, url) => {
   const sseClient = new Client({
     name,
   });
@@ -10,4 +10,4 @@ const initSseClient = async (name, url) => {
   return sseClient;
 };
 
-export default initSseClient;
+export default initSseMcpClient;
