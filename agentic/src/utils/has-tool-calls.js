@@ -1,5 +1,5 @@
 import { END } from "@langchain/langgraph";
-import { getLastMessage } from "#utils/_index.js";
+import { getLastMessage } from "./_index.js";
 
 function hasToolCalls(state) {
   const lastMessage = getLastMessage(state);

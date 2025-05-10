@@ -1,4 +1,3 @@
-import { ChatGroq } from "@langchain/groq";
 import { SystemMessage } from "@langchain/core/messages";
 import {
   END,
@@ -8,14 +7,14 @@ import {
   messagesStateReducer,
 } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
+import Utils from "#utils/_index.js";
+import { loadMcpTools } from "@langchain/mcp-adapters";
 
-import { tavilySearchTool } from "#tools/_index.js";
-import { buildModel, hasToolCalls, generateGraphImage } from "#utils/_index.js";
+// import { tavilySearchTool } from "#tools/_index.js";
+import { hasToolCalls, generateGraphImage } from "#utils/_index.js";
+import LLM from "#LLMs/_index.js";
 
-const agentModel = buildModel(ChatGroq, {
-  model: "llama-3.3-70b-versatile",
-  temperature: 0,
-});
+const model = LLM.groqLlama3_3_70b_versatile;
 
 const agentAnnotation = Annotation.Root({
   messages: Annotation({
@@ -28,12 +27,18 @@ const agentAnnotation = Annotation.Root({
   }),
 });
 
-const tools = [tavilySearchTool];
+const sseClient = await Utils.initSseMcpClient(
+  "researcher",
+  "http://localhost:8080/sse"
+);
+
+const tools = await loadMcpTools("search-mcp", sseClient);
+// const tools = [tavilySearchTool];
 const toolNode = new ToolNode(tools);
 
 async function modelNode(state) {
   const { messages } = state;
-  const result = await agentModel.bindTools(tools).invoke(messages);
+  const result = await model.bindTools(tools).invoke(messages);
   return { messages: [result] };
 }
 
